@@ -1,4 +1,5 @@
 import pygame
+from random import randrange
 
 
 # -----Fish Class----------------------------------------------------------------------------------
@@ -70,8 +71,13 @@ class Fish:
             ),
         )
 
-    def changeColor(self, c: tuple):
-        self.color = c
+    # change the color of the fish to a random color
+    def changeColor(self):
+        self.color = (
+            randrange(255),
+            randrange(255),
+            randrange(255),
+        )
 
 
 # --------------------------------------------------------------------------------------------------
@@ -98,6 +104,11 @@ black = (0, 0, 0)
 yellow = (231, 199, 25)
 white = (255, 255, 255)
 
+# List of note names
+NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+
+noteUsed = ["C", "B"]
+
 
 # -----Functions to create the fishes --------------------------------------------------------------
 def drawFishes():
@@ -106,6 +117,7 @@ def drawFishes():
 
 
 # instance of fish --> change it so i don't do it manually
+
 f1 = Fish(window, "D", red, 300)
 f2 = Fish(window, "C", blue, 150)
 fishList: list[Fish] = [f1, f2]
@@ -124,14 +136,9 @@ while run:
             run = False
         if event.type == pygame.MOUSEBUTTONUP:
             for i in range(0, len(fishList)):
-                if fishList[i].color == red:
-                    fishList[i].changeColor(green)
-                elif fishList[i].color == green:
-                    fishList[i].changeColor(red)
-                elif fishList[i].color == blue:
-                    fishList[i].changeColor(yellow)
-                elif fishList[i].color == yellow:
-                    fishList[i].changeColor(blue)
+                # change to function that checks if note is played
+                if noteUsed.__contains__(fishList[i].name):
+                    fishList[i].changeColor()
     pygame.display.flip()
 
 pygame.quit
