@@ -19,30 +19,15 @@ if not os.path.exists("audio_in"):
 OUTPUT_FOLDER = os.path.abspath("output")
 INPUT_FOLDER = os.path.abspath("audio_in")
 
-WINDOW_TIME = 0.125
+WINDOW_TIME = 0.125  # window time of each analysis
 
 FREQ_MIN = 100
 FREQ_MAX = 7_000
 
-TOP_NOTES = 10
+TOP_NOTES = 10  # how many notes are stored per analysis
 
 NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
 
-# Mapping of note names to MIDI numbers
-NOTE_TO_MIDI = {
-    "C": 0,
-    "C#": 1,
-    "D": 2,
-    "D#": 3,
-    "E": 4,
-    "F": 5,
-    "F#": 6,
-    "G": 7,
-    "G#": 8,
-    "A": 9,
-    "A#": 10,
-    "B": 11,
-}
 
 INSTRUMENTS_HARMONICS = {
     "Piano": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
@@ -50,35 +35,52 @@ INSTRUMENTS_HARMONICS = {
 }
 
 
-def freq_to_number(f):
-    return int(round(69 + 12 * np.log2(f / 440.0)))
-
-
-def number_to_freq(n):
-    return 440 * 2.0 ** ((n - 69) / 12.0)
-
-
-def note_name(n):
-    return NOTE_NAMES[n % 12] + str(int(n / 12 - 1))
-
-
 class Tools:
+    NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+    # Mapping of note names to MIDI numbers
+    NOTE_TO_MIDI = {
+        "C": 0,
+        "C#": 1,
+        "D": 2,
+        "D#": 3,
+        "E": 4,
+        "F": 5,
+        "F#": 6,
+        "G": 7,
+        "G#": 8,
+        "A": 9,
+        "A#": 10,
+        "B": 11,
+    }
+
     @staticmethod
     def note_to_midi(note):
         note_name = note[:-1]  # Extract the note name (e.g., 'A', 'B', etc.)
         octave = int(note[-1])  # Extract the octave (e.g., '0', '2', etc.)
-        return NOTE_TO_MIDI[note_name] + 12 * (octave + 1)
+        return Tools.NOTE_TO_MIDI[note_name] + 12 * (octave + 1)
 
     @staticmethod
     def seconds_to_beat(sec, bpm):
         return sec * (bpm / 60.0)
 
+    @staticmethod
+    def freq_to_number(f):
+        return int(round(69 + 12 * np.log2(f / 440.0)))
+
+    @staticmethod
+    def number_to_freq(n):
+        return 440 * 2.0 ** ((n - 69) / 12.0)
+
+    @staticmethod
+    def note_name(n):
+        return NOTE_NAMES[n % 12] + str(int(n / 12 - 1))
+
 
 class Note:
     def __init__(self, frequency, magnitude, variation=0.0):
         self.frequency = frequency
-        self.midi_number = freq_to_number(self.frequency)
-        self.name = note_name(self.midi_number)
+        self.midi_number = Tools.freq_to_number(self.frequency)
+        self.name = Tools.note_name(self.midi_number)
         self.magnitude = magnitude
         self.maximum = magnitude  # Store the maximum magnitude observed for this note
         self.variation = variation  # Indicates if the note is fading in or out (positive for fading in, negative for fading out)
@@ -112,7 +114,7 @@ class AudioAnalyzer:
         est_bpm = librosa.feature.rhythm.tempo(y=self.audio_data, sr=self.sample_rate)[
             0
         ]
-        if est_bpm % 10 / 2 > 5:
+        if est_bpm % 10 > 5:
             self.audio_bpm = est_bpm - est_bpm % 10 + 10
         else:
             self.audio_bpm = est_bpm - est_bpm % 10
