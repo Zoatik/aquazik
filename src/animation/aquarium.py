@@ -5,6 +5,8 @@ from animation.starfish import Starfish
 import animation.drawings
 from animation.drawings import Colors
 from random import randrange
+import math
+import pygame   
 
 
 class Aquarium:
@@ -191,3 +193,27 @@ class Aquarium:
                 (x - length / base_wall_ratio, y),
             ],
         )
+
+    def drawPatrickHouse(window:Surface):
+        # Semi-circle parameters
+        center_x, center_y = 80,850
+        radius = 50
+        num_triangles = 30  # more = smoother curve
+        TRIANGLE_COLOR = (139, 69, 19)  # brown
+
+        # Draw semicircle with triangles
+        for i in range(num_triangles):
+            angle1 = math.pi * i / num_triangles  # start angle
+            angle2 = math.pi * (i + 1) / num_triangles  # end angle
+            x1 = center_x + radius * math.cos(angle1)
+            y1 = center_y - radius * math.sin(angle1)
+            x2 = center_x + radius * math.cos(angle2)
+            y2 = center_y - radius * math.sin(angle2)
+            pygame.draw.polygon(window, TRIANGLE_COLOR, [(center_x, center_y), (x1, y1), (x2, y2)])
+        #Draw the door
+        pygame.draw.polygon(window,Colors.black,[(center_x - radius/10, center_y),(center_x - radius/10 + radius/5, center_y),(center_x + radius/10, center_y - radius/5)],)
+        pygame.draw.polygon(window,Colors.black,[(center_x - radius/10, center_y),(center_x - radius/10, center_y - radius/5),(center_x + radius/10, center_y - radius/5)],)
+        #Draw the pseudo antenna
+        pygame.draw.polygon(window,Colors.white,[(center_x, center_y-radius),(center_x - radius/10, center_y-radius - radius/5),(center_x + radius/10, center_y -radius - radius/5)],)
+
+

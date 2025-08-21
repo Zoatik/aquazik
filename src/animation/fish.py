@@ -19,7 +19,7 @@ class Fish:
         self.center = center
         self.color = color
         self.firstColor = color
-        self.secondColor = Colors.get_random_color()
+        self.secondColor = (randrange(255), randrange(255), randrange(255))
         self.listTriangles = [
             (
                 (self.center[0] - 75, self.center[1] - 25),
