@@ -76,7 +76,9 @@ class MidiNote:
             endTicks, self.parent.ticks_per_beat, self.parent.tempo
         )
 
-
+# test case
+"""
 mdi = MidiFile("audio_in/PinkPanther.midi")
 for n in mdi.find_note(5.2):
     print(n.startSeconds, n.endSeconds)
+"""
