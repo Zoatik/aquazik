@@ -15,39 +15,39 @@ class Fish:
         self.color = color
         self.listTriangles = [
             (
-                (self.center - 75, self.center - 25),
-                (self.center - 75, self.center + 25),
-                (self.center, self.center),
+                (self.center[0] - 75, self.center[1] - 25),
+                (self.center[0] - 75, self.center[1] + 25),
+                (self.center[0], self.center[1]),
             ),
             (
-                (self.center - 50, center - 17),
-                (self.center - 25, center - 50),
-                (self.center, self.center),
+                (self.center[0] - 50, self.center[1] - 17),
+                (self.center[0] - 25, self.center[1] - 50),
+                (self.center[0], self.center[1]),
             ),
             (
-                (self.center - 50, self.center + 17),
-                (self.center - 25, self.center + 50),
-                (self.center, self.center),
+                (self.center[0] - 50, self.center[1] + 17),
+                (self.center[0] - 25, self.center[1] + 50),
+                (self.center[0], self.center[1]),
             ),
             (
-                (self.center - 25, self.center - 50),
-                (self.center + 25, self.center - 50),
-                (self.center, self.center),
+                (self.center[0] - 25, self.center[1] - 50),
+                (self.center[0] + 25, self.center[1] - 50),
+                (self.center[0], self.center[1]),
             ),
             (
-                (self.center - 25, self.center + 50),
-                (self.center + 25, self.center + 50),
-                (self.center, self.center),
+                (self.center[0] - 25, self.center[1] + 50),
+                (self.center[0] + 25, self.center[1] + 50),
+                (self.center[0], self.center[1]),
             ),
             (
-                (self.center + 25, self.center - 50),
-                (self.center + 50, self.center - 17),
-                (self.center, self.center),
+                (self.center[0] + 25, self.center[1] - 50),
+                (self.center[0] + 50, self.center[1] - 17),
+                (self.center[0], self.center[1]),
             ),
             (
-                (self.center + 25, self.center + 50),
-                (self.center + 50, self.center + 17),
-                (self.center, self.center),
+                (self.center[0] + 25, self.center[1] + 50),
+                (self.center[0] + 50, self.center[1] + 17),
+                (self.center[0], self.center[1]),
             ),
         ]
 
@@ -65,9 +65,9 @@ class Fish:
             self.window,
             black,
             (
-                (self.center - 5, self.center - 40),
-                (self.center + 5, self.center - 40),
-                (self.center, self.center - 35),
+                (self.center[0] - 5, self.center[1] - 40),
+                (self.center[0] + 5, self.center[1] - 40),
+                (self.center[0], self.center[1] - 35),
             ),
         )
 
@@ -117,9 +117,27 @@ def drawFishes():
 
 
 # instance of fish --> change it so i don't do it manually
-
-f1 = Fish(window, "D", red, 300)
-f2 = Fish(window, "C", blue, 150)
+# x + 150, y + 125
+centerList = [
+    (100, 50),
+    (250, 50),
+    (400, 50),
+    (500, 50),
+    (100, 175),
+    (250, 175),
+    (400, 175),
+    (500, 175),
+    (100, 300),
+    (250, 300),
+    (400, 300),
+    (500, 300),
+    (100, 425),
+    (250, 425),
+    (400, 425),
+    (500, 425),
+]
+f1 = Fish(window, "D", red, centerList[0])
+f2 = Fish(window, "C", blue, centerList[12])
 fishList: list[Fish] = [f1, f2]
 
 # ---Loop, update display and quit------------------------------------------------------------------
@@ -135,6 +153,12 @@ while run:
         if event.type == pygame.QUIT:
             run = False
         if event.type == pygame.MOUSEBUTTONUP:
+
+            """
+            Need to import the function from midi_reader
+            if get_instrument == "PIANO":
+                print("Piano note played")
+            """
             for i in range(0, len(fishList)):
                 # change to function that checks if note is played
                 if noteUsed.__contains__(fishList[i].name):
