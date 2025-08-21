@@ -145,7 +145,7 @@ class AudioAnalyzer:
                 notes_array.append(dominant_note.name)
                 
             else: 
-                notes_array.append("No Note")
+                notes_array.append(None)
 
             # draw and save the figure
             self.__build_fig_matplotlib(fft, mx, top_notes, f"{frames_folder}/fft_frame_{frame_num:04d}.png")
