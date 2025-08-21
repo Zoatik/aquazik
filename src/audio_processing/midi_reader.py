@@ -1,6 +1,8 @@
 from enum import Enum, auto
 import mido
 
+NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", 
+              "F#", "G", "G#", "A", "A#", "B"]
 
 class Instrument(Enum):
     PIANO = auto()
@@ -75,6 +77,11 @@ class MidiNote:
         self.endSeconds = mido.tick2second(
             endTicks, self.parent.ticks_per_beat, self.parent.tempo
         )
+
+    def get_real_note(self) -> str:
+        octave = (self.noteIndex // 12) - 1
+        note = NOTE_NAMES[self.noteIndex % 12]
+        return f"{note}{octave}"
 
 # test case
 """
