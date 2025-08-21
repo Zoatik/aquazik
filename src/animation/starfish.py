@@ -46,6 +46,6 @@ class Starfish:
             self.color = Colors.yellow
         self.color = Colors.orange"""
         if self.color == Colors.orange:
-            self.color = Colors.yellow
+            self.color = Colors.green
         else:
             self.color = Colors.orange

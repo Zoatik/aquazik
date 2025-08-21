@@ -3,18 +3,20 @@ from time import time
 from random import random
 from animation.aquarium import Aquarium
 from animation.fish import Colors, Bubble
-from audio_processing.midi_reader import MidiFile
+from audio_processing.midi_reader import MidiFile, Instrument
 from audio_processing.freq_analysis import AudioAnalyzer
 import audio_processing.MidiV2
 
 
 def main():
+    FILE = "PinkPanther_Both.mp3"
+
     # Setup analysis
     print("-- Analysing audio --")
-    #audio_analyser = AudioAnalyzer("PinkPanther_Both.mp3")
+    #audio_analyser = AudioAnalyzer("PinkPanther_Piano_Only.mp3")
 
     print("-- Creating MIDI file --")
-    # file_name = audio_processing.MidiV2.midi_maker()
+    #file_name = audio_processing.MidiV2.midi_maker(audio_analyser.convert_to_notes())
 
     # Create MidiFile instance
     print("-- Processing MIDI file --")
@@ -37,6 +39,13 @@ def main():
 
     run = True
     init = True
+
+    # Start music
+    pygame.mixer.init()
+    pygame.mixer.music.load("audio_in/"+FILE)
+    pygame.mixer.music.play()
+    pygame.event.wait()
+
     # Loop that updates the display
 
     start = time()
@@ -51,16 +60,19 @@ def main():
         notes = mdi.find_note(currentTime)
         # [:-1] enlève le dernier char du string (l'octave de la note)
         result = [
-            x.get_real_note()[:-1] for x in notes if x not in last_notes
+            x for x in notes if x not in last_notes
         ]  # uniquement les nouvelles notes
-        # result = [x.get_real_note()[:-1] for x in notes]                           # contient toutes les notes jouées à ce moment-là
+
+        result_piano = [x.get_real_note()[:-1] for x in result if x.get_instrument() == Instrument.PIANO]
+        result_trumpet = [x.get_real_note()[:-1] for x in result if x.get_instrument() == Instrument.TRUMPET]
+        #result_allNotes = [x.get_real_note()[:-1] for x in notes]                           # contient toutes les notes jouées à ce moment-là
 
         last_notes = notes
 
         # for each fish
         for i in range(len(fishList)):
             # if notes played contain fish name, change it's color
-            if result.__contains__(fishList[i].name):
+            if result_piano.__contains__(fishList[i].name):
                 fishList[i].changeColor()
                 bubbleList.append(
                     Bubble(
@@ -75,7 +87,7 @@ def main():
 
         for i in range(len(starFishList)):
             # if notes played contain fish name, change it's color
-            if result.__contains__(starFishList[i].name):
+            if result_trumpet.__contains__(starFishList[i].name):
                 starFishList[i].animStarfish()
 
         # draw aquarium background and details
