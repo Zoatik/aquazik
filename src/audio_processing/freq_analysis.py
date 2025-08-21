@@ -10,7 +10,7 @@ import tqdm
 from datetime import datetime
 
 
-DEBUG_OUTPUT_FILES = True  # Set to True to enable output files
+DEBUG_OUTPUT_FILES = False  # Set to True to enable output files
 if not os.path.exists("output"):
     os.makedirs("output")
 if not os.path.exists("audio_in"):

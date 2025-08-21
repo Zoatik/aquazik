@@ -9,10 +9,18 @@ import audio_processing.MidiV2
 
 def main():
     # Setup analysis
+    print("-- Analysing audio --")
     audio_analyser = AudioAnalyzer("PinkPanther_Both.mp3")
+
+    print("-- Creating MIDI file --")
     #file_name = audio_processing.MidiV2.midi_maker()
+    
+    # Create MidiFile instance
+    print("-- Processing MIDI file --")
+    mdi = MidiFile("audio_in/PinkPanther.midi")
 
     # -------Create the window--------------------------------------------------------------------------
+    print("-- Creating pygame window --")
     pygame.init()
 
     # Create a window
@@ -24,8 +32,6 @@ def main():
     # icon = pygame.image.load('....png')
     # pygame.display.set_icon(icon)
 
-    # Create MidiFile instance
-    mdi = MidiFile("audio_in/music.mid")
 
     # ---Loop, update display and quit------------------------------------------------------------------
 
@@ -40,7 +46,6 @@ def main():
     starFishList = Aquarium.createStarfishList(window)
 
     while run:
-        # time
         currentTime = time() - start
 
         notes = mdi.find_note(currentTime)
@@ -75,10 +80,10 @@ def main():
 
         # draw aquarium background and details
         Aquarium.drawBackground(window)
-        for b in bubbleList:
-            b.move_and_draw()
         Aquarium.drawFishes(fishList)
         Aquarium.drawStarfish(starFishList)
+        for b in bubbleList:
+            b.move_and_draw()
         Aquarium.drawProgressBar(window, currentTime, mdi.totalTime)
         for event in pygame.event.get():
             # quit if click quit
