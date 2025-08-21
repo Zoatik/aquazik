@@ -10,7 +10,6 @@ import tqdm
 from datetime import datetime
 
 
-DEBUG_OUTPUT_FILES = True  # Set to True to enable output files
 if not os.path.exists("output"):
     os.makedirs("output")
 if not os.path.exists("audio_in"):
@@ -49,6 +48,9 @@ class Tools:
         note_name = note[:-1]  # Extract the note name (e.g., 'A', 'B', etc.)
         octave = int(note[-1])  # Extract the octave (e.g., '0', '2', etc.)
         return NOTE_TO_MIDI[note_name] + 12 * (octave + 1)
+    @staticmethod
+    def seconds_to_beat(sec, bpm):
+        return sec * (bpm / 60.0)
 
 class Note:
     def __init__(self, frequency, magnitude, variation=0.0):
@@ -66,17 +68,19 @@ class Note:
     
 
 class AudioAnalyzer:
-    def __init__(self, audio_name="PinkPanther_Trumpet_cut.mp3"):
+    def __init__(self, audio_name="PinkPanther_Trumpet_cut.mp3", DEBUG_OUTPUT_FILES = False):
         self.audio_name = audio_name
         self.audio_path = os.path.join(INPUT_FOLDER, audio_name)
         self.audio_data, self.sample_rate = librosa.load(self.audio_path, mono=True)
         self.audio_length = librosa.get_duration(y=self.audio_data, sr=self.sample_rate)
         self.audio_bpm = librosa.feature.rhythm.tempo(y=self.audio_data, sr=self.sample_rate)[0]
+        self.beat_unit = 60 / self.audio_bpm
         self.samples_per_window = int(self.sample_rate * WINDOW_TIME)
         self.number_of_windows = int(self.audio_data.size / self.samples_per_window)  # + 1
         self.fps = self.number_of_windows / self.audio_length
         self.xf = np.fft.rfftfreq(self.samples_per_window, 1/self.sample_rate)
         self.freq_dist_per_bin = abs(self.xf[0] - self.xf[1]) if len(self.xf) > 1 else 8.0
+        self.debug_output_files = DEBUG_OUTPUT_FILES
 
     def convert_to_notes(self):
         mx = 0.0
@@ -105,7 +109,7 @@ class AudioAnalyzer:
         output_videos_folder = os.path.join(OUTPUT_FOLDER, music_name_folder, f"output_videos_{current_time_formated}")
 
 
-        if DEBUG_OUTPUT_FILES:
+        if self.debug_output_files:
             os.makedirs(frames_folder, exist_ok=True)
             os.makedirs(output_videos_folder, exist_ok=True)
 
@@ -138,18 +142,19 @@ class AudioAnalyzer:
                 if top_notes[0].variation < 0 and top_notes[0].magnitude < 0.2 * top_notes[0].maximum: # note is fading out
                     dominant_note = top_notes[1] if len(top_notes) > 1 else top_notes[0]
 
-                notes_array.append({WINDOW_TIME * frame_num:dominant_note.name})
+                notes_array.append(dominant_note.name)
                 
             else: 
-                notes_array.append({WINDOW_TIME * frame_num:"No Note"})
+                notes_array.append("No Note")
 
             # draw and save the figure
             self.__build_fig_matplotlib(fft, mx, top_notes, f"{frames_folder}/fft_frame_{frame_num:04d}.png")
 
 
-        print(notes_array)
+        print(self.__find_notes_length(notes_array))
+        #print(notes_array)
 
-        if DEBUG_OUTPUT_FILES:
+        if self.debug_output_files:
 
             # Combine frames into a video using ffmpeg
             import subprocess
@@ -189,6 +194,30 @@ class AudioAnalyzer:
 
         distance_mean = np.mean(distances)
         distance_median = np.median(distances)
+
+    def __find_notes_length(self, notes: list):
+        notes_duration = []
+        prev_note = None
+        for note in notes:
+            if prev_note is None or note != prev_note:
+                prev_note = note
+                notes_duration.append([note, WINDOW_TIME])
+                continue
+            
+            if note == prev_note:
+                prev_duration = notes_duration[-1][1] # retrieves the last note duration
+                notes_duration[-1][1] = notes_duration[-1][1] + WINDOW_TIME
+                continue
+            
+            
+            prev_note = note
+
+        for i in range(len(notes_duration)):
+            beat_duration = Tools.seconds_to_beat(notes_duration[i][1], self.audio_bpm)
+            snapped_beat_duration = round(beat_duration * 8) / 8
+            notes_duration[i][1] = snapped_beat_duration
+
+        return notes_duration
 
     def __get_top_notes(self, fft, mx, prev_notes, top_n=TOP_NOTES) -> list:
 
@@ -283,8 +312,8 @@ class AudioAnalyzer:
                             break
 
                     found_notes.append(found_note)
-                else:
-                    found_notes_probabilities[name].append(note_probability)
+                '''else:
+                    found_notes_probabilities[name].append(note_probability)'''
                     
 
                     
@@ -306,7 +335,7 @@ class AudioAnalyzer:
         return found_notes
     
     def __build_fig_matplotlib(self, fft, mx, notes, filename, dimensions=(16, 8)):
-        if not DEBUG_OUTPUT_FILES:
+        if not self.debug_output_files:
             return
         plt.figure(figsize=dimensions)
         plt.plot(self.xf, fft/mx, color='steelblue')
@@ -331,7 +360,7 @@ class AudioAnalyzer:
 
 
 
-audioAnalyzer = AudioAnalyzer("PinkPanther_Trumpet_cut.mp3")
+audioAnalyzer = AudioAnalyzer("PinkPanther_Trumpet_cut.mp3", True)
 audioAnalyzer.convert_to_notes()
 
 
