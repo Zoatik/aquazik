@@ -1,4 +1,5 @@
 import pygame
+
 from random import randrange, random
 
 class Colors:
@@ -71,7 +72,7 @@ class Fish:
         # body parts and contouring
         for i in range(0, len(self.listTriangles)):
             pygame.draw.polygon(self.window, self.color, self.listTriangles[i])
-            pygame.draw.polygon(self.window, Colors.black, self.listTriangles[i], 2)
+            pygame.draw.polygon(self.window, Colors.black, self.listTriangles[i], width=2)
 
         # black eye
         pygame.draw.polygon(
