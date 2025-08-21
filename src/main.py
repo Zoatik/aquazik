@@ -7,14 +7,15 @@ from audio_processing.midi_reader import MidiFile
 from audio_processing.freq_analysis import AudioAnalyzer
 import audio_processing.MidiV2
 
+
 def main():
     # Setup analysis
     print("-- Analysing audio --")
     audio_analyser = AudioAnalyzer("PinkPanther_Both.mp3")
 
     print("-- Creating MIDI file --")
-    #file_name = audio_processing.MidiV2.midi_maker()
-    
+    # file_name = audio_processing.MidiV2.midi_maker()
+
     # Create MidiFile instance
     print("-- Processing MIDI file --")
     mdi = MidiFile("audio_in/PinkPanther.midi")
@@ -31,7 +32,6 @@ def main():
     pygame.display.set_caption("Aquazik")
     # icon = pygame.image.load('....png')
     # pygame.display.set_icon(icon)
-
 
     # ---Loop, update display and quit------------------------------------------------------------------
 

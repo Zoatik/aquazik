@@ -17,22 +17,18 @@ class Aquarium:
         # instance of fish --> change it so i don't do it manually
         # x + 150, y + 125
         fishCenterList = [
-            (100, 50),
-            (250, 50),
-            (400, 50),
-            (550, 50),
-            (100, 175),
-            (250, 175),
-            (400, 175),
-            (550, 175),
-            (100, 300),
-            (250, 300),
-            (400, 300),
-            (550, 300),
-            (100, 425),
-            (250, 425),
-            (400, 425),
-            (550, 425),
+            (randrange(50, 350), randrange(50, 100)),
+            (randrange(50, 350), randrange(200, 250)),
+            (randrange(50, 350), randrange(350, 400)),
+            (randrange(450, 750), randrange(50, 100)),
+            (randrange(450, 750), randrange(200, 250)),
+            (randrange(450, 750), randrange(350, 400)),
+            (randrange(850, 1150), randrange(50, 100)),
+            (randrange(850, 1150), randrange(200, 250)),
+            (randrange(850, 1150), randrange(350, 400)),
+            (randrange(1250, 1550), randrange(50, 100)),
+            (randrange(1250, 1550), randrange(200, 250)),
+            (randrange(1250, 1550), randrange(350, 400)),
         ]
         fishList: list[Fish] = []
         for ni in range(len(NOTE_NAMES)):
