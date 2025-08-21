@@ -217,7 +217,143 @@ class Aquarium:
         #Draw the pseudo antenna
         pygame.draw.polygon(window,Colors.white,[(center_x, center_y-radius),(center_x - radius/10, center_y-radius - radius/5),(center_x + radius/10, center_y -radius - radius/5)],)
 
+    def drawSquidwardHouse(window:Surface, base_x: int = -1, base_y: int = -1, base_size: int = 50):
+        # default parameters
+        if base_x == -1:
+            base_x = window.get_size()[0] / 2
+        if base_y == -1:
+            base_y = window.get_size()[1] - 5
+
+        height_ratio = 2.2
+        triangles = [
+            # house center
+            [
+                (base_x - base_size / 2, base_y),
+                (base_x - (2 * base_size) / 5, base_y - base_size * height_ratio),
+                (base_x + base_size / 2, base_y)
+            ],
+            [
+                (base_x + base_size / 2, base_y),
+                (base_x + (2*base_size) / 5, base_y - base_size * height_ratio),
+                (base_x - base_size / 2, base_y)
+            ],
+            [
+                (base_x - (2 * base_size) / 5, base_y - base_size * height_ratio),
+                (base_x + (2*base_size) / 5, base_y - base_size * height_ratio),
+                (base_x, base_y)
+            ],
+            # left ear
+            [
+                (base_x - base_size/3, base_y - base_size * 1.5),
+                (base_x - base_size / 1.5, base_y - base_size * 1.5),
+                (base_x - base_size/3, base_y - base_size),
+            ],
+            [
+                (base_x - base_size / 1.5, base_y - base_size * 1.5),
+                (base_x - base_size / 1.5, base_y - base_size),
+                (base_x - base_size/3, base_y - base_size),
+            ],
+            # right ear
+            [
+                (base_x + base_size/3, base_y - base_size * 1.5),
+                (base_x + base_size / 1.5, base_y - base_size * 1.5),
+                (base_x + base_size/3, base_y - base_size),
+            ],
+            [
+                (base_x + base_size / 1.5, base_y - base_size * 1.5),
+                (base_x + base_size / 1.5, base_y - base_size),
+                (base_x + base_size/3, base_y - base_size),
+            ],
+        ]
+
+        nose_eyebrow = [
+            # eyebrow
+            [
+                (base_x - (2*base_size) / 5 + 2, base_y - (base_size * height_ratio)*(2/3)),
+                (base_x + (2*base_size) / 5 - 2, base_y - (base_size * height_ratio)*(2/3) - 10),
+                (base_x + (2*base_size) / 5 - 2, base_y - (base_size * height_ratio)*(2/3))
+            ],
+            [
+                (base_x - (2*base_size) / 5 + 2, base_y - (base_size * height_ratio)*(2/3) - 10),
+                (base_x + (2*base_size) / 5 - 2, base_y - (base_size * height_ratio)*(2/3) - 10),
+                (base_x - (2*base_size) / 5 + 2, base_y - (base_size * height_ratio)*(2/3))
+            ],
+            # nose
+            [
+                (base_x - 3, base_y - (base_size * height_ratio)*(2/3)),
+                (base_x - (base_size / 6), base_y - (base_size * height_ratio)/3),
+                (base_x + (base_size / 6), base_y - (base_size * height_ratio)/3)
+            ],
+            [
+                (base_x + 3, base_y - (base_size * height_ratio)*(2/3)),
+                (base_x - (base_size / 6), base_y - (base_size * height_ratio)/3),
+                (base_x + (base_size / 6), base_y - (base_size * height_ratio)/3)
+            ],
+            [
+                (base_x - 3, base_y - (base_size * height_ratio)*(2/3)),
+                (base_x + 3, base_y - (base_size * height_ratio)*(2/3)),
+                (base_x, base_y - (base_size * height_ratio)/3)
+            ]
+        ]
+
+        # eyes
+        eye_pos_left = ((((base_x - 10) + base_x - (base_size / 6)) / 2) + (base_x - (2*base_size) / 5 + 2))/2
+        eye_pos_right = base_x - (eye_pos_left - base_x)
+        outer = [
+            animation.drawings.getPolygonPoints(15, eye_pos_left, base_y - (base_size * height_ratio)*(2/3) + 10, 7),
+            animation.drawings.getPolygonPoints(15, eye_pos_right, base_y - (base_size * height_ratio)*(2/3) + 10, 7)
+        ]
+        inner = [
+            animation.drawings.getPolygonPoints(15, eye_pos_left, base_y - (base_size * height_ratio)*(2/3) + 10, 3.5),
+            animation.drawings.getPolygonPoints(15, eye_pos_right, base_y - (base_size * height_ratio)*(2/3) + 10, 3.5)
+        ]
+
+        # door
+        door = [
+            [
+                (base_x - (base_size / 6), base_y),
+                (base_x - (base_size / 6), base_y - (base_size * height_ratio / 6)),
+                (base_x + (base_size / 6), base_y - (base_size * height_ratio / 6)),
+            ],
+            [
+                (base_x + (base_size / 6), base_y),
+                (base_x - (base_size / 6), base_y),
+                (base_x + (base_size / 6), base_y - (base_size * height_ratio / 6)),
+            ]
+        ]
+
+        for t in triangles:
+            pygame.draw.polygon(window, (0,0,150), t)
+
+        for e in nose_eyebrow:
+            pygame.draw.polygon(window, (0,0, 255), e)
+
+        for polygon in outer:
+            for e in polygon:
+                pygame.draw.polygon(window, (125, 125, 255), e)
         
+        for polygon in inner:
+            for e in polygon:
+                pygame.draw.polygon(window, (150, 150, 255), e)
+
+        brown_color = (139, 69, 19)
+
+        for t in door:
+            pygame.draw.polygon(window, brown_color, t) # brown
+        # Draw semicircle with triangles
+
+        triangle_number = 12
+        door_radius = (base_size / 6)
+
+        for i in range(triangle_number):
+            angle1 = math.pi * i / triangle_number  # start angle
+            angle2 = math.pi * (i + 1) / triangle_number  # end angle
+            x1 = base_x + door_radius * math.cos(angle1)
+            y1 = base_y - (base_size * height_ratio / 6) - door_radius * math.sin(angle1)
+            x2 = base_x + door_radius * math.cos(angle2)
+            y2 = base_y - (base_size * height_ratio / 6) - door_radius * math.sin(angle2)
+            pygame.draw.polygon(window, brown_color, [(base_x, base_y - (base_size * height_ratio / 6)), (x1, y1), (x2, y2)])
+                    
 
 
     def lerp(a, b, t):
