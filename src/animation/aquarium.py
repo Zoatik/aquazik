@@ -197,7 +197,7 @@ class Aquarium:
 
     def drawPatrickHouse(window:Surface):
         # Semi-circle parameters
-        center_x, center_y = 80,850
+        center_x, center_y = 80,895
         radius = 50
         num_triangles = 30  # more = smoother curve
         TRIANGLE_COLOR = (139, 69, 19)  # brown
@@ -369,7 +369,7 @@ class Aquarium:
 
     # --- CROWN (LEAVES) ----------------------------------------------------------
     def drawBobHouse(surface):
-        center = 1520, 820
+        center = 1520, 855
         rx = 30
         ry = 50
         segments = 40
@@ -392,7 +392,7 @@ class Aquarium:
     def drawBobTopHouse(surface):
         #surface, base_center, base_width, height,layers=3, spikes=9, tilt=0.15,jitter=0.12, seed=None
 
-        base_center = (1520, 780)
+        base_center = (1520, 815)
         base_width = 50
         height = 70
         layers = 10 
@@ -406,20 +406,20 @@ class Aquarium:
         LEAF_LIGHT = (46, 181, 101)
         SAND = (232, 210, 160)
         """
-Draw a pineapple crown using ONLY triangles.
+        Draw a pineapple crown using ONLY triangles.
 
 
-Parameters
------------
-base_center : (x, y) tuple for where the crown sits on the pineapple top
-base_width : width of the lowest leaf layer
-height : total crown height from base to top tips
-layers : number of stacked leaf rows
-spikes : number of leaf spikes on the widest, lowest layer
-tilt : horizontal lean of leaf tips (positive leans right)
-jitter : randomness factor (0..~0.3) to vary tips & bases
-seed : optional random seed for reproducible shapes
-"""
+        Parameters
+        -----------
+        base_center : (x, y) tuple for where the crown sits on the pineapple top
+        base_width : width of the lowest leaf layer
+        height : total crown height from base to top tips
+        layers : number of stacked leaf rows
+        spikes : number of leaf spikes on the widest, lowest layer
+        tilt : horizontal lean of leaf tips (positive leans right)
+        jitter : randomness factor (0..~0.3) to vary tips & bases
+        seed : optional random seed for reproducible shapes
+        """
 
     
 
