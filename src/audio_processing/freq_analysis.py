@@ -360,8 +360,8 @@ class AudioAnalyzer:
 
 
 
-audioAnalyzer = AudioAnalyzer("PinkPanther_Trumpet_cut.mp3", True)
-audioAnalyzer.convert_to_notes()
+#audioAnalyzer = AudioAnalyzer("PinkPanther_Trumpet_cut.mp3", False)
+#audioAnalyzer.convert_to_notes()
 
 
 
