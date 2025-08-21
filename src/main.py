@@ -4,14 +4,15 @@ from random import random
 from animation.aquarium import Aquarium
 from animation.fish import Colors, Bubble
 from audio_processing.midi_reader import MidiFile
-
+from audio_processing.freq_analysis import AudioAnalyzer
+import audio_processing.MidiV2
 
 def main():
-    print("Hello from Aquazik!")
+    # Setup analysis
+    audio_analyser = AudioAnalyzer("PinkPanther_Both.mp3")
+    #file_name = audio_processing.MidiV2.midi_maker()
 
     # -------Create the window--------------------------------------------------------------------------
-
-    # Initialise pygame
     pygame.init()
 
     # Create a window
