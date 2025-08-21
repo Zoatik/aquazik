@@ -1,5 +1,5 @@
 import pygame
-from random import randrange
+from random import randrange, random
 
 class Colors:
     bgColor = (255, 255, 255)
@@ -9,6 +9,11 @@ class Colors:
     black = (0, 0, 0)
     yellow = (231, 199, 25)
     white = (255, 255, 255)
+    
+    def get_random_color():
+        # Récupère tous les attributs de la classe sauf spéciaux (__xxx__)
+        values = [v for k, v in Colors.__dict__.items() if not k.startswith("__") and not k.startswith("bgColor") and not k.startswith("get")]
+        return values[int(random()*len(values))]
 
 # -----Fish Class----------------------------------------------------------------------------------
 # I can't seem to find a way to import this class from fish.py, so i copied it here...
@@ -23,39 +28,39 @@ class Fish:
         self.color = color
         self.listTriangles = [
             (
-                (self.center - 75, self.center - 25),
-                (self.center - 75, self.center + 25),
-                (self.center, self.center),
+                (self.center[0] - 75, self.center[1] - 25),
+                (self.center[0] - 75, self.center[1] + 25),
+                (self.center[0], self.center[1]),
             ),
             (
-                (self.center - 50, center - 17),
-                (self.center - 25, center - 50),
-                (self.center, self.center),
+                (self.center[0] - 50, self.center[1] - 17),
+                (self.center[0] - 25, self.center[1] - 50),
+                (self.center[0], self.center[1]),
             ),
             (
-                (self.center - 50, self.center + 17),
-                (self.center - 25, self.center + 50),
-                (self.center, self.center),
+                (self.center[0] - 50, self.center[1] + 17),
+                (self.center[0] - 25, self.center[1] + 50),
+                (self.center[0], self.center[1]),
             ),
             (
-                (self.center - 25, self.center - 50),
-                (self.center + 25, self.center - 50),
-                (self.center, self.center),
+                (self.center[0] - 25, self.center[1] - 50),
+                (self.center[0] + 25, self.center[1] - 50),
+                (self.center[0], self.center[1]),
             ),
             (
-                (self.center - 25, self.center + 50),
-                (self.center + 25, self.center + 50),
-                (self.center, self.center),
+                (self.center[0] - 25, self.center[1] + 50),
+                (self.center[0] + 25, self.center[1] + 50),
+                (self.center[0], self.center[1]),
             ),
             (
-                (self.center + 25, self.center - 50),
-                (self.center + 50, self.center - 17),
-                (self.center, self.center),
+                (self.center[0] + 25, self.center[1] - 50),
+                (self.center[0] + 50, self.center[1] - 17),
+                (self.center[0], self.center[1]),
             ),
             (
-                (self.center + 25, self.center + 50),
-                (self.center + 50, self.center + 17),
-                (self.center, self.center),
+                (self.center[0] + 25, self.center[1] + 50),
+                (self.center[0] + 50, self.center[1] + 17),
+                (self.center[0], self.center[1]),
             ),
         ]
 
@@ -73,9 +78,9 @@ class Fish:
             self.window,
             Colors.black,
             (
-                (self.center - 5, self.center - 40),
-                (self.center + 5, self.center - 40),
-                (self.center, self.center - 35),
+                (self.center[0] - 5, self.center[1] - 40),
+                (self.center[0] + 5, self.center[1] - 40),
+                (self.center[0], self.center[1] - 35),
             ),
         )
 

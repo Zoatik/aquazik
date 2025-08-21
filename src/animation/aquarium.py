@@ -31,10 +31,31 @@ def drawFishes():
 
 
 # instance of fish --> change it so i don't do it manually
-
-f1 = Fish(window, "D", Colors.red, 300)
-f2 = Fish(window, "C", Colors.blue, 150)
-fishList: list[Fish] = [f1, f2]
+# x + 150, y + 125
+centerList = [
+    (100, 50),
+    (250, 50),
+    (400, 50),
+    (500, 50),
+    (100, 175),
+    (250, 175),
+    (400, 175),
+    (500, 175),
+    (100, 300),
+    (250, 300),
+    (400, 300),
+    (500, 300),
+    (100, 425),
+    (250, 425),
+    (400, 425),
+    (500, 425),
+]
+fishList: list[Fish] = [
+    #Fish(window, "D", Colors.red, centerList[0]), 
+    #Fish(window, "C", Colors.blue, centerList[12])
+]
+for ni in range(len(NOTE_NAMES)):
+    fishList.append(Fish(window, NOTE_NAMES[ni], Colors.get_random_color() , centerList[ni]))
 
 # Create MidiFile instance
 mdi = MidiFile("audio_in/PinkPanther.midi")
@@ -62,6 +83,7 @@ while run:
     for i in range(len(fishList)):
         # if notes played contain fish name, change it's color
         if result.__contains__(fishList[i].name):
+            print(fishList[i].name)
             fishList[i].changeColor()
 
     window.fill(Colors.bgColor)
