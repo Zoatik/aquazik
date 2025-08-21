@@ -12,35 +12,43 @@ def note_to_midi(note):
     octave = int(note[-1])  # Extract the octave (e.g., '0', '2', etc.)
     return NOTE_TO_MIDI[note_name] + 12 * (octave + 1)
 
-# Informations to fill
-degrees = {
-    "M0" : [60, 2, "G4"], "M1" : [None],  "M2" : [80, 1, "C4", 90, 2, "D4"]
-}                                               # MIDI note number
-track = 0                                       # Track number (if 1 => 0)
-channel = 0                                     # Channel number (btwn 0 and 15)
-time = 0                                        # Time of the first note (In Beats)
-duration = 1                                    # Duration of each note (In Beats)
-tempo =  110 #librosa.feature.rhythm.tempo("audio_in/Ecossaise_Both.mp3")
-volume = 100                                    # 0-127
 
-'''for i in note:
-    degrees.append(note_to_midi(i))'''
+def midi_maker(macro, track = 0, bpm = 110):
+    """
+    Create a .mid file as music.mid
 
-MyMIDI = MIDIFile(1)
+    Args:
+        macro : Dictionnary with the velocity, the duration and the note ("M0" : [60, 2, "G4"])
+        track : Number of tracks (if 1 => 0)
+        bpm : The tempo of the music
+    
+    Returns:
+        The string of the path of the music.mid
+    """
 
-MyMIDI.addTempo(track, time, tempo)
+    channel = 0                                     # Channel number (btwn 0 and 15)
+    time = 0                                        # Time of the first note (In Beats)
+    duration = 1                                    # Duration of each note (In Beats)
+    volume = 100                                    # 0-127
 
-for i, event in enumerate(degrees):
-    for j in range(0, len(degrees[event]), 3):
-        l = degrees[event]
-        print(l)
-        if l[j] is None:
-            continue
-        else: 
-            volume = l[j]
-            duration = l[j + 1]
-            note = note_to_midi(l[j + 2])
-            MyMIDI.addNote(track, channel, note, time + i, duration, volume)
+    MyMIDI = MIDIFile(1)
 
-with open("music.mid", "wb") as output_file:
-    MyMIDI.writeFile(output_file)
+    MyMIDI.addTempo(track, time, bpm)
+
+    # Adding the notes to the sheet music 
+    for i, event in enumerate(macro):
+        for j in range(0, len(macro[event]), 3):
+            l = macro[event]
+            print(l)
+            if l[j] is None:
+                continue
+            else: 
+                volume = l[j]
+                duration = l[j + 1]
+                note = note_to_midi(l[j + 2])
+                MyMIDI.addNote(track, channel, note, time + i, duration, volume)
+
+    with open("music.mid", "wb") as output_file:
+        MyMIDI.writeFile(output_file)
+    
+    return
