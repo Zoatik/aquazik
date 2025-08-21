@@ -96,16 +96,15 @@ class Bubble:
         # bouge +- en x et toujours - en y
         self.pos = (
             self.pos[0] + (int(random() * 2 - 1) * 4),
-            self.pos[1] - int(random() * 1.3),
+            self.pos[1] - int(randrange(2)),
         )
 
-        # border
-        for t in animation.drawings.getPolygonPoints(
-            15, self.pos[0], self.pos[1], self.radius + 1
-        ):
-            pygame.draw.polygon(self.window, Colors.black, t)
-        # bubble
-        for t in animation.drawings.getPolygonPoints(
+        points = animation.drawings.getPolygonPoints(
             15, self.pos[0], self.pos[1], self.radius
-        ):
+        )
+        # draw bubble's border
+        for t in points:
+            pygame.draw.polygon(self.window, Colors.black, t, width = 3)
+        # draw white part of bubble (inside)
+        for t in points:
             pygame.draw.polygon(self.window, Colors.white, t)

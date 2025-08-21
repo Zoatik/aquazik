@@ -10,7 +10,7 @@ import audio_processing.MidiV2
 def main():
     # Setup analysis
     print("-- Analysing audio --")
-    audio_analyser = AudioAnalyzer("PinkPanther_Both.mp3")
+    #audio_analyser = AudioAnalyzer("PinkPanther_Both.mp3")
 
     print("-- Creating MIDI file --")
     #file_name = audio_processing.MidiV2.midi_maker()
