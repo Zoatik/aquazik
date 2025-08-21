@@ -2,9 +2,7 @@ import pygame
 from time import time
 from animation.aquarium import Aquarium
 from animation.fish import Colors
-
-# faut lancer avec py -m src.animation.aquarium
-from audio_processing.midi_reader import MidiFile, MidiNote
+from audio_processing.midi_reader import MidiFile
 
 def main():
     print("Hello from Aquazik!")
@@ -36,7 +34,7 @@ def main():
     start = time()
     last_notes = []
     fishList = Aquarium.createFishList(window)
-    
+
     while run:
         # time
         currentTime = time() - start
