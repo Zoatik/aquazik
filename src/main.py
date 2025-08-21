@@ -24,7 +24,7 @@ def main():
     # pygame.display.set_icon(icon)
 
     # Create MidiFile instance
-    mdi = MidiFile("audio_in/PinkPanther.midi")
+    mdi = MidiFile("audio_in/music.mid")
 
     # ---Loop, update display and quit------------------------------------------------------------------
 
@@ -58,6 +58,7 @@ def main():
                 fishList[i].changeColor()
                 bubbleList.append(Bubble(window, (fishList[i].center[0] + 20 + random()*5, fishList[i].center[1]), 5+ random()*20))
 
+        # draw aquarium background and details
         Aquarium.drawBackground(window)
         for b in bubbleList:
             b.move_and_draw()

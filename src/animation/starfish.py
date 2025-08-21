@@ -30,4 +30,4 @@ class Starfish:
                 self.center, self.arm_length, self.arm_width, angle
             )
             pygame.draw.polygon(self.window, Colors.orange, points)
-            pygame.draw.polygon(self.window, Colors.black, points, width=2)
+           # pygame.draw.polygon(self.window, Colors.black, points, width=2)

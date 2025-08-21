@@ -140,3 +140,24 @@ class Aquarium:
     
     def drawBackground(window: Surface):
         window.fill((125, 125, 255))
+
+    # x, y = point central de la base de la plante
+    def drawPlant(window: Surface, x: int, y: int, length: float = 15, angle: float = 0):
+        # base
+        base_wall_ratio = 10
+        # triangle qui a le haut
+        draw.polygon(window, Colors.green, [
+            (x,y),
+            (x - length / base_wall_ratio, y - length),
+            (x + length / base_wall_ratio, y - length)
+        ])
+        draw.polygon(window, Colors.green, [
+            (x - length / base_wall_ratio, y),
+            (x - length / base_wall_ratio, y - length),
+            (x + length / base_wall_ratio,y)
+        ])
+        draw.polygon(window, Colors.green, [
+            (x + length / base_wall_ratio,y),
+            (x + length / base_wall_ratio, y - length),
+            (x - length / base_wall_ratio,y)
+        ])
