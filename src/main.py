@@ -9,18 +9,20 @@ import audio_processing.MidiV2
 
 
 def main():
-    FILE = "PinkPanther_Both.mp3"
+    FILE = "PinkPanther_Trumpet_Only.mp3"
 
     # Setup analysis
     print("-- Analysing audio --")
-    #audio_analyser = AudioAnalyzer("PinkPanther_Piano_Only.mp3")
+    audio_analyser = AudioAnalyzer(FILE)
+    audio_data = audio_analyser.convert_to_notes()
 
     print("-- Creating MIDI file --")
-    #file_name = audio_processing.MidiV2.midi_maker(audio_analyser.convert_to_notes())
+    midi_path = audio_processing.MidiV2.midi_maker(audio_data[1], bpm=audio_data[0])
+    print(f"bpm = {audio_data[0]}")
 
     # Create MidiFile instance
     print("-- Processing MIDI file --")
-    mdi = MidiFile("audio_in/PinkPanther.midi")
+    mdi = MidiFile(midi_path)
 
     # -------Create the window--------------------------------------------------------------------------
     print("-- Creating pygame window --")
@@ -42,7 +44,7 @@ def main():
 
     # Start music
     pygame.mixer.init()
-    pygame.mixer.music.load("audio_in/"+FILE)
+    pygame.mixer.music.load("audio_in/" + FILE)
     pygame.mixer.music.play()
     pygame.event.wait()
 
@@ -63,9 +65,17 @@ def main():
             x for x in notes if x not in last_notes
         ]  # uniquement les nouvelles notes
 
-        result_piano = [x.get_real_note()[:-1] for x in result if x.get_instrument() == Instrument.PIANO]
-        result_trumpet = [x.get_real_note()[:-1] for x in result if x.get_instrument() == Instrument.TRUMPET]
-        #result_allNotes = [x.get_real_note()[:-1] for x in notes]                           # contient toutes les notes jouées à ce moment-là
+        result_piano = [
+            x.get_real_note()[:-1]
+            for x in result
+            if x.get_instrument() == Instrument.PIANO
+        ]
+        result_trumpet = [
+            x.get_real_note()[:-1]
+            for x in result
+            if x.get_instrument() == Instrument.TRUMPET
+        ]
+        # result_allNotes = [x.get_real_note()[:-1] for x in notes]                           # contient toutes les notes jouées à ce moment-là
 
         last_notes = notes
 
