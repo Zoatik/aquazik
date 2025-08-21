@@ -1,20 +1,7 @@
 import pygame
 
-from random import randrange, random
-
-class Colors:
-    bgColor = (255, 255, 255)
-    red = (255, 0, 0)
-    green = (0, 255, 0)
-    blue = (0, 0, 255)
-    black = (0, 0, 0)
-    yellow = (231, 199, 25)
-    white = (255, 255, 255)
-    
-    def get_random_color():
-        # Récupère tous les attributs de la classe sauf spéciaux (__xxx__)
-        values = [v for k, v in Colors.__dict__.items() if not k.startswith("__") and not k.startswith("bgColor") and not k.startswith("get")]
-        return values[int(random()*len(values))]
+from random import randrange
+from animation.drawings import Colors
 
 # -----Fish Class----------------------------------------------------------------------------------
 # I can't seem to find a way to import this class from fish.py, so i copied it here...

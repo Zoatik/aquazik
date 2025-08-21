@@ -32,7 +32,7 @@ class MidiFile:
                             )
                         )
                     case "note_off":
-                        note = next(
+                        note: MidiNote = next(
                             x for x in unfinished_notes if x.noteIndex == msg.note
                         )
                         unfinished_notes.remove(note)
@@ -41,6 +41,7 @@ class MidiFile:
                     case "set_tempo":
                         self.tempo = msg.tempo
                 current_tick += msg.time
+        self.totalTime = self.note_list[-1].endSeconds
 
     def find_note(self, time_seconds: float):
         ret = []
