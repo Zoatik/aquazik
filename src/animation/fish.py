@@ -1,7 +1,8 @@
 import pygame
 
-from random import randrange
+from random import randrange, random
 from animation.drawings import Colors
+import animation.drawings
 
 # -----Fish Class----------------------------------------------------------------------------------
 # I can't seem to find a way to import this class from fish.py, so i copied it here...
@@ -9,7 +10,7 @@ from animation.drawings import Colors
 class Fish:
     global listTriangles
 
-    def __init__(self, window, name: str, color: str, center):
+    def __init__(self, window: pygame.Surface, name: str, color: str, center):
         self.window = window
         self.name = name
         self.center = center
@@ -79,3 +80,14 @@ class Fish:
             randrange(255),
             randrange(255),
         )
+
+class Bubble:
+    def __init__(self, window: pygame.Surface, starting_pos: tuple[int, int], radius: int):
+        self.window = window
+        self.pos = starting_pos
+        self.radius = radius
+    def move_and_draw(self):
+        # bouge +- en x et toujours - en y
+        self.pos = (self.pos[0] + (int(random()*2 -1)* 4), self.pos[1] - int(random()*1.3))
+        for t in animation.drawings.getPolygonPoints(15, self.pos[0], self.pos[1], self.radius): 
+            pygame.draw.polygon(self.window, Colors.white, t)
