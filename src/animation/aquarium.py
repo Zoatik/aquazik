@@ -49,18 +49,18 @@ class Aquarium:
     def createStarfishList(window):
         starFishList = []
         starfishCenterList = [
-            (50, 450),
-            (100, 450),
-            (150, 450),
-            (200, 450),
-            (250, 450),
-            (300, 450),
-            (350, 450),
-            (400, 450),
-            (450, 450),
-            (500, 450),
-            (550, 450),
-            (600, 450),
+            (randrange(50, 350), randrange(500, 550)),
+            (randrange(50, 350), randrange(650, 700)),
+            (randrange(50, 350), randrange(800, 850)),
+            (randrange(450, 750), randrange(500, 550)),
+            (randrange(450, 750), randrange(650, 700)),
+            (randrange(450, 750), randrange(800, 850)),
+            (randrange(850, 1150), randrange(500, 550)),
+            (randrange(850, 1150), randrange(650, 700)),
+            (randrange(850, 1150), randrange(800, 850)),
+            (randrange(1250, 1550), randrange(500, 550)),
+            (randrange(1250, 1550), randrange(650, 700)),
+            (randrange(1250, 1550), randrange(800, 850)),
         ]
         for ni in range(len(NOTE_NAMES)):
             starFishList.append(
@@ -157,6 +157,6 @@ class Aquarium:
         for e in pupils:
             for t in e:
                 draw.polygon(window, Colors.black, t)
-    
+
     def drawBackground(window: Surface):
         window.fill((125, 125, 255))

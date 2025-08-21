@@ -15,7 +15,7 @@ def main():
     pygame.init()
 
     # Create a window
-    (width, height) = (625, 500)
+    (width, height) = (1600, 900)
     window = pygame.display.set_mode((width, height))
 
     # Set window's caption // and icon
@@ -73,10 +73,10 @@ def main():
                 starFishList[i].animStarfish()
 
         Aquarium.drawBackground(window)
-        for b in bubbleList:
-            b.move_and_draw()
         Aquarium.drawFishes(fishList)
         Aquarium.drawStarfish(starFishList)
+        for b in bubbleList:
+            b.move_and_draw()
         Aquarium.drawProgressBar(window, currentTime, mdi.totalTime)
         for event in pygame.event.get():
             # quit if click quit
