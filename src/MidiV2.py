@@ -51,4 +51,4 @@ def midi_maker(macro, track = 0, bpm = 110):
     with open("music.mid", "wb") as output_file:
         MyMIDI.writeFile(output_file)
     
-    return
+    return "music.mid"

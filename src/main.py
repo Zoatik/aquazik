@@ -56,15 +56,29 @@ def main():
             # if notes played contain fish name, change it's color
             if result.__contains__(fishList[i].name):
                 fishList[i].changeColor()
-                bubbleList.append(Bubble(window, (fishList[i].center[0] + 20 + random()*5, fishList[i].center[1]), 5+ random()*20))
+                bubbleList.append(
+                    Bubble(
+                        window,
+                        (
+                            fishList[i].center[0] + 20 + random() * 5,
+                            fishList[i].center[1],
+                        ),
+                        5 + random() * 20,
+                    )
+                )
+
+        for i in range(len(starFishList)):
+            # if notes played contain fish name, change it's color
+            if result.__contains__(starFishList[i].name):
+                starFishList[i].animStarfish()
 
         # draw aquarium background and details
         Aquarium.drawBackground(window)
         for b in bubbleList:
             b.move_and_draw()
-        Aquarium.drawProgressBar(window, currentTime, mdi.totalTime)
         Aquarium.drawFishes(fishList)
         Aquarium.drawStarfish(starFishList)
+        Aquarium.drawProgressBar(window, currentTime, mdi.totalTime)
         for event in pygame.event.get():
             # quit if click quit
             if event.type == pygame.QUIT:
