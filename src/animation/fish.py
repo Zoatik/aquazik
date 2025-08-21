@@ -10,12 +10,16 @@ import animation.drawings
 # Need to learn how to do that...
 class Fish:
     global listTriangles
+    global fistColor
+    global secondColor
 
     def __init__(self, window: pygame.Surface, name: str, color, center):
         self.window = window
         self.name = name
         self.center = center
         self.color = color
+        self.firstColor = color
+        self.secondColor = Colors.get_random_color()
         self.listTriangles = [
             (
                 (self.center[0] - 75, self.center[1] - 25),
@@ -78,10 +82,10 @@ class Fish:
 
     # change the color of the fish to a random color
     def changeColor(self):
-        newColor = (randrange(255), randrange(255), randrange(255))
-        while newColor == Colors.orange:
-            newColor = (randrange(255), randrange(255), randrange(255))
-        self.color = newColor
+        if self.color == self.firstColor:
+            self.color = self.secondColor
+        else:
+            self.color = self.firstColor
 
 
 class Bubble:
