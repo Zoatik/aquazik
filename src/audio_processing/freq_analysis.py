@@ -96,9 +96,7 @@ class AudioAnalyzer:
         self.audio_path = os.path.join(INPUT_FOLDER, audio_name)
         self.audio_data, self.sample_rate = librosa.load(self.audio_path, mono=True)
         self.audio_length = librosa.get_duration(y=self.audio_data, sr=self.sample_rate)
-        self.audio_bpm = librosa.feature.rhythm.tempo(
-            y=self.audio_data, sr=self.sample_rate
-        )[0]
+        self.audio_bpm = 120
         self.beat_unit = 60 / self.audio_bpm
         self.samples_per_window = int(self.sample_rate * WINDOW_TIME)
         self.number_of_windows = int(
@@ -110,6 +108,14 @@ class AudioAnalyzer:
             abs(self.xf[0] - self.xf[1]) if len(self.xf) > 1 else 8.0
         )
         self.debug_output_files = DEBUG_OUTPUT_FILES
+
+        est_bpm = librosa.feature.rhythm.tempo(y=self.audio_data, sr=self.sample_rate)[
+            0
+        ]
+        if est_bpm % 10 / 2 > 5:
+            self.audio_bpm = est_bpm - est_bpm % 10 + 10
+        else:
+            self.audio_bpm = est_bpm - est_bpm % 10
 
     def convert_to_notes(self):
         mx = 0.0
@@ -230,6 +236,7 @@ class AudioAnalyzer:
 
             print(f"Video with audio saved as: {final_video}")
 
+        print(self.__find_notes_length(notes_array))
         return self.audio_bpm, self.__find_notes_length(notes_array)
         # print(notes_array)
 
@@ -472,8 +479,8 @@ class AudioAnalyzer:
         plt.close()
 
 
-audioAnalyzer = AudioAnalyzer("PinkPanther_Trumpet_cut.mp3", True)
-audioAnalyzer.convert_to_notes()
+# audioAnalyzer = AudioAnalyzer("PinkPanther_Trumpet_Only.mp3", False)
+# audioAnalyzer.convert_to_notes()
 
 
 """

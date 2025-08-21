@@ -4,6 +4,7 @@ from constants import NOTE_NAMES
 
 DEBUG = False
 
+
 class Instrument(Enum):
     PIANO = auto()
     TRUMPET = auto()
@@ -43,7 +44,9 @@ class MidiFile:
                         note.set_end_ticks(current_tick + msg.time)
                         self.note_list.append(note)
                         if DEBUG:
-                            print("midi_reader DBG:  note_off : " + note.get_real_note())
+                            print(
+                                "midi_reader DBG:  note_off : " + note.get_real_note()
+                            )
                     case "set_tempo":
                         self.tempo = msg.tempo
                 current_tick += msg.time
@@ -60,6 +63,7 @@ class MidiFile:
     def get_used_notes(self) -> list[str]:
         return list(set([x.get_real_note()[:-1] for x in self.note_list]))
 
+
 class MidiNote:
     endTicks = -1
     endSeconds = -1
@@ -75,9 +79,9 @@ class MidiNote:
         )
 
     def get_instrument(self):
-        if self.channel == 2:
+        if self.channel == 1:  # TODO: dynamicly choose a chanel
             return Instrument.TRUMPET
-        if self.channel == 11:
+        if self.channel == 0:
             return Instrument.PIANO
 
     def set_end_ticks(self, endTicks):
@@ -90,6 +94,7 @@ class MidiNote:
         octave = (self.noteIndex // 12) - 1
         note = NOTE_NAMES[self.noteIndex % 12]
         return f"{note}{octave}"
+
 
 # test case
 """
