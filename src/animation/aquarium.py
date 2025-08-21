@@ -1,11 +1,12 @@
 import pygame
 from random import randrange
+from fish import Fish
 
 
 # -----Fish Class----------------------------------------------------------------------------------
 # I can't seem to find a way to import this class from fish.py, so i copied it here...
 # Need to learn how to do that...
-class Fish:
+"""class Fish:
     global listTriangles
 
     def __init__(self, window, name: str, color: str, center):
@@ -78,7 +79,7 @@ class Fish:
             randrange(255),
             randrange(255),
         )
-
+"""
 
 # --------------------------------------------------------------------------------------------------
 # -------Create the window--------------------------------------------------------------------------
