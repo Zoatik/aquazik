@@ -98,6 +98,13 @@ class Bubble:
             self.pos[0] + (int(random() * 2 - 1) * 4),
             self.pos[1] - int(random() * 1.3),
         )
+
+        # border
+        for t in animation.drawings.getPolygonPoints(
+            15, self.pos[0], self.pos[1], self.radius + 1
+        ):
+            pygame.draw.polygon(self.window, Colors.black, t)
+        # bubble
         for t in animation.drawings.getPolygonPoints(
             15, self.pos[0], self.pos[1], self.radius
         ):
