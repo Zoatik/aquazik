@@ -57,6 +57,7 @@ def main():
                 fishList[i].changeColor()
 
         window.fill(Colors.bgColor)
+        Aquarium.drawProgressBar(window, currentTime, mdi.totalTime)
         Aquarium.drawFishes(fishList)
         Aquarium.drawStarfish(starFishList)
         for event in pygame.event.get():
