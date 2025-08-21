@@ -92,12 +92,19 @@ def main():
 
         # draw aquarium background and details
         Aquarium.drawBackground(window)
+
+        Aquarium.drawPatrickHouse(window)
+        Aquarium.drawBobHouse(window)
+        Aquarium.drawBobTopHouse(window)
+
+        
+
         Aquarium.drawFishes(fishList)
         Aquarium.drawStarfish(starFishList)
         for b in bubbleList:
             b.move_and_draw()
 
-        Aquarium.drawPatrickHouse(window)
+        
         Aquarium.drawProgressBar(window, currentTime, mdi.totalTime)
         for event in pygame.event.get():
             # quit if click quit
