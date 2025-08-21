@@ -1,7 +1,9 @@
 import pygame
 
-from random import randrange
+from random import randrange, random
 from animation.drawings import Colors
+import animation.drawings
+
 
 # -----Fish Class----------------------------------------------------------------------------------
 # I can't seem to find a way to import this class from fish.py, so i copied it here...
@@ -9,7 +11,7 @@ from animation.drawings import Colors
 class Fish:
     global listTriangles
 
-    def __init__(self, window, name: str, color: str, center):
+    def __init__(self, window: pygame.Surface, name: str, color, center):
         self.window = window
         self.name = name
         self.center = center
@@ -59,7 +61,9 @@ class Fish:
         # body parts and contouring
         for i in range(0, len(self.listTriangles)):
             pygame.draw.polygon(self.window, self.color, self.listTriangles[i])
-            pygame.draw.polygon(self.window, Colors.black, self.listTriangles[i], width=2)
+            pygame.draw.polygon(
+                self.window, Colors.black, self.listTriangles[i], width=2
+            )
 
         # black eye
         pygame.draw.polygon(
@@ -74,8 +78,7 @@ class Fish:
 
     # change the color of the fish to a random color
     def changeColor(self):
-        self.color = (
-            randrange(255),
-            randrange(255),
-            randrange(255),
-        )
+        newColor = (randrange(255), randrange(255), randrange(255))
+        while newColor == Colors.orange:
+            newColor = (randrange(255), randrange(255), randrange(255))
+        self.color = newColor

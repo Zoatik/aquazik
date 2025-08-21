@@ -4,6 +4,7 @@ from constants import NOTE_NAMES
 from animation.starfish import Starfish
 import animation.drawings
 from animation.drawings import Colors
+from random import randrange
 
 
 class Aquarium:
@@ -15,7 +16,7 @@ class Aquarium:
     def createFishList(window):
         # instance of fish --> change it so i don't do it manually
         # x + 150, y + 125
-        centerList = [
+        fishCenterList = [
             (100, 50),
             (250, 50),
             (400, 50),
@@ -35,17 +36,36 @@ class Aquarium:
         ]
         fishList: list[Fish] = []
         for ni in range(len(NOTE_NAMES)):
-
             fishList.append(
-                Fish(window, NOTE_NAMES[ni], Colors.get_random_color(), centerList[ni])
+                Fish(
+                    window,
+                    NOTE_NAMES[ni],
+                    (randrange(255), randrange(255), randrange(255)),
+                    fishCenterList[ni],
+                )
             )
         return fishList
 
     def createStarfishList(window):
         starFishList = []
-        center = (200, 450)
-        s1 = Starfish(window, center)
-        starFishList.append(s1)
+        starfishCenterList = [
+            (50, 450),
+            (100, 450),
+            (150, 450),
+            (200, 450),
+            (250, 450),
+            (300, 450),
+            (350, 450),
+            (400, 450),
+            (450, 450),
+            (500, 450),
+            (550, 450),
+            (600, 450),
+        ]
+        for ni in range(len(NOTE_NAMES)):
+            starFishList.append(
+                Starfish(window, NOTE_NAMES[ni], starfishCenterList[ni])
+            )
         return starFishList
 
     def drawStarfish(starFishList):

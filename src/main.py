@@ -56,10 +56,15 @@ def main():
                 print(fishList[i].name)
                 fishList[i].changeColor()
 
+        for i in range(len(starFishList)):
+            # if notes played contain fish name, change it's color
+            if result.__contains__(starFishList[i].name):
+                starFishList[i].animStarfish()
+
         window.fill(Colors.bgColor)
-        Aquarium.drawProgressBar(window, currentTime, mdi.totalTime)
         Aquarium.drawFishes(fishList)
         Aquarium.drawStarfish(starFishList)
+        Aquarium.drawProgressBar(window, currentTime, mdi.totalTime)
         for event in pygame.event.get():
             # quit if click quit
             if event.type == pygame.QUIT:
