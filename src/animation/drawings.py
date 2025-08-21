@@ -28,11 +28,15 @@ class Colors:
 
 
 def getOctogonPoints(cx, cy, radius):
+    return getPolygonPoints(8, cx, cy, radius)
+
+
+def getPolygonPoints(sides: int, cx, cy, radius):
     points = []
     ret = []
     # recherche des sommets du triangle à l'aide des angles : 45° : octogone
-    for i in range(8):  # 8 sommets
-        angle = math.radians(45 * i)  # 45° * i
+    for i in range(sides):  # 8 sommets
+        angle = math.radians((360 / sides) * i)  # 45° * i
         x = cx + radius * math.cos(angle)
         y = cy + radius * math.sin(angle)
         points.append((x, y))

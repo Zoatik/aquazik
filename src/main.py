@@ -1,7 +1,8 @@
 import pygame
 from time import time
+from random import random
 from animation.aquarium import Aquarium
-from animation.fish import Colors
+from animation.fish import Colors, Bubble
 from audio_processing.midi_reader import MidiFile
 
 
@@ -33,6 +34,7 @@ def main():
 
     start = time()
     last_notes = []
+    bubbleList: list[Bubble] = []
     fishList = Aquarium.createFishList(window)
     starFishList = Aquarium.createStarfishList(window)
 
@@ -53,15 +55,26 @@ def main():
         for i in range(len(fishList)):
             # if notes played contain fish name, change it's color
             if result.__contains__(fishList[i].name):
-                print(fishList[i].name)
                 fishList[i].changeColor()
+                bubbleList.append(
+                    Bubble(
+                        window,
+                        (
+                            fishList[i].center[0] + 20 + random() * 5,
+                            fishList[i].center[1],
+                        ),
+                        5 + random() * 20,
+                    )
+                )
 
         for i in range(len(starFishList)):
             # if notes played contain fish name, change it's color
             if result.__contains__(starFishList[i].name):
                 starFishList[i].animStarfish()
 
-        window.fill(Colors.bgColor)
+        Aquarium.drawBackground(window)
+        for b in bubbleList:
+            b.move_and_draw()
         Aquarium.drawFishes(fishList)
         Aquarium.drawStarfish(starFishList)
         Aquarium.drawProgressBar(window, currentTime, mdi.totalTime)

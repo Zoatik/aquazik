@@ -82,3 +82,23 @@ class Fish:
         while newColor == Colors.orange:
             newColor = (randrange(255), randrange(255), randrange(255))
         self.color = newColor
+
+
+class Bubble:
+    def __init__(
+        self, window: pygame.Surface, starting_pos: tuple[int, int], radius: int
+    ):
+        self.window = window
+        self.pos = starting_pos
+        self.radius = radius
+
+    def move_and_draw(self):
+        # bouge +- en x et toujours - en y
+        self.pos = (
+            self.pos[0] + (int(random() * 2 - 1) * 4),
+            self.pos[1] - int(random() * 1.3),
+        )
+        for t in animation.drawings.getPolygonPoints(
+            15, self.pos[0], self.pos[1], self.radius
+        ):
+            pygame.draw.polygon(self.window, Colors.white, t)

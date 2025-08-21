@@ -50,6 +50,9 @@ class MidiFile:
                 ret.append(x)
         return ret
 
+    # returns a list of unique used notes in the midi file
+    def get_used_notes(self) -> list[str]:
+        return list(set([x.get_real_note()[:-1] for x in self.note_list]))
 
 class MidiNote:
     endTicks = -1

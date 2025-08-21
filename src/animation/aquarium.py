@@ -99,7 +99,7 @@ class Aquarium:
         draw.polygon(window, bodyColor, body)
 
         # draw coquille
-        coquille = animation.drawings.getOctogonPoints(current, height, radius)
+        coquille = animation.drawings.getPolygonPoints(15, current, height, radius)
 
         for t in coquille:
             draw.polygon(window, (0xDC, 0x49, 0x60), t, 2)
@@ -157,3 +157,6 @@ class Aquarium:
         for e in pupils:
             for t in e:
                 draw.polygon(window, Colors.black, t)
+    
+    def drawBackground(window: Surface):
+        window.fill((125, 125, 255))
