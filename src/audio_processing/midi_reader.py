@@ -1,8 +1,6 @@
 from enum import Enum, auto
 import mido
-
-NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", 
-              "F#", "G", "G#", "A", "A#", "B"]
+from constants import NOTE_NAMES
 
 class Instrument(Enum):
     PIANO = auto()
