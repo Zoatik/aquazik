@@ -1,17 +1,6 @@
 import pygame
 import math
-
-
-class Colors:
-    bgColor = (255, 255, 255)
-    red = (255, 0, 0)
-    green = (0, 255, 0)
-    blue = (0, 0, 255)
-    black = (0, 0, 0)
-    yellow = (231, 199, 25)
-    white = (255, 255, 255)
-    orange = (255, 150, 50)
-
+from animation.drawings import Colors
 
 class Starfish:
     def __init__(self, window, center):

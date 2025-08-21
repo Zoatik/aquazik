@@ -9,6 +9,7 @@ class Colors:
     black = (0, 0, 0)
     yellow = (231, 199, 25)
     white = (255, 255, 255)
+    orange = (255, 150, 50)
     
     def get_random_color():
         # Récupère tous les attributs de la classe sauf spéciaux (__xxx__)
