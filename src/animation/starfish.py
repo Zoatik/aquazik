@@ -26,14 +26,18 @@ class Starfish:
         right_y = y + width / 2 * math.sin(math.radians(angle - 90))
         return [(tip_x, tip_y), (left_x, left_y), (right_x, right_y)]
 
-    def draw(self):
+    def draw(self, borders: bool = False):
+        if not borders:
+            self.draw(borders=True)
         for i in range(self.arm_count):
             angle = i * (360 / self.arm_count) - 90  # rotate to start pointing upwards
             points = self.triangle_arm(
                 self.center, self.arm_length, self.arm_width, angle
             )
-            pygame.draw.polygon(self.window, self.color, points)
-            pygame.draw.polygon(self.window, Colors.black, points, width=2)
+            if borders:
+                pygame.draw.polygon(self.window, Colors.black, points, width=3)
+            else:
+                pygame.draw.polygon(self.window, self.color, points)
 
     # change the color of the fish to a random color
     def animStarfish(self):

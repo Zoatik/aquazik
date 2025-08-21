@@ -17,22 +17,18 @@ class Aquarium:
         # instance of fish --> change it so i don't do it manually
         # x + 150, y + 125
         fishCenterList = [
-            (100, 50),
-            (250, 50),
-            (400, 50),
-            (550, 50),
-            (100, 175),
-            (250, 175),
-            (400, 175),
-            (550, 175),
-            (100, 300),
-            (250, 300),
-            (400, 300),
-            (550, 300),
-            (100, 425),
-            (250, 425),
-            (400, 425),
-            (550, 425),
+            (randrange(50, 350), randrange(50, 100)),
+            (randrange(50, 350), randrange(200, 250)),
+            (randrange(50, 350), randrange(350, 400)),
+            (randrange(450, 750), randrange(50, 100)),
+            (randrange(450, 750), randrange(200, 250)),
+            (randrange(450, 750), randrange(350, 400)),
+            (randrange(850, 1150), randrange(50, 100)),
+            (randrange(850, 1150), randrange(200, 250)),
+            (randrange(850, 1150), randrange(350, 400)),
+            (randrange(1250, 1550), randrange(50, 100)),
+            (randrange(1250, 1550), randrange(200, 250)),
+            (randrange(1250, 1550), randrange(350, 400)),
         ]
         fishList: list[Fish] = []
         for ni in range(len(NOTE_NAMES)):
@@ -49,18 +45,18 @@ class Aquarium:
     def createStarfishList(window):
         starFishList = []
         starfishCenterList = [
-            (50, 450),
-            (100, 450),
-            (150, 450),
-            (200, 450),
-            (250, 450),
-            (300, 450),
-            (350, 450),
-            (400, 450),
-            (450, 450),
-            (500, 450),
-            (550, 450),
-            (600, 450),
+            (randrange(50, 350), randrange(500, 550)),
+            (randrange(50, 350), randrange(650, 700)),
+            (randrange(50, 350), randrange(800, 850)),
+            (randrange(450, 750), randrange(500, 550)),
+            (randrange(450, 750), randrange(650, 700)),
+            (randrange(450, 750), randrange(800, 850)),
+            (randrange(850, 1150), randrange(500, 550)),
+            (randrange(850, 1150), randrange(650, 700)),
+            (randrange(850, 1150), randrange(800, 850)),
+            (randrange(1250, 1550), randrange(500, 550)),
+            (randrange(1250, 1550), randrange(650, 700)),
+            (randrange(1250, 1550), randrange(800, 850)),
         ]
         for ni in range(len(NOTE_NAMES)):
             starFishList.append(
@@ -157,6 +153,41 @@ class Aquarium:
         for e in pupils:
             for t in e:
                 draw.polygon(window, Colors.black, t)
-    
+
     def drawBackground(window: Surface):
         window.fill((125, 125, 255))
+
+    # x, y = point central de la base de la plante
+    def drawPlant(
+        window: Surface, x: int, y: int, length: float = 15, angle: float = 0
+    ):
+        # base
+        base_wall_ratio = 10
+        # triangle qui a le haut
+        draw.polygon(
+            window,
+            Colors.green,
+            [
+                (x, y),
+                (x - length / base_wall_ratio, y - length),
+                (x + length / base_wall_ratio, y - length),
+            ],
+        )
+        draw.polygon(
+            window,
+            Colors.green,
+            [
+                (x - length / base_wall_ratio, y),
+                (x - length / base_wall_ratio, y - length),
+                (x + length / base_wall_ratio, y),
+            ],
+        )
+        draw.polygon(
+            window,
+            Colors.green,
+            [
+                (x + length / base_wall_ratio, y),
+                (x + length / base_wall_ratio, y - length),
+                (x - length / base_wall_ratio, y),
+            ],
+        )

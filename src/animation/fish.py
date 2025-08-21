@@ -10,12 +10,16 @@ import animation.drawings
 # Need to learn how to do that...
 class Fish:
     global listTriangles
+    global fistColor
+    global secondColor
 
     def __init__(self, window: pygame.Surface, name: str, color, center):
         self.window = window
         self.name = name
         self.center = center
         self.color = color
+        self.firstColor = color
+        self.secondColor = Colors.get_random_color()
         self.listTriangles = [
             (
                 (self.center[0] - 75, self.center[1] - 25),
@@ -78,10 +82,10 @@ class Fish:
 
     # change the color of the fish to a random color
     def changeColor(self):
-        newColor = (randrange(255), randrange(255), randrange(255))
-        while newColor == Colors.orange:
-            newColor = (randrange(255), randrange(255), randrange(255))
-        self.color = newColor
+        if self.color == self.firstColor:
+            self.color = self.secondColor
+        else:
+            self.color = self.firstColor
 
 
 class Bubble:
@@ -96,9 +100,15 @@ class Bubble:
         # bouge +- en x et toujours - en y
         self.pos = (
             self.pos[0] + (int(random() * 2 - 1) * 4),
-            self.pos[1] - int(random() * 1.3),
+            self.pos[1] - int(randrange(2)),
         )
-        for t in animation.drawings.getPolygonPoints(
+
+        points = animation.drawings.getPolygonPoints(
             15, self.pos[0], self.pos[1], self.radius
-        ):
+        )
+        # draw bubble's border
+        for t in points:
+            pygame.draw.polygon(self.window, Colors.black, t, width = 3)
+        # draw white part of bubble (inside)
+        for t in points:
             pygame.draw.polygon(self.window, Colors.white, t)

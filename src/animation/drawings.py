@@ -23,7 +23,6 @@ class Colors:
             and not k.startswith("black")
             and not k.startswith("white")
         ]
-        print(values[int(random() * len(values))])
         return values[int(random() * len(values))]
 
 

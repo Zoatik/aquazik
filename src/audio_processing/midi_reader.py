@@ -2,6 +2,8 @@ from enum import Enum, auto
 import mido
 from constants import NOTE_NAMES
 
+DEBUG = False
+
 class Instrument(Enum):
     PIANO = auto()
     TRUMPET = auto()
@@ -20,6 +22,8 @@ class MidiFile:
         for track in mid.tracks:
             current_tick = 0
             for msg in track:
+                if DEBUG:
+                    print("midi_reader DBG: ", msg)
                 match msg.type:
                     case "note_on":
                         unfinished_notes.append(
@@ -38,6 +42,8 @@ class MidiFile:
                         unfinished_notes.remove(note)
                         note.set_end_ticks(current_tick + msg.time)
                         self.note_list.append(note)
+                        if DEBUG:
+                            print("midi_reader DBG:  note_off : " + note.get_real_note())
                     case "set_tempo":
                         self.tempo = msg.tempo
                 current_tick += msg.time
