@@ -35,7 +35,7 @@ NOTE_TO_MIDI = {
 
 INSTRUMENTS_HARMONICS = {
     "Piano": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-    "Trumpet": [12, 1, 2, 3, 4, 5, 6, 7, 8],
+    "Trumpet": [12, 7, 5, 4, 3, 3],
 }
 
 def freq_to_number(f): return int(round(69 + 12*np.log2(f/440.0)))
@@ -151,9 +151,6 @@ class AudioAnalyzer:
             self.__build_fig_matplotlib(fft, mx, top_notes, f"{frames_folder}/fft_frame_{frame_num:04d}.png")
 
 
-        print(self.__find_notes_length(notes_array))
-        #print(notes_array)
-
         if self.debug_output_files:
 
             # Combine frames into a video using ffmpeg
@@ -185,6 +182,9 @@ class AudioAnalyzer:
             ])
 
             print(f"Video with audio saved as: {final_video}")
+
+        return self.audio_bpm, self.__find_notes_length(notes_array)
+        #print(notes_array)
 
     def __find_instrument(self, notes):
         distances = []
@@ -329,7 +329,7 @@ class AudioAnalyzer:
             if note.name in found_notes_probabilities:
                 mean_proba = np.mean(found_notes_probabilities[note.name])
                 print(f"Note: {note.name}, Mean Probability: {mean_proba}")
-                if mean_proba < 0.3:
+                if mean_proba < 0.01:
                     found_notes.remove(note)
         
         return found_notes
@@ -360,7 +360,7 @@ class AudioAnalyzer:
 
 
 
-audioAnalyzer = AudioAnalyzer("PinkPanther_Trumpet_cut.mp3", True)
+audioAnalyzer = AudioAnalyzer("PinkPanther_Piano_cut.mp3", False)
 audioAnalyzer.convert_to_notes()
 
 
