@@ -233,7 +233,7 @@ class Aquarium:
 
     # --- CROWN (LEAVES) ----------------------------------------------------------
     def drawBobHouse(surface):
-        center = 800, 800
+        center = 1520, 820
         rx = 30
         ry = 50
         segments = 40
@@ -256,7 +256,7 @@ class Aquarium:
     def drawBobTopHouse(surface):
         #surface, base_center, base_width, height,layers=3, spikes=9, tilt=0.15,jitter=0.12, seed=None
 
-        base_center = (800, 760)
+        base_center = (1520, 780)
         base_width = 50
         height = 70
         layers = 10 
