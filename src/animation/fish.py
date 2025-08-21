@@ -4,13 +4,14 @@ from random import randrange, random
 from animation.drawings import Colors
 import animation.drawings
 
+
 # -----Fish Class----------------------------------------------------------------------------------
 # I can't seem to find a way to import this class from fish.py, so i copied it here...
 # Need to learn how to do that...
 class Fish:
     global listTriangles
 
-    def __init__(self, window: pygame.Surface, name: str, color: str, center):
+    def __init__(self, window: pygame.Surface, name: str, color, center):
         self.window = window
         self.name = name
         self.center = center
@@ -60,7 +61,9 @@ class Fish:
         # body parts and contouring
         for i in range(0, len(self.listTriangles)):
             pygame.draw.polygon(self.window, self.color, self.listTriangles[i])
-            pygame.draw.polygon(self.window, Colors.black, self.listTriangles[i], width=2)
+            pygame.draw.polygon(
+                self.window, Colors.black, self.listTriangles[i], width=2
+            )
 
         # black eye
         pygame.draw.polygon(
@@ -75,19 +78,27 @@ class Fish:
 
     # change the color of the fish to a random color
     def changeColor(self):
-        self.color = (
-            randrange(255),
-            randrange(255),
-            randrange(255),
-        )
+        newColor = (randrange(255), randrange(255), randrange(255))
+        while newColor == Colors.orange:
+            newColor = (randrange(255), randrange(255), randrange(255))
+        self.color = newColor
+
 
 class Bubble:
-    def __init__(self, window: pygame.Surface, starting_pos: tuple[int, int], radius: int):
+    def __init__(
+        self, window: pygame.Surface, starting_pos: tuple[int, int], radius: int
+    ):
         self.window = window
         self.pos = starting_pos
         self.radius = radius
+
     def move_and_draw(self):
         # bouge +- en x et toujours - en y
-        self.pos = (self.pos[0] + (int(random()*2 -1)* 4), self.pos[1] - int(random()*1.3))
-        for t in animation.drawings.getPolygonPoints(15, self.pos[0], self.pos[1], self.radius): 
+        self.pos = (
+            self.pos[0] + (int(random() * 2 - 1) * 4),
+            self.pos[1] - int(random() * 1.3),
+        )
+        for t in animation.drawings.getPolygonPoints(
+            15, self.pos[0], self.pos[1], self.radius
+        ):
             pygame.draw.polygon(self.window, Colors.white, t)

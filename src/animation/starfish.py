@@ -2,10 +2,13 @@ import pygame
 import math
 from animation.drawings import Colors
 
+
 class Starfish:
-    def __init__(self, window, center):
+    def __init__(self, window, name: str, center):
         self.window = window
+        self.name = name
         self.center = center
+        self.color = Colors.orange
         self.arm_count = 5
         self.arm_length = 50
         self.arm_width = 25
@@ -29,5 +32,16 @@ class Starfish:
             points = self.triangle_arm(
                 self.center, self.arm_length, self.arm_width, angle
             )
-            pygame.draw.polygon(self.window, Colors.orange, points)
+            pygame.draw.polygon(self.window, self.color, points)
             pygame.draw.polygon(self.window, Colors.black, points, width=2)
+
+    # change the color of the fish to a random color
+    def animStarfish(self):
+        """temp = pygame.time.get_ticks()
+        while pygame.time.get_ticks() - temp < 1000:
+            self.color = Colors.yellow
+        self.color = Colors.orange"""
+        if self.color == Colors.orange:
+            self.color = Colors.yellow
+        else:
+            self.color = Colors.orange
