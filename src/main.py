@@ -108,6 +108,7 @@ def main():
         Aquarium.drawBackground(window)
 
         Aquarium.drawPatrickHouse(window)
+        Aquarium.drawSquidwardHouse(window)
         Aquarium.drawBobHouse(window)
         Aquarium.drawBobTopHouse(window)
 
@@ -118,8 +119,6 @@ def main():
         for b in [x for x in bubbleList if not x.out_of_bounds]:
             b.move_and_draw()
 
-        Aquarium.drawPatrickHouse(window)
-        Aquarium.drawSquidwardHouse(window)
         Aquarium.drawProgressBar(window, currentTime, mdi.totalTime)
         for event in pygame.event.get():
             # quit if click quit
