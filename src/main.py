@@ -6,7 +6,7 @@ from animation.fish import Colors, Bubble
 from audio_processing.midi_reader import MidiFile, Instrument
 from audio_processing.freq_analysis import AudioAnalyzer
 import audio_processing.MidiV2
-
+import constants
 
 def main():
     FILE = "PinkPanther_Trumpet_Only.mp3"
@@ -61,21 +61,19 @@ def main():
 
         notes = mdi.find_note(currentTime)
         # [:-1] enlève le dernier char du string (l'octave de la note)
-        result = [
-            x for x in notes if x not in last_notes
-        ]  # uniquement les nouvelles notes
 
         result_piano = [
             x.get_real_note()[:-1]
-            for x in result
-            if x.get_instrument() == Instrument.PIANO
+            for x in notes
+            if x not in last_notes and x.get_instrument() == Instrument.PIANO
         ]
         result_trumpet = [
             x.get_real_note()[:-1]
-            for x in result
-            if x.get_instrument() == Instrument.TRUMPET
+            for x in notes
+            if x not in last_notes and x.get_instrument() == Instrument.TRUMPET
         ]
-        # result_allNotes = [x.get_real_note()[:-1] for x in notes]                           # contient toutes les notes jouées à ce moment-là
+
+        allnotes_piano = [x for x in notes if x.get_instrument() == Instrument.PIANO]
 
         last_notes = notes
 
@@ -83,7 +81,8 @@ def main():
         for i in range(len(fishList)):
             # if notes played contain fish name, change it's color
             if result_piano.__contains__(fishList[i].name):
-                fishList[i].changeColor()
+                #fishList[i].changeColor()
+                # if note was just played, create bubble
                 bubbleList.append(
                     Bubble(
                         window,
@@ -94,6 +93,11 @@ def main():
                         5 + random() * 20,
                     )
                 )
+            if [x.get_real_note()[:-1] for x in allnotes_piano].__contains__(fishList[i].name):
+                fishList[i].color = Colors.red
+                #fishList[i].drawBorder(bordersize = len([x for x in allnotes_piano if x.get_real_note().__contains__(fishList[i].name)]))
+            else:
+                fishList[i].color = fishList[i].firstColor
 
         for i in range(len(starFishList)):
             # if notes played contain fish name, change it's color
@@ -111,7 +115,7 @@ def main():
 
         Aquarium.drawFishes(fishList)
         Aquarium.drawStarfish(starFishList)
-        for b in bubbleList:
+        for b in [x for x in bubbleList if not x.out_of_bounds]:
             b.move_and_draw()
 
         Aquarium.drawPatrickHouse(window)

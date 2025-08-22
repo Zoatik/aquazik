@@ -39,7 +39,8 @@ class Aquarium:
                 Fish(
                     window,
                     NOTE_NAMES[ni],
-                    (randrange(255), randrange(255), randrange(255)),
+                    #(randrange(255), randrange(255), randrange(255)),
+                    Colors.yellow,
                     fishCenterList[ni],
                 )
             )
