@@ -4,10 +4,6 @@ from random import randrange, random
 from animation.drawings import Colors
 import animation.drawings
 
-
-# -----Fish Class----------------------------------------------------------------------------------
-# I can't seem to find a way to import this class from fish.py, so i copied it here...
-# Need to learn how to do that...
 class Fish:
     global listTriangles
     global fistColor
@@ -62,12 +58,10 @@ class Fish:
         return f"{self.name}, {self.color}"
 
     def draw(self):
-        # body parts and contouring
+        self.drawBorder(3)
+
         for i in range(0, len(self.listTriangles)):
             pygame.draw.polygon(self.window, self.color, self.listTriangles[i])
-            pygame.draw.polygon(
-                self.window, Colors.black, self.listTriangles[i], width=2
-            )
 
         # black eye
         pygame.draw.polygon(
@@ -86,9 +80,16 @@ class Fish:
             self.color = self.secondColor
         else:
             self.color = self.firstColor
-
+    
+    def drawBorder(self, bordersize = 1):
+        for i in range(len(self.listTriangles)):
+            pygame.draw.polygon(
+                self.window, Colors.black, self.listTriangles[i], width=(bordersize+3)
+            )
 
 class Bubble:
+    out_of_bounds: bool = False
+
     def __init__(
         self, window: pygame.Surface, starting_pos: tuple[int, int], radius: int
     ):
@@ -102,6 +103,10 @@ class Bubble:
             self.pos[0] + (int(random() * 2 - 1) * 4),
             self.pos[1] - int(randrange(2)),
         )
+
+        if (self.pos[1] - self.radius <= 0):
+            self.out_of_bounds = True
+            return
 
         points = animation.drawings.getPolygonPoints(
             15, self.pos[0], self.pos[1], self.radius
