@@ -4,14 +4,16 @@ from animation.drawings import Colors
 
 
 class Starfish:
-    def __init__(self, window, name: str, center):
+    def __init__(self, window, name: str, center, length):
         self.window = window
         self.name = name
         self.center = center
         self.color = Colors.orange
         self.arm_count = 5
-        self.arm_length = 50
-        self.arm_width = 25
+        #self.arm_length = 50
+        self.arm_length = length
+        #self.arm_width = 25
+        self.arm_width = length / 2
 
     # Function to create a single triangle for an arm
     def triangle_arm(self, center, length, width, angle):

@@ -7,6 +7,8 @@ from audio_processing.midi_reader import MidiFile, Instrument
 from audio_processing.freq_analysis import AudioAnalyzer
 import audio_processing.MidiV2
 import constants
+import ctypes
+import platform
 
 def main():
     FILE = "PinkPanther_Trumpet_Only.mp3"
@@ -29,6 +31,8 @@ def main():
     pygame.init()
 
     # Create a window
+    if "Windows" in platform.system():
+        ctypes.windll.user32.SetProcessDPIAware()
     (width, height) = (1600, 900)
     window = pygame.display.set_mode((width, height))
 
