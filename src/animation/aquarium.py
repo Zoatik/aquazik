@@ -211,9 +211,6 @@ class Aquarium:
             x2 = center_x + radius * math.cos(angle2)
             y2 = center_y - radius * math.sin(angle2)
             pygame.draw.polygon(window, TRIANGLE_COLOR, [(center_x, center_y), (x1, y1), (x2, y2)])
-        #Draw the door
-        pygame.draw.polygon(window,Colors.black,[(center_x - radius/10, center_y),(center_x - radius/10 + radius/5, center_y),(center_x + radius/10, center_y - radius/5)],)
-        pygame.draw.polygon(window,Colors.black,[(center_x - radius/10, center_y),(center_x - radius/10, center_y - radius/5),(center_x + radius/10, center_y - radius/5)],)
         #Draw the pseudo antenna
         pygame.draw.polygon(window,Colors.white,[(center_x, center_y-radius),(center_x - radius/10, center_y-radius - radius/5),(center_x + radius/10, center_y -radius - radius/5)],)
 
@@ -400,6 +397,7 @@ class Aquarium:
         tilt = 0.18
         jitter = 0.10
         seed = 20
+        #seed = None #epileptic
 
         LEAF_MAIN = (27, 142, 73)
         LEAF_DARK = (18, 102, 53)

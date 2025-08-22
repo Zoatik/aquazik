@@ -42,9 +42,9 @@ class Starfish:
     # change the color of the fish to a random color
     def animStarfish(self):
         """temp = pygame.time.get_ticks()
-        while pygame.time.get_ticks() - temp < 1000:
+        if pygame.time.get_ticks() - temp < 1000:
             self.color = Colors.yellow
-        self.color = Colors.orange"""
+        else.color = Colors.orange"""
         if self.color == Colors.orange:
             self.color = Colors.green
         else:

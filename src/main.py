@@ -79,7 +79,7 @@ def main():
 
         last_notes = notes
 
-        # for each fish
+        # fish note animation
         for i in range(len(fishList)):
             # if notes played contain fish name, change it's color
             if result_piano.__contains__(fishList[i].name):
@@ -95,6 +95,7 @@ def main():
                     )
                 )
 
+        # for each starfish
         for i in range(len(starFishList)):
             # if notes played contain fish name, change it's color
             if result_trumpet.__contains__(starFishList[i].name):
@@ -103,12 +104,6 @@ def main():
         # draw aquarium background and details
         Aquarium.drawBackground(window)
 
-        Aquarium.drawPatrickHouse(window)
-        Aquarium.drawBobHouse(window)
-        Aquarium.drawBobTopHouse(window)
-
-        
-
         Aquarium.drawFishes(fishList)
         Aquarium.drawStarfish(starFishList)
         for b in bubbleList:
@@ -116,7 +111,11 @@ def main():
 
         Aquarium.drawPatrickHouse(window)
         Aquarium.drawSquidwardHouse(window)
+        Aquarium.drawBobHouse(window)
+        Aquarium.drawBobTopHouse(window)
+
         Aquarium.drawProgressBar(window, currentTime, mdi.totalTime)
+
         for event in pygame.event.get():
             # quit if click quit
             if event.type == pygame.QUIT:
