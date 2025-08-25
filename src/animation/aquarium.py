@@ -160,6 +160,11 @@ class Aquarium:
 
     def drawBackground(window: Surface):
         window.fill((125, 125, 255))
+        
+        SAND = (232, 210, 160)
+        pygame.draw.polygon(window, SAND,((0,window.get_height()/2),(0,window.get_height()),(window.get_width(),window.get_height()/2)))
+        pygame.draw.polygon(window,SAND,((window.get_width(),window.get_height()/2),(0,window.get_height()),(window.get_width(),window.get_height()))
+)
 
     # x, y = point central de la base de la plante
     def drawPlant(
@@ -365,7 +370,6 @@ class Aquarium:
             )
 
 
-    # --- CROWN (LEAVES) ----------------------------------------------------------
     def drawBobHouse(surface):
         center = 1520, 855
         rx = 30
