@@ -2,11 +2,11 @@ import pygame
 from time import time
 from random import random
 from animation.aquarium import Aquarium
-from animation.fish import Colors, Bubble
+from animation.fish import Bubble
 from audio_processing.midi_reader import MidiFile, Instrument
 from audio_processing.freq_analysis import AudioAnalyzer
 import audio_processing.MidiV2
-import constants
+from constants import Colors,FishColors
 import ctypes
 import platform
 
