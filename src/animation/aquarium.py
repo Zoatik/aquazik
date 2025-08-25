@@ -181,7 +181,7 @@ class Aquarium:
                 draw.polygon(window, Colors.black, t)
 
     def drawBackground(window: Surface):
-        window.fill((125, 125, 255))
+        window.fill(Colors.bgColor)
         
         pygame.draw.polygon(window, Colors.SAND,((0,window.get_height()/2),(0,window.get_height()),(window.get_width(),window.get_height()/2)))
         pygame.draw.polygon(window,Colors.SAND,((window.get_width(),window.get_height()/2),(0,window.get_height()),(window.get_width(),window.get_height()))
@@ -395,21 +395,11 @@ class Aquarium:
         rx = 30
         ry = 50
         segments = 40
-        #color = (255, 140, 0)
-        color=(240, 100, 0)
         cx, cy = center
-        points = []
-        for i in range(segments + 1):
-            angle = 2 * math.pi * i / segments
-            x = cx + rx * math.cos(angle)
-            y = cy + ry * math.sin(angle)
-            points.append((x, y))
-
-        # Draw triangle fan
-        for i in range(segments):
-            triangle = [ (cx, cy), points[i], points[i+1] ]
-            pygame.draw.polygon(surface, color, triangle)
-            pygame.draw.polygon(surface, (0xAB, 0x21, 0x00), triangle, 2)
+        Triangles = animation.drawings.getEllipseTriangles(cx, cy, rx, ry, segments)
+        for triangle in Triangles:
+            pygame.draw.polygon(surface, Colors.bobHouse, triangle)
+            pygame.draw.polygon(surface, Colors.bobHouseLines, triangle, 2)
 
     def drawBobTopHouse(surface):
         #surface, base_center, base_width, height,layers=3, spikes=9, tilt=0.15,jitter=0.12, seed=None
@@ -424,10 +414,7 @@ class Aquarium:
         seed = 20
         #seed = None #epileptic
 
-        LEAF_MAIN = (27, 142, 73)
-        LEAF_DARK = (18, 102, 53)
-        LEAF_LIGHT = (46, 181, 101)
-        SAND = (232, 210, 160)
+        
         """
         Draw a pineapple crown using ONLY triangles.
 
@@ -445,7 +432,6 @@ class Aquarium:
         """
 
     
-
         if seed is not None:
             rnd = random.Random(seed)
         else:
@@ -501,7 +487,7 @@ class Aquarium:
 
                 # Choose a subtle color variation per spike
                 shade_t = 0.35 * rnd.random()
-                col = Aquarium.color_lerp(LEAF_MAIN, LEAF_LIGHT, shade_t)
+                col = Aquarium.color_lerp(Colors.LEAF_MAIN, Colors.LEAF_LIGHT, shade_t)
 
 
                 # Main leaf triangle
@@ -512,7 +498,7 @@ class Aquarium:
                 ridge_mid = Aquarium.lerp(mid, tip_x, 0.55)
                 ridge_tip = (ridge_mid, Aquarium.lerp(base_y, tip_y, 0.75))
                 ridge_left = (Aquarium.lerp(a[0], b[0], 0.48), Aquarium.lerp(a[1], b[1], 0.48))
-                pygame.draw.polygon(surface, Aquarium.color_lerp(LEAF_MAIN, LEAF_DARK, 0.35), (ridge_left, c_pt, ridge_tip))
+                pygame.draw.polygon(surface, Aquarium.color_lerp(Colors.LEAF_MAIN, Colors.LEAF_DARK, 0.35), (ridge_left, c_pt, ridge_tip))
 
             # Between layers, stitch small back-facing fillers to avoid gaps (triangles)
             if layer < layers - 1:
@@ -527,7 +513,7 @@ class Aquarium:
                     x1 = Aquarium.lerp(cx - w / 2, cx + w / 2, t1)
                     nx = Aquarium.lerp(cx - next_w / 2, cx + next_w / 2, (t0 + t1) / 2)
                     # Back filler triangle
-                    pygame.draw.polygon(surface, Aquarium.color_lerp(LEAF_MAIN, LEAF_DARK, 0.15),( (x0, base_y), (x1, base_y), (nx, next_base_y)))
+                    pygame.draw.polygon(surface, Aquarium.color_lerp(Colors.LEAF_MAIN, Colors.LEAF_DARK, 0.15),( (x0, base_y), (x1, base_y), (nx, next_base_y)))
 
         pygame.draw.polygon(surface, Colors.SAND, [(cx - base_width / 2, cy + 95), (cx + base_width / 2, cy + 95), (cx + base_width / 2, cy + 80)])
         pygame.draw.polygon(surface, Colors.SAND, [(cx - base_width / 2, cy + 95), (cx - base_width / 2, cy + 80), (cx + base_width / 2, cy + 80)])

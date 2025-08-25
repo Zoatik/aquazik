@@ -5,7 +5,7 @@ from enum import Enum, auto
 NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
 
 class Colors:
-    bgColor = (0x44, 0x63, 0xB2)
+    bgColor = (125, 125, 255)
     red = (255, 0, 0)
     green = (0, 255, 0)
     blue = (0, 0, 255)
@@ -14,6 +14,11 @@ class Colors:
     white = (255, 255, 255)
     orange = (255, 150, 50)
     SAND = (232, 210, 160)
+    bobHouse = (240, 100, 0)
+    bobHouseLines = (0xAB, 0x21, 0x00)
+    LEAF_MAIN = (27, 142, 73)
+    LEAF_DARK = (18, 102, 53)
+    LEAF_LIGHT = (46, 181, 101)
 
     
 class FishColors:
