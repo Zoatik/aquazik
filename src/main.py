@@ -38,8 +38,9 @@ def main():
 
     # Set window's caption // and icon
     pygame.display.set_caption("Aquazik")
-    # icon = pygame.image.load('....png')
-    # pygame.display.set_icon(icon)
+    path = 'src/journalist.png'
+    icon = pygame.image.load(path)
+    pygame.display.set_icon(icon)
 
     # ---Loop, update display and quit------------------------------------------------------------------
 
