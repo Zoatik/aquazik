@@ -19,7 +19,7 @@ def main():
     audio_data = audio_analyser.convert_to_notes()
 
     print("-- Creating MIDI file --")
-    midi_path = audio_processing.MidiV2.midi_maker(audio_data[1], bpm=audio_data[0])
+    midi_path = audio_processing.MidiV2.midi_maker([(0,audio_data[1])], bpm=audio_data[0])
     print(f"bpm = {audio_data[0]}")
 
     # Create MidiFile instance
