@@ -92,14 +92,40 @@ class Fish:
             eyeCenter = (cx - rx/2, cy - ry/2)
             endTail = cx + rx + self.length/4
             midTail = cx + rx + self.length/8
+
+            nageoireTopX = cx + rx/2
+            nageoireLeftX = nageoireTopX - rx/4
+            nageoireRightX = nageoireTopX + rx/4
+            nageoireInDownY = cy + ry- ry/2
+            nageoireInUpY = cy - ry + ry/2
+
             
         else : # right
             eyeCenter = (cx + rx/2, cy - ry/2)
             endTail = cx - rx - self.length/4
             midTail = cx - rx - self.length/8
+
+            nageoireTopX = cx - rx/2
+            nageoireLeftX = nageoireTopX + rx/4
+            nageoireRightX = nageoireTopX - rx/4
+            nageoireInDownY = cy + ry- ry/2
+            nageoireInUpY = cy - ry + ry/2
             
-        topY = cy - ry
-        downY = cy + ry
+        
+        topTailY = cy - ry
+        downTailY = cy + ry
+        dorsalTopY = cy - ry - ry/2
+        dorsalDownY = cy - ry
+        dorsalLeftX = cx - rx/4
+        dorsalRightX = cx + rx/4
+
+        #down
+        nageoireTopDownY = cy + ry
+        nageoireDownDownY = nageoireTopDownY + ry/2
+        #up
+        nageoireTopUpY = cy - ry
+        nageoireDownUpY = nageoireTopUpY - ry/2
+        
         
 
         # body
@@ -108,8 +134,8 @@ class Fish:
             pygame.draw.polygon(self.window, self.color, triangle)
 
         # tail
-        pygame.draw.polygon(self.window, self.color,((endTail, topY),(midTail, cy),(cx, cy)))
-        pygame.draw.polygon(self.window, self.color,((endTail, downY),(midTail, cy),(cx, cy)))
+        pygame.draw.polygon(self.window, self.color,((endTail, topTailY),(midTail, cy),(cx, cy)))
+        pygame.draw.polygon(self.window, self.color,((endTail, downTailY),(midTail, cy),(cx, cy)))
 
         # iris
         eyeTriangles = animation.drawings.getEllipseTriangles(eyeCenter[0], eyeCenter[1], irisRadius, irisRadius, segments=20)
@@ -120,7 +146,17 @@ class Fish:
         eyeTriangles = animation.drawings.getEllipseTriangles(eyeCenter[0], eyeCenter[1], pupilRadius, pupilRadius, segments=20)
         for triangle in eyeTriangles:
             pygame.draw.polygon(self.window, Colors.black, triangle)
-            
+
+        # dorsal fin for long fish
+        if self.length > 50 and self.height < 30:
+            pygame.draw.polygon(self.window, self.color, ((cx, dorsalTopY),(dorsalRightX, dorsalDownY),(dorsalLeftX, dorsalDownY)))
+        
+        if self.height>= 30:
+            # top fin
+            pygame.draw.polygon(self.window, self.color, ((nageoireTopX, nageoireDownUpY),(nageoireRightX, nageoireInUpY),(nageoireLeftX, nageoireTopUpY)))
+            # bottom fin
+            pygame.draw.polygon(self.window, self.color, ((nageoireTopX, nageoireDownDownY),(nageoireRightX, nageoireInDownY),(nageoireLeftX, nageoireTopDownY)))
+
 
     # change the color of the fish to a random color
     def changeColor(self):
