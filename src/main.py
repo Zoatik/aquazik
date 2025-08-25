@@ -2,11 +2,11 @@ import pygame
 from time import time
 from random import random
 from animation.aquarium import Aquarium
-from animation.fish import Colors, Bubble
+from animation.fish import Bubble
 from audio_processing.midi_reader import MidiFile, Instrument
 from audio_processing.freq_analysis import AudioAnalyzer
 import audio_processing.MidiV2
-import constants
+from constants import Colors,FishColors
 import ctypes
 import platform
 
@@ -19,7 +19,7 @@ def main():
     audio_data = audio_analyser.convert_to_notes()
 
     print("-- Creating MIDI file --")
-    midi_path = audio_processing.MidiV2.midi_maker(audio_data[1], bpm=audio_data[0])
+    midi_path = audio_processing.MidiV2.midi_maker([(0,audio_data[1])], bpm=audio_data[0])
     print(f"bpm = {audio_data[0]}")
 
     # Create MidiFile instance
@@ -38,8 +38,9 @@ def main():
 
     # Set window's caption // and icon
     pygame.display.set_caption("Aquazik")
-    # icon = pygame.image.load('....png')
-    # pygame.display.set_icon(icon)
+    path = 'src/journalist.png'
+    icon = pygame.image.load(path)
+    pygame.display.set_icon(icon)
 
     # ---Loop, update display and quit------------------------------------------------------------------
 
@@ -83,25 +84,11 @@ def main():
 
         # fish note animation
         for i in range(len(fishList)):
-            # if notes played contain fish name, change it's color
+            # create bubble if there's a note played
             if result_piano.__contains__(fishList[i].name):
-                #fishList[i].changeColor()
-                # if note was just played, create bubble
-                bubbleList.append(
-                    Bubble(
-                        window,
-                        (
-                            fishList[i].center[0] + 20 + random() * 5,
-                            fishList[i].center[1],
-                        ),
-                        5 + random() * 20,
-                    )
-                )
-            if [x.get_real_note()[:-1] for x in allnotes_piano].__contains__(fishList[i].name):
-                fishList[i].color = Colors.red
-                #fishList[i].drawBorder(bordersize = len([x for x in allnotes_piano if x.get_real_note().__contains__(fishList[i].name)]))
-            else:
-                fishList[i].color = fishList[i].firstColor
+                bubbleList.append(fishList[i].createBubble(window))
+
+            fishList[i].animate = [x.get_real_note()[:-1] for x in allnotes_piano].__contains__(fishList[i].name)
 
         # for each starfish
         for i in range(len(starFishList)):

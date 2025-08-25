@@ -2,30 +2,6 @@ import math
 from random import random
 
 
-class Colors:
-    bgColor = (0x44, 0x63, 0xB2)
-    red = (255, 0, 0)
-    green = (0, 255, 0)
-    blue = (0, 0, 255)
-    black = (0, 0, 0)
-    yellow = (231, 199, 25)
-    white = (255, 255, 255)
-    orange = (255, 150, 50)
-
-    def get_random_color():
-        # Récupère tous les attributs de la classe sauf spéciaux (__xxx__)
-        values = [
-            v
-            for k, v in Colors.__dict__.items()
-            if not k.startswith("__")
-            and not k.startswith("bgColor")
-            and not k.startswith("get")
-            and not k.startswith("black")
-            and not k.startswith("white")
-        ]
-        return values[int(random() * len(values))]
-
-
 def getOctogonPoints(cx, cy, radius):
     return getPolygonPoints(8, cx, cy, radius)
 
@@ -47,3 +23,17 @@ def getPolygonPoints(sides: int, cx, cy, radius):
         ret.append(((cx, cy), p1, p2))
 
     return ret
+
+def getEllipseTriangles(cx, cy, rx, ry, segments=40):
+    points = []
+    triangle = []
+    for i in range(segments + 1):
+        angle = 2 * math.pi * i / segments
+        x = cx + rx * math.cos(angle)
+        y = cy + ry * math.sin(angle)
+        points.append((x, y))
+    for i in range(segments):
+        triangle.append([ (cx, cy), points[i], points[i+1] ])
+    
+    return triangle
+    

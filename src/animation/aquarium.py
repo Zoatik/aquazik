@@ -1,13 +1,13 @@
 from animation.fish import Fish
 from pygame import draw, Surface
-from constants import NOTE_NAMES
+from constants import NOTE_NAMES, Colors, FishColors
 from animation.starfish import Starfish
 import animation.drawings
-from animation.drawings import Colors
 from random import randrange
 import math
 import pygame
 import random
+from constants import Direction
 
 
 class Aquarium:
@@ -18,7 +18,6 @@ class Aquarium:
 
     def createFishList(window):
         # instance of fish --> change it so i don't do it manually
-        # x + 150, y + 125
         fishCenterList = [
             (randrange(50, 350), randrange(50, 100)),
             (randrange(50, 350), randrange(200, 250)),
@@ -40,8 +39,11 @@ class Aquarium:
                     window,
                     NOTE_NAMES[ni],
                     #(randrange(255), randrange(255), randrange(255)),
-                    Colors.yellow,
+                    FishColors.yellow,
                     fishCenterList[ni],
+                    length = randrange(30,70),
+                    height = randrange(15,40),
+                    direction = random.choice([Direction.LEFT, Direction.RIGHT])
                 )
             )
         return fishList
@@ -64,7 +66,7 @@ class Aquarium:
         ]
         for ni in range(len(NOTE_NAMES)):
             starFishList.append(
-                Starfish(window, NOTE_NAMES[ni], starfishCenterList[ni], randrange(20,50))
+                Starfish(window, NOTE_NAMES[ni], starfishCenterList[ni], randrange(int(starfishCenterList[ni][1]/20) ,int((starfishCenterList[ni][1] + 30 )/20) ))
             )
         return starFishList
 
@@ -75,8 +77,8 @@ class Aquarium:
     def drawProgressBar(window: Surface, current_time, total_time):
         height = window.get_size()[1] - 25
         start = 15
-        # end = window_width - 50px
         end = window.get_size()[0] - 50
+        bodyColor = (0x87, 0xCD, 0xEA)
 
         percentage = current_time / total_time
 
@@ -85,25 +87,9 @@ class Aquarium:
             current = end
 
         # ---------------- DRAW GARY
+        # order = eyelids border, body, eyelids, coquille, eyes
         radius = 20
 
-        # draw body
-        body = [
-            (current, height + radius),
-            (current + 50, height),
-            (current + 50, height + radius),
-        ]
-
-        bodyColor = (0x87, 0xCD, 0xEA)
-        draw.polygon(window, Colors.black, body, 2)
-        draw.polygon(window, bodyColor, body)
-
-        # draw coquille
-        coquille = animation.drawings.getPolygonPoints(15, current, height, radius)
-
-        for t in coquille:
-            draw.polygon(window, (0xDC, 0x49, 0x60), t, 2)
-            draw.polygon(window, (0xF4, 0x83, 0xAC), t)
 
         # draw eyelids
         eyelids = [
@@ -129,18 +115,54 @@ class Aquarium:
             ],
         ]
 
+        for t in eyelids:
+            draw.polygon(window, Colors.black, t, 3)
+
+        # draw body
+        body = [
+            (current, height + radius),
+            (current + 50, height),
+            (current + 50, height + radius),
+        ]
+
+        draw.polygon(window, Colors.black, body, 3)
+        draw.polygon(window, bodyColor, body)
+
+        # eyelids without border
+        
         for e in eyelids:
             draw.polygon(window, bodyColor, e)
+
+        # draw coquille
+        coquille = animation.drawings.getPolygonPoints(15, current, height, radius)
+
+        for t in coquille:
+            draw.polygon(window, Colors.black, t, 3)
+
+        for t in coquille:
+            draw.polygon(window, (0xDC, 0x49, 0x60), t, 2)
+            draw.polygon(window, (0xF4, 0x83, 0xAC), t)
 
         # eyes
         eyes = [
             animation.drawings.getOctogonPoints(current + 51, height - 15, 8),
             animation.drawings.getOctogonPoints(current + 39, height - 15, 8),
         ]
-        for e in eyes:
-            for t in e:
-                draw.polygon(window, Colors.yellow, t)
+        
+        # first eye border
+        for t in eyes[0]:
+            draw.polygon(window, Colors.black, t, 3)
 
+        for t in eyes[0]:
+            draw.polygon(window, Colors.yellow, t)
+
+        # second eye border
+        for t in eyes[1]:
+            draw.polygon(window, Colors.black, t, 3)
+            
+        for t in eyes[1]:
+            draw.polygon(window, Colors.yellow, t)
+        
         # iris
         iris = [
             animation.drawings.getOctogonPoints(current + 53, height - 14, 4),
@@ -159,7 +181,11 @@ class Aquarium:
                 draw.polygon(window, Colors.black, t)
 
     def drawBackground(window: Surface):
-        window.fill((125, 125, 255))
+        window.fill(Colors.bgColor)
+        
+        pygame.draw.polygon(window, Colors.SAND,((0,window.get_height()/2),(0,window.get_height()),(window.get_width(),window.get_height()/2)))
+        pygame.draw.polygon(window,Colors.SAND,((window.get_width(),window.get_height()/2),(0,window.get_height()),(window.get_width(),window.get_height()))
+)
 
     # x, y = point central de la base de la plante
     def drawPlant(
@@ -198,7 +224,7 @@ class Aquarium:
 
     def drawPatrickHouse(window:Surface):
         # Semi-circle parameters
-        center_x, center_y = 80,895
+        center_x, center_y = 80, window.get_size()[1] / 2 + 20
         radius = 50
         num_triangles = 30  # more = smoother curve
         TRIANGLE_COLOR = (139, 69, 19)  # brown
@@ -220,7 +246,7 @@ class Aquarium:
         if base_x == -1:
             base_x = window.get_size()[0] / 2
         if base_y == -1:
-            base_y = window.get_size()[1] - 5
+            base_y = window.get_size()[1] / 2 + 20
 
         height_ratio = 2.2
         triangles = [
@@ -364,33 +390,21 @@ class Aquarium:
             int(Aquarium.lerp(c1[2], c2[2], t)),
             )
 
-
-    # --- CROWN (LEAVES) ----------------------------------------------------------
     def drawBobHouse(surface):
-        center = 1520, 855
+        center = 1520, surface.get_size()[1] / 2 - 17
         rx = 30
         ry = 50
         segments = 40
-        #color = (255, 140, 0)
-        color=(240, 100, 0)
         cx, cy = center
-        points = []
-        for i in range(segments + 1):
-            angle = 2 * math.pi * i / segments
-            x = cx + rx * math.cos(angle)
-            y = cy + ry * math.sin(angle)
-            points.append((x, y))
-
-        # Draw triangle fan
-        for i in range(segments):
-            triangle = [ (cx, cy), points[i], points[i+1] ]
-            pygame.draw.polygon(surface, color, triangle)
-            pygame.draw.polygon(surface, (0xAB, 0x21, 0x00), triangle, 2)
+        Triangles = animation.drawings.getEllipseTriangles(cx, cy, rx, ry, segments)
+        for triangle in Triangles:
+            pygame.draw.polygon(surface, Colors.bobHouse, triangle)
+            pygame.draw.polygon(surface, Colors.bobHouseLines, triangle, 2)
 
     def drawBobTopHouse(surface):
         #surface, base_center, base_width, height,layers=3, spikes=9, tilt=0.15,jitter=0.12, seed=None
 
-        base_center = (1520, 815)
+        base_center = (1520, surface.get_size()[1] / 2 - 57)
         base_width = 50
         height = 70
         layers = 10 
@@ -400,10 +414,7 @@ class Aquarium:
         seed = 20
         #seed = None #epileptic
 
-        LEAF_MAIN = (27, 142, 73)
-        LEAF_DARK = (18, 102, 53)
-        LEAF_LIGHT = (46, 181, 101)
-        SAND = (232, 210, 160)
+        
         """
         Draw a pineapple crown using ONLY triangles.
 
@@ -421,7 +432,6 @@ class Aquarium:
         """
 
     
-
         if seed is not None:
             rnd = random.Random(seed)
         else:
@@ -477,7 +487,7 @@ class Aquarium:
 
                 # Choose a subtle color variation per spike
                 shade_t = 0.35 * rnd.random()
-                col = Aquarium.color_lerp(LEAF_MAIN, LEAF_LIGHT, shade_t)
+                col = Aquarium.color_lerp(Colors.LEAF_MAIN, Colors.LEAF_LIGHT, shade_t)
 
 
                 # Main leaf triangle
@@ -488,7 +498,7 @@ class Aquarium:
                 ridge_mid = Aquarium.lerp(mid, tip_x, 0.55)
                 ridge_tip = (ridge_mid, Aquarium.lerp(base_y, tip_y, 0.75))
                 ridge_left = (Aquarium.lerp(a[0], b[0], 0.48), Aquarium.lerp(a[1], b[1], 0.48))
-                pygame.draw.polygon(surface, Aquarium.color_lerp(LEAF_MAIN, LEAF_DARK, 0.35), (ridge_left, c_pt, ridge_tip))
+                pygame.draw.polygon(surface, Aquarium.color_lerp(Colors.LEAF_MAIN, Colors.LEAF_DARK, 0.35), (ridge_left, c_pt, ridge_tip))
 
             # Between layers, stitch small back-facing fillers to avoid gaps (triangles)
             if layer < layers - 1:
@@ -503,8 +513,8 @@ class Aquarium:
                     x1 = Aquarium.lerp(cx - w / 2, cx + w / 2, t1)
                     nx = Aquarium.lerp(cx - next_w / 2, cx + next_w / 2, (t0 + t1) / 2)
                     # Back filler triangle
-                    pygame.draw.polygon(surface, Aquarium.color_lerp(LEAF_MAIN, LEAF_DARK, 0.15),( (x0, base_y), (x1, base_y), (nx, next_base_y)))
+                    pygame.draw.polygon(surface, Aquarium.color_lerp(Colors.LEAF_MAIN, Colors.LEAF_DARK, 0.15),( (x0, base_y), (x1, base_y), (nx, next_base_y)))
 
-        pygame.draw.polygon(surface, (125, 125, 255), [(cx - base_width / 2, cy + 95), (cx + base_width / 2, cy + 95), (cx + base_width / 2, cy + 80)])
-        pygame.draw.polygon(surface, (125, 125, 255), [(cx - base_width / 2, cy + 95), (cx - base_width / 2, cy + 80), (cx + base_width / 2, cy + 80)])
+        pygame.draw.polygon(surface, Colors.SAND, [(cx - base_width / 2, cy + 95), (cx + base_width / 2, cy + 95), (cx + base_width / 2, cy + 80)])
+        pygame.draw.polygon(surface, Colors.SAND, [(cx - base_width / 2, cy + 95), (cx - base_width / 2, cy + 80), (cx + base_width / 2, cy + 80)])
 

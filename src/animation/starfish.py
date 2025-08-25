@@ -1,6 +1,6 @@
 import pygame
 import math
-from animation.drawings import Colors
+from constants import Colors,FishColors
 
 
 class Starfish:
@@ -8,7 +8,7 @@ class Starfish:
         self.window = window
         self.name = name
         self.center = center
-        self.color = Colors.orange
+        self.color = FishColors.orange
         self.arm_count = 5
         #self.arm_length = 50
         self.arm_length = length
@@ -45,9 +45,9 @@ class Starfish:
     def animStarfish(self):
         """temp = pygame.time.get_ticks()
         if pygame.time.get_ticks() - temp < 1000:
-            self.color = Colors.yellow
-        else.color = Colors.orange"""
-        if self.color == Colors.orange:
-            self.color = Colors.green
+            self.color = FishColors.yellow
+        else.color = FishColors.orange"""
+        if self.color == FishColors.orange:
+            self.color = FishColors.green
         else:
-            self.color = Colors.orange
+            self.color = FishColors.orange
