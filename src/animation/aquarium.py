@@ -224,7 +224,7 @@ class Aquarium:
 
     def drawPatrickHouse(window:Surface):
         # Semi-circle parameters
-        center_x, center_y = 80,895
+        center_x, center_y = 80, window.get_size()[1] / 2 + 20
         radius = 50
         num_triangles = 30  # more = smoother curve
         TRIANGLE_COLOR = (139, 69, 19)  # brown
@@ -246,7 +246,7 @@ class Aquarium:
         if base_x == -1:
             base_x = window.get_size()[0] / 2
         if base_y == -1:
-            base_y = window.get_size()[1] - 5
+            base_y = window.get_size()[1] / 2 + 20
 
         height_ratio = 2.2
         triangles = [
@@ -390,9 +390,8 @@ class Aquarium:
             int(Aquarium.lerp(c1[2], c2[2], t)),
             )
 
-
     def drawBobHouse(surface):
-        center = 1520, 855
+        center = 1520, surface.get_size()[1] / 2 - 17
         rx = 30
         ry = 50
         segments = 40
@@ -415,7 +414,7 @@ class Aquarium:
     def drawBobTopHouse(surface):
         #surface, base_center, base_width, height,layers=3, spikes=9, tilt=0.15,jitter=0.12, seed=None
 
-        base_center = (1520, 815)
+        base_center = (1520, surface.get_size()[1] / 2 - 57)
         base_width = 50
         height = 70
         layers = 10 
@@ -530,6 +529,6 @@ class Aquarium:
                     # Back filler triangle
                     pygame.draw.polygon(surface, Aquarium.color_lerp(LEAF_MAIN, LEAF_DARK, 0.15),( (x0, base_y), (x1, base_y), (nx, next_base_y)))
 
-        pygame.draw.polygon(surface, (125, 125, 255), [(cx - base_width / 2, cy + 95), (cx + base_width / 2, cy + 95), (cx + base_width / 2, cy + 80)])
-        pygame.draw.polygon(surface, (125, 125, 255), [(cx - base_width / 2, cy + 95), (cx - base_width / 2, cy + 80), (cx + base_width / 2, cy + 80)])
+        pygame.draw.polygon(surface, Colors.SAND, [(cx - base_width / 2, cy + 95), (cx + base_width / 2, cy + 95), (cx + base_width / 2, cy + 80)])
+        pygame.draw.polygon(surface, Colors.SAND, [(cx - base_width / 2, cy + 95), (cx - base_width / 2, cy + 80), (cx + base_width / 2, cy + 80)])
 

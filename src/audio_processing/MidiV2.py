@@ -1,7 +1,6 @@
 from midiutil import MIDIFile
-import librosa
 
-from freq_analysis import AudioAnalyzer
+#from freq_analysis import AudioAnalyzer
 
 
 # Mapping of note names to MIDI numbers
@@ -112,7 +111,7 @@ def midi_maker(macro, bpm):
         case _: return 
 
 
-baba = AudioAnalyzer("PinkPanther_Trumpet_Only.mp3")
-bpm, mama = baba.convert_to_notes()  # mama = [[C4, 1], [...]]
-babar = [(1, mama)]
-midi_maker(babar, bpm=bpm)
+#baba = AudioAnalyzer("PinkPanther_Trumpet_Only.mp3")
+#bpm, mama = baba.convert_to_notes()  # mama = [[C4, 1], [...]]
+#babar = [(1, mama)]
+#midi_maker(babar, bpm=bpm)
