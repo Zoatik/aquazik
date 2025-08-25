@@ -4,19 +4,20 @@ from random import randrange, random
 from constants import FishColors,Colors
 import animation.drawings 
 import math
+from constants import Direction
 
 class Fish:
     global listTriangles
     global fistColor
     global secondColor
 
-    def __init__(self, window: pygame.Surface, name: str, color, center, length, height, Direction):
+    def __init__(self, window: pygame.Surface, name: str, color, center, length, height, direction):
         self.window = window
         self.name = name
         self.center = center
         self.length = length
         self.height = height
-        self.Direction = Direction
+        self.direction = direction
         self.color = color
         self.firstColor = color
         self.secondColor = (randrange(255), randrange(255), randrange(255))
@@ -57,6 +58,15 @@ class Fish:
                 (self.center[0], self.center[1]),
             ),
         ]
+        self.fishMouth = FishMouth(
+            window, 
+            cx = self.center[0] + (direction.value * 3) * length / 5,
+            cy = self.center[1],
+            length = 2 * self.length / 5,
+            maxAngleDeg = 65,
+            direction = direction
+        )
+        self.animate = False
 
     def __str__(self):
         return f"{self.name}, {self.color}"
@@ -88,7 +98,7 @@ class Fish:
         pupilRadius = air/15
         
 
-        if self.Direction == 0: # left
+        if self.direction == Direction.LEFT:
             eyeCenter = (cx - rx/2, cy - ry/2)
             endTail = cx + rx + self.length/4
             midTail = cx + rx + self.length/8
@@ -127,6 +137,9 @@ class Fish:
         nageoireDownUpY = nageoireTopUpY - ry/2
         
         
+        self.color = Colors.red if self.animate else self.firstColor
+
+        self.fishMouth.isOpening = self.animate
 
         # body
         Triangles = animation.drawings.getEllipseTriangles(cx, cy, rx, ry, segments)
@@ -170,6 +183,16 @@ class Fish:
             pygame.draw.polygon(
                 self.window, Colors.black, self.listTriangles[i], width=(bordersize+3)
             )
+    
+    def createBubble(self, window):
+        return Bubble(
+            window,
+            (
+                self.center[0] + self.direction.value * (self.length + random() * 5),
+                self.center[1],
+            ),
+            radius = 5 + random() * 20,
+        )
 
 class Bubble:
     out_of_bounds: bool = False
@@ -201,3 +224,34 @@ class Bubble:
         # draw white part of bubble (inside)
         for t in points:
             pygame.draw.polygon(self.window, Colors.white, t)
+
+class FishMouth:
+    def __init__(self, window, cx, cy, length, maxAngleDeg: int, direction = Direction):
+        self.window = window
+        self.cx = cx
+        self.cy = cy
+        self.length = length
+        self.maxAngle = maxAngleDeg
+        self.isOpening = False
+        self.angleDeg = 0
+        self.direction = direction
+    
+    # Calculates new angle and draws
+    def draw(self):
+        if self.isOpening:
+            if self.angleDeg < self.maxAngle:
+                self.angleDeg += 0.25
+        else:
+            if self.angleDeg > 0:
+                self.angleDeg -= 0.25
+        
+        if self.angleDeg == 0:
+            return
+        
+        triangle = [
+            (self.cx, self.cy),
+            (self.cx + (self.direction.value * self.length), self.cy - math.tan(math.radians(self.angleDeg / 2))*self.length),
+            (self.cx + (self.direction.value * self.length), self.cy + math.tan(math.radians(self.angleDeg / 2))*self.length)
+        ]
+
+        pygame.draw.polygon(self.window, Colors.bgColor, triangle)
