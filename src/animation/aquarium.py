@@ -75,8 +75,8 @@ class Aquarium:
     def drawProgressBar(window: Surface, current_time, total_time):
         height = window.get_size()[1] - 25
         start = 15
-        # end = window_width - 50px
         end = window.get_size()[0] - 50
+        bodyColor = (0x87, 0xCD, 0xEA)
 
         percentage = current_time / total_time
 
@@ -85,25 +85,9 @@ class Aquarium:
             current = end
 
         # ---------------- DRAW GARY
+        # order = eyelids border, body, eyelids, coquille, eyes
         radius = 20
 
-        # draw body
-        body = [
-            (current, height + radius),
-            (current + 50, height),
-            (current + 50, height + radius),
-        ]
-
-        bodyColor = (0x87, 0xCD, 0xEA)
-        draw.polygon(window, Colors.black, body, 2)
-        draw.polygon(window, bodyColor, body)
-
-        # draw coquille
-        coquille = animation.drawings.getPolygonPoints(15, current, height, radius)
-
-        for t in coquille:
-            draw.polygon(window, (0xDC, 0x49, 0x60), t, 2)
-            draw.polygon(window, (0xF4, 0x83, 0xAC), t)
 
         # draw eyelids
         eyelids = [
@@ -129,18 +113,54 @@ class Aquarium:
             ],
         ]
 
+        for t in eyelids:
+            draw.polygon(window, Colors.black, t, 3)
+
+        # draw body
+        body = [
+            (current, height + radius),
+            (current + 50, height),
+            (current + 50, height + radius),
+        ]
+
+        draw.polygon(window, Colors.black, body, 3)
+        draw.polygon(window, bodyColor, body)
+
+        # eyelids without border
+        
         for e in eyelids:
             draw.polygon(window, bodyColor, e)
+
+        # draw coquille
+        coquille = animation.drawings.getPolygonPoints(15, current, height, radius)
+
+        for t in coquille:
+            draw.polygon(window, Colors.black, t, 3)
+
+        for t in coquille:
+            draw.polygon(window, (0xDC, 0x49, 0x60), t, 2)
+            draw.polygon(window, (0xF4, 0x83, 0xAC), t)
 
         # eyes
         eyes = [
             animation.drawings.getOctogonPoints(current + 51, height - 15, 8),
             animation.drawings.getOctogonPoints(current + 39, height - 15, 8),
         ]
-        for e in eyes:
-            for t in e:
-                draw.polygon(window, Colors.yellow, t)
+        
+        # first eye border
+        for t in eyes[0]:
+            draw.polygon(window, Colors.black, t, 3)
 
+        for t in eyes[0]:
+            draw.polygon(window, Colors.yellow, t)
+
+        # second eye border
+        for t in eyes[1]:
+            draw.polygon(window, Colors.black, t, 3)
+            
+        for t in eyes[1]:
+            draw.polygon(window, Colors.yellow, t)
+        
         # iris
         iris = [
             animation.drawings.getOctogonPoints(current + 53, height - 14, 4),
