@@ -7,6 +7,7 @@ from random import randrange
 import math
 import pygame
 import random
+from constants import Direction
 
 
 class Aquarium:
@@ -40,9 +41,9 @@ class Aquarium:
                     #(randrange(255), randrange(255), randrange(255)),
                     FishColors.yellow,
                     fishCenterList[ni],
-                    randrange(30,70),
-                    randrange(15,40),
-                    randrange(2)  # Direction (0=left, 1=right)
+                    length = randrange(30,70),
+                    height = randrange(15,40),
+                    direction = random.choice([Direction.LEFT, Direction.RIGHT])
                 )
             )
         return fishList

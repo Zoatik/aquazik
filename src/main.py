@@ -83,23 +83,13 @@ def main():
 
         # fish note animation
         for i in range(len(fishList)):
-            # if notes played contain fish name, change it's color
+            # create bubble if there's a note played
             if result_piano.__contains__(fishList[i].name):
-                #fishList[i].changeColor()
-                # if note was just played, create bubble
-                bubbleList.append(
-                    Bubble(
-                        window,
-                        (
-                            fishList[i].center[0] + 20 + random() * 5,
-                            fishList[i].center[1],
-                        ),
-                        5 + random() * 20,
-                    )
-                )
+                bubbleList.append(fishList[i].createBubble(window))
+
+            # change color
             if [x.get_real_note()[:-1] for x in allnotes_piano].__contains__(fishList[i].name):
                 fishList[i].color = Colors.red
-                #fishList[i].drawBorder(bordersize = len([x for x in allnotes_piano if x.get_real_note().__contains__(fishList[i].name)]))
             else:
                 fishList[i].color = fishList[i].firstColor
 

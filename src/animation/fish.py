@@ -4,19 +4,20 @@ from random import randrange, random
 from constants import FishColors,Colors
 import animation.drawings 
 import math
+from constants import Direction
 
 class Fish:
     global listTriangles
     global fistColor
     global secondColor
 
-    def __init__(self, window: pygame.Surface, name: str, color, center, length, height, Direction):
+    def __init__(self, window: pygame.Surface, name: str, color, center, length, height, direction):
         self.window = window
         self.name = name
         self.center = center
         self.length = length
         self.height = height
-        self.Direction = Direction
+        self.direction = direction
         self.color = color
         self.firstColor = color
         self.secondColor = (randrange(255), randrange(255), randrange(255))
@@ -88,7 +89,7 @@ class Fish:
         pupilRadius = air/15
         
 
-        if self.Direction == 0: # left
+        if self.direction == Direction.LEFT:
             eyeCenter = (cx - rx/2, cy - ry/2)
             endTail = cx + rx + self.length/4
             midTail = cx + rx + self.length/8
@@ -134,6 +135,16 @@ class Fish:
             pygame.draw.polygon(
                 self.window, Colors.black, self.listTriangles[i], width=(bordersize+3)
             )
+    
+    def createBubble(self, window):
+        return Bubble(
+            window,
+            (
+                self.center[0] + self.direction.value * (self.length + random() * 5),
+                self.center[1],
+            ),
+            radius = 5 + random() * 20,
+        )
 
 class Bubble:
     out_of_bounds: bool = False

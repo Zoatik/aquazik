@@ -40,5 +40,5 @@ class FishColors:
     
 
 class Direction(Enum):
-    LEFT = auto()
-    RIGHT = auto()
+    LEFT: float = -1
+    RIGHT: float = 1
