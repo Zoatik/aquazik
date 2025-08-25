@@ -1,9 +1,8 @@
 from animation.fish import Fish
 from pygame import draw, Surface
-from constants import NOTE_NAMES
+from constants import NOTE_NAMES, Colors, FishColors
 from animation.starfish import Starfish
 import animation.drawings
-from animation.drawings import Colors
 from random import randrange
 import math
 import pygame
@@ -18,7 +17,6 @@ class Aquarium:
 
     def createFishList(window):
         # instance of fish --> change it so i don't do it manually
-        # x + 150, y + 125
         fishCenterList = [
             (randrange(50, 350), randrange(50, 100)),
             (randrange(50, 350), randrange(200, 250)),
@@ -40,8 +38,11 @@ class Aquarium:
                     window,
                     NOTE_NAMES[ni],
                     #(randrange(255), randrange(255), randrange(255)),
-                    Colors.yellow,
+                    FishColors.yellow,
                     fishCenterList[ni],
+                    randrange(30,70),
+                    randrange(15,40),
+                    randrange(2)  # Direction (0=left, 1=right)
                 )
             )
         return fishList
@@ -161,9 +162,8 @@ class Aquarium:
     def drawBackground(window: Surface):
         window.fill((125, 125, 255))
         
-        SAND = (232, 210, 160)
-        pygame.draw.polygon(window, SAND,((0,window.get_height()/2),(0,window.get_height()),(window.get_width(),window.get_height()/2)))
-        pygame.draw.polygon(window,SAND,((window.get_width(),window.get_height()/2),(0,window.get_height()),(window.get_width(),window.get_height()))
+        pygame.draw.polygon(window, Colors.SAND,((0,window.get_height()/2),(0,window.get_height()),(window.get_width(),window.get_height()/2)))
+        pygame.draw.polygon(window,Colors.SAND,((window.get_width(),window.get_height()/2),(0,window.get_height()),(window.get_width(),window.get_height()))
 )
 
     # x, y = point central de la base de la plante

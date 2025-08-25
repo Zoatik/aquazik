@@ -1,18 +1,22 @@
 import pygame
 
 from random import randrange, random
-from animation.drawings import Colors
-import animation.drawings
+from constants import FishColors,Colors
+import animation.drawings 
+import math
 
 class Fish:
     global listTriangles
     global fistColor
     global secondColor
 
-    def __init__(self, window: pygame.Surface, name: str, color, center):
+    def __init__(self, window: pygame.Surface, name: str, color, center, length, height, Direction):
         self.window = window
         self.name = name
         self.center = center
+        self.length = length
+        self.height = height
+        self.Direction = Direction
         self.color = color
         self.firstColor = color
         self.secondColor = (randrange(255), randrange(255), randrange(255))
@@ -57,7 +61,6 @@ class Fish:
     def __str__(self):
         return f"{self.name}, {self.color}"
 
-    def draw(self):
         self.drawBorder(3)
 
         for i in range(0, len(self.listTriangles)):
@@ -73,6 +76,51 @@ class Fish:
                 (self.center[0], self.center[1] - 35),
             ),
         )
+
+    def draw(self):
+        center =self.center
+        rx = self.length
+        ry = self.height
+        segments = 40
+        cx, cy = center
+        air = (math.pi*self.length*self.height)/60
+        irisRadius = air/10
+        pupilRadius = air/15
+        
+
+        if self.Direction == 0: # left
+            eyeCenter = (cx - rx/2, cy - ry/2)
+            endTail = cx + rx + self.length/4
+            midTail = cx + rx + self.length/8
+            
+        else : # right
+            eyeCenter = (cx + rx/2, cy - ry/2)
+            endTail = cx - rx - self.length/4
+            midTail = cx - rx - self.length/8
+            
+        topY = cy - ry
+        downY = cy + ry
+        
+
+        # body
+        Triangles = animation.drawings.getEllipseTriangles(cx, cy, rx, ry, segments)
+        for triangle in Triangles:
+            pygame.draw.polygon(self.window, self.color, triangle)
+
+        # tail
+        pygame.draw.polygon(self.window, self.color,((endTail, topY),(midTail, cy),(cx, cy)))
+        pygame.draw.polygon(self.window, self.color,((endTail, downY),(midTail, cy),(cx, cy)))
+
+        # iris
+        eyeTriangles = animation.drawings.getEllipseTriangles(eyeCenter[0], eyeCenter[1], irisRadius, irisRadius, segments=20)
+        for triangle in eyeTriangles:
+            pygame.draw.polygon(self.window, Colors.orange, triangle)
+        
+        # pupil
+        eyeTriangles = animation.drawings.getEllipseTriangles(eyeCenter[0], eyeCenter[1], pupilRadius, pupilRadius, segments=20)
+        for triangle in eyeTriangles:
+            pygame.draw.polygon(self.window, Colors.black, triangle)
+            
 
     # change the color of the fish to a random color
     def changeColor(self):
