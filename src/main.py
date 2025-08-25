@@ -87,11 +87,7 @@ def main():
             if result_piano.__contains__(fishList[i].name):
                 bubbleList.append(fishList[i].createBubble(window))
 
-            # change color
-            if [x.get_real_note()[:-1] for x in allnotes_piano].__contains__(fishList[i].name):
-                fishList[i].color = Colors.red
-            else:
-                fishList[i].color = fishList[i].firstColor
+            fishList[i].animate = [x.get_real_note()[:-1] for x in allnotes_piano].__contains__(fishList[i].name)
 
         # for each starfish
         for i in range(len(starFishList)):

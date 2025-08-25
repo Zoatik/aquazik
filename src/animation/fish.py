@@ -58,6 +58,15 @@ class Fish:
                 (self.center[0], self.center[1]),
             ),
         ]
+        self.fishMouth = FishMouth(
+            window, 
+            cx = self.center[0] + (direction.value * 3) * length / 5,
+            cy = self.center[1],
+            length = 2 * self.length / 5,
+            maxAngleDeg = 65,
+            direction = direction
+        )
+        self.animate = False
 
     def __str__(self):
         return f"{self.name}, {self.color}"
@@ -102,6 +111,9 @@ class Fish:
         topY = cy - ry
         downY = cy + ry
         
+        self.color = Colors.red if self.animate else self.firstColor
+
+        self.fishMouth.isOpening = self.animate
 
         # body
         Triangles = animation.drawings.getEllipseTriangles(cx, cy, rx, ry, segments)
@@ -121,14 +133,8 @@ class Fish:
         eyeTriangles = animation.drawings.getEllipseTriangles(eyeCenter[0], eyeCenter[1], pupilRadius, pupilRadius, segments=20)
         for triangle in eyeTriangles:
             pygame.draw.polygon(self.window, Colors.black, triangle)
-            
-
-    # change the color of the fish to a random color
-    def changeColor(self):
-        if self.color == self.firstColor:
-            self.color = self.secondColor
-        else:
-            self.color = self.firstColor
+        
+        self.fishMouth.draw()
     
     def drawBorder(self, bordersize = 1):
         for i in range(len(self.listTriangles)):
@@ -176,3 +182,34 @@ class Bubble:
         # draw white part of bubble (inside)
         for t in points:
             pygame.draw.polygon(self.window, Colors.white, t)
+
+class FishMouth:
+    def __init__(self, window, cx, cy, length, maxAngleDeg: int, direction = Direction):
+        self.window = window
+        self.cx = cx
+        self.cy = cy
+        self.length = length
+        self.maxAngle = maxAngleDeg
+        self.isOpening = False
+        self.angleDeg = 0
+        self.direction = direction
+    
+    # Calculates new angle and draws
+    def draw(self):
+        if self.isOpening:
+            if self.angleDeg < self.maxAngle:
+                self.angleDeg += 0.25
+        else:
+            if self.angleDeg > 0:
+                self.angleDeg -= 0.25
+        
+        if self.angleDeg == 0:
+            return
+        
+        triangle = [
+            (self.cx, self.cy),
+            (self.cx + (self.direction.value * self.length), self.cy - math.tan(math.radians(self.angleDeg / 2))*self.length),
+            (self.cx + (self.direction.value * self.length), self.cy + math.tan(math.radians(self.angleDeg / 2))*self.length)
+        ]
+
+        pygame.draw.polygon(self.window, Colors.bgColor, triangle)
