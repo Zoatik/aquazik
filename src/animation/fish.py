@@ -71,21 +71,6 @@ class Fish:
     def __str__(self):
         return f"{self.name}, {self.color}"
 
-        self.drawBorder(3)
-
-        for i in range(0, len(self.listTriangles)):
-            pygame.draw.polygon(self.window, self.color, self.listTriangles[i])
-
-        # black eye
-        pygame.draw.polygon(
-            self.window,
-            Colors.black,
-            (
-                (self.center[0] - 5, self.center[1] - 40),
-                (self.center[0] + 5, self.center[1] - 40),
-                (self.center[0], self.center[1] - 35),
-            ),
-        )
 
     def draw(self):
         center =self.center
