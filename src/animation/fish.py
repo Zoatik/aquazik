@@ -154,7 +154,8 @@ class Fish:
             pygame.draw.polygon(self.window, self.color, ((nageoireTopX, nageoireDownUpY),(nageoireRightX, nageoireInUpY),(nageoireLeftX, nageoireTopUpY)))
             # bottom fin
             pygame.draw.polygon(self.window, self.color, ((nageoireTopX, nageoireDownDownY),(nageoireRightX, nageoireInDownY),(nageoireLeftX, nageoireTopDownY)))
-
+        
+        self.fishMouth.draw()
 
     # change the color of the fish to a random color
     def changeColor(self):
