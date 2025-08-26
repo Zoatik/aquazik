@@ -66,7 +66,7 @@ class Fish:
             maxAngleDeg = 65,
             direction = direction
         )
-        self.animate = False
+        self.playing = True
 
     def __str__(self):
         return f"{self.name}, {self.color}"
@@ -121,10 +121,7 @@ class Fish:
         nageoireTopUpY = cy - ry
         nageoireDownUpY = nageoireTopUpY - ry/2
         
-        
-        self.color = Colors.red if self.animate else self.firstColor
-
-        self.fishMouth.isOpening = self.animate
+        self.color = self.secondColor if self.playing else self.firstColor
 
         # body
         Triangles = animation.drawings.getEllipseTriangles(cx, cy, rx, ry, segments)
@@ -157,12 +154,16 @@ class Fish:
         
         self.fishMouth.draw()
 
-    # change the color of the fish to a random color
-    def changeColor(self):
-        if self.color == self.firstColor:
-            self.color = self.secondColor
-        else:
-            self.color = self.firstColor
+    def animate(self, deltaTime):
+        self.fishMouth.animate(deltaTime)
+    
+    def openMouth(self, velocity, noteTime):
+        # maximum de velocity est 127 ce qui correspondra à un angle de 70°
+        self.fishMouth.maxAngle = (70 / 127) * velocity
+        self.fishMouth.angleDeg = self.fishMouth.maxAngle
+
+        # add 650 ms to time to close so the animation is more visible
+        self.fishMouth.timeToClose = noteTime + 0.65
     
     def drawBorder(self, bordersize = 1):
         for i in range(len(self.listTriangles)):
@@ -219,18 +220,25 @@ class FishMouth:
         self.length = length
         self.maxAngle = maxAngleDeg
         self.isOpening = False
-        self.angleDeg = 0
+        self.angleDeg = 0.05
         self.direction = direction
+        self.timeToClose = 0
     
+    def animate(self, deltaTime):
+        """
+        if self.angleDeg < self.maxAngle:
+            self.angleDeg += 20
+        else:
+            self.isOpening = False
+        """
+        if self.angleDeg > 0.05:
+            self.angleDeg -= (deltaTime / self.timeToClose) * self.angleDeg
+
+        self.timeToClose -= deltaTime
+
+
     # Calculates new angle and draws
     def draw(self):
-        if self.isOpening:
-            if self.angleDeg < self.maxAngle:
-                self.angleDeg += 0.25
-        else:
-            if self.angleDeg > 0:
-                self.angleDeg -= 0.25
-        
         if self.angleDeg == 0:
             return
         

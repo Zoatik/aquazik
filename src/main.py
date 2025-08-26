@@ -60,14 +60,17 @@ def main():
     fishList = Aquarium.createFishList(window)
     starFishList = Aquarium.createStarfishList(window)
 
+    deltaTime = 0
+
     while run:
-        currentTime = time() - start
+        runStartTime = time()
+        currentTime = runStartTime - start
 
         notes = mdi.find_note(currentTime)
         # [:-1] enlève le dernier char du string (l'octave de la note)
 
         result_piano = [
-            x.get_real_note()[:-1]
+            x
             for x in notes
             if x not in last_notes and x.get_instrument() == Instrument.PIANO
         ]
@@ -77,23 +80,32 @@ def main():
             if x not in last_notes and x.get_instrument() == Instrument.TRUMPET
         ]
 
-        allnotes_piano = [x for x in notes if x.get_instrument() == Instrument.PIANO]
+        allnotes_piano = [x.get_real_note()[:-1] for x in notes if x.get_instrument() == Instrument.PIANO]
 
         last_notes = notes
 
         # fish note animation
-        for i in range(len(fishList)):
-            # create bubble if there's a note played
-            if result_piano.__contains__(fishList[i].name):
-                bubbleList.append(fishList[i].createBubble(window))
+        for fish in fishList:
+            fish.playing = False
+            result_piano_fish = [x for x in result_piano if x.get_real_note()[:-1] == fish.name]
 
-            fishList[i].animate = [x.get_real_note()[:-1] for x in allnotes_piano].__contains__(fishList[i].name)
+            # new notes
+            if len(result_piano_fish) != 0:
+                fish.openMouth(result_piano_fish[0].velocity, result_piano_fish[0].get_time())
+                bubbleList.append(fish.createBubble(window))
+
+            # all notes
+            if allnotes_piano.__contains__(fish.name):
+                fish.playing = True
+            
+            # animer tous les poissons à chaque fois
+            fish.animate(deltaTime)
 
         # for each starfish
-        for i in range(len(starFishList)):
+        for starfish in starFishList:
             # if notes played contain fish name, change it's color
-            if result_trumpet.__contains__(starFishList[i].name):
-                starFishList[i].animStarfish()
+            if result_trumpet.__contains__(starfish.name):
+                starfish.animStarfish()
 
         # draw aquarium background and details
         Aquarium.drawBackground(window)
@@ -116,6 +128,8 @@ def main():
                 run = False
 
         pygame.display.flip()
+
+        deltaTime = time() - runStartTime
 
     pygame.quit()
     exit()

@@ -94,6 +94,9 @@ class MidiNote:
         octave = (self.noteIndex // 12) - 1
         note = NOTE_NAMES[self.noteIndex % 12]
         return f"{note}{octave}"
+    
+    def get_time(self) -> float:
+        return self.endSeconds - self.startSeconds
 
 
 # test case
