@@ -3,11 +3,11 @@ import os
 from matplotlib.collections import LineCollection
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy import optimize
+from scipy import optimize, interpolate
 from scipy.signal import savgol_filter, medfilt
 
 
-def rough_start_stop(audio_name="PinkPanther_Piano_Only.mp3"):
+def rough_start_stop(audio_name="PinkPanther_Trumpet_Only.mp3"):
 
     INPUT_FOLDER = os.path.abspath("audio_in")
     audio_data, sr = librosa.load(
@@ -39,21 +39,22 @@ def rough_start_stop(audio_name="PinkPanther_Piano_Only.mp3"):
 
     # look for chunks start / end
     smoothed_energies = medfilt(energies, kernel_size=11)
-    smoothed_energies = medfilt(smoothed_energies, kernel_size=21)
+    # smoothed_energies = medfilt(smoothed_energies, kernel_size=21)
     # smoothed_energies = savgol_filter(energies, window_length=11, polyorder=2)
 
     starts_x = []
     starts_y = []
     ends_x = []
     ends_y = []
-    sound_treshhold = 0.01 * max_energy
+    sound_treshhold = 0.01 * max_energy  # originally 0.01
+    min_prominence = 0.1 * max_energy
     sound_low_lim = 0.01 * sound_treshhold
     min_dist = 3 * audio_duration / len(chunk_x)
 
-    for i in range(len(chunk_x) - 1):
+    for i in range(len(chunk_x) - 3):
         if (
             smoothed_energies[i] < sound_treshhold
-            and smoothed_energies[i + 1] > sound_treshhold
+            and np.max(smoothed_energies[i + 1 : i + 4]) > sound_treshhold
         ):
             if len(starts_x) - len(ends_x) < 1:  # must be in pairs
                 if len(starts_x) < 1 or chunk_x[i] - chunk_x[starts_x[-1]] > min_dist:
@@ -96,6 +97,96 @@ def enhanced_start_stop(x, raw_data):  # TODO
 
     plt.plot(x, raw_data)
     plt.plot(x[outliers], raw_data[outliers], "ro")
+
+
+def estimate_bpm(x_axis, starts_x, ends_x):
+    print(len(starts_x))
+    if len(starts_x) < 2:
+        return None
+    total_length = x_axis[starts_x[-1]] - x_axis[starts_x[0]]
+    distances = [
+        x_axis[starts_x[i + 1]] - x_axis[starts_x[i]] for i in range(len(starts_x) - 1)
+    ]
+    distances = sorted(distances)
+
+    min_dist = np.min(distances)
+    max_dist = np.max(distances)
+
+    print(min_dist)
+    print(max_dist)
+
+    #### It does not matter if the bpm is n or 2*n or x*n.
+    #### It will be adjusted with the beats length (1/n * length)
+
+    max_error_for_1_beat = 0.05
+    min_notes_per_bucket = 0
+    bucket_x = 0.01
+    print("bucket x: ", bucket_x)
+    x_arr = np.arange(min_dist, max_dist, bucket_x)
+    y_arr = np.zeros_like(x_arr)
+    for el in distances:
+        prev_dist = -1
+        fitting_idx = 0
+        for i in range(len(x_arr)):
+            dist = abs(x_arr[i] - el)
+            if dist < prev_dist or prev_dist < 0:
+                fitting_idx = i
+                prev_dist = dist
+
+        y_arr[fitting_idx] += 1
+
+    new_x = [x_arr[i] for i in range(len(x_arr)) if y_arr[i] >= min_notes_per_bucket]
+    new_y = [y_arr[i] for i in range(len(x_arr)) if y_arr[i] >= min_notes_per_bucket]
+
+    max = None
+    max_idx = -1
+    for i in range(len(new_x)):
+        if max == None or new_y[i] > max:
+            max = new_y[i]
+            max_idx = i
+
+    quarter_note = None
+    mult_notes = []
+    for i in range(len(new_x)):
+        if quarter_note == None:
+            if is_local_maximum(i, new_y):
+                quarter_note = new_x[i]
+        else:
+            i = (i) * 2
+            if i > len(new_x):
+                break
+            lower_bound = i - 3 if i > 2 else 0
+            upper_bound = i + 3 if len(new_x) > i else len(new_x)
+            loc_max = find_local_maximums(
+                new_x[lower_bound:upper_bound], new_y[lower_bound:upper_bound]
+            )
+            print("loc maxs: ", loc_max[0])
+            if len(loc_max[0]) > 0:
+                most_sig_y = loc_max[1][0]
+                most_sig_x = loc_max[0][0]
+                for j in range(1, len(loc_max[0])):
+                    if loc_max[1][j] > most_sig_y:
+                        most_sig_y = loc_max[1][j]
+                        most_sig_x = loc_max[0][j]
+                if not most_sig_x in mult_notes and most_sig_x != quarter_note:
+                    mult_notes.append(most_sig_x)
+
+    print("quarter note : ", quarter_note)
+    print("mult notes :", mult_notes)
+    coeffs = [int(x / quarter_note) for x in mult_notes if x % quarter_note < 0.1]
+    mult_notes = [x for x in mult_notes if x % quarter_note < 0.1]
+    print("coeffs: ", coeffs)
+    m = np.mean(
+        [quarter_note] + [mult_notes[i] / coeffs[i] for i in range(len(mult_notes))]
+    )
+    print("mean: ", m)
+    est_bpm = 1 / m * 60.0
+    print(f"bpm: {est_bpm}, noire: {m}")
+    # plt.plot(new_x, new_y)
+    # plt.show()
+    # exit(0)
+
+    return quarter_note, est_bpm
 
 
 def is_local_minimum(x, arr):
@@ -144,6 +235,46 @@ def is_local_maximum(x, arr):
         right_y = arr[x + r] if x + r < len(arr) else y + 1
 
 
+def find_local_minimums(xs, ys, count_borders=False):
+    if len(ys) < 1:
+        return [], []
+    mins_x = []
+    mins_y = []
+    for i in range(1, len(ys) - 1):
+        if ys[i] < ys[i - 1] and ys[i] < ys[i + 1]:
+            mins_x.append(xs[i])
+            mins_y.append(ys[i])
+    if count_borders and len(ys) > 1:
+        if ys[-1] < ys[-2]:
+            mins_x.append(xs[len(ys) - 1])
+            mins_y.append(ys[-1])
+        if ys[0] < ys[1]:
+            mins_x.append(xs[0])
+            mins_y.append(ys[0])
+
+    return mins_x, mins_y
+
+
+def find_local_maximums(xs, ys, count_borders=False):
+    if len(ys) < 1:
+        return [], []
+    maxs_x = []
+    maxs_y = []
+    for i in range(1, len(ys) - 1):
+        if ys[i] > ys[i - 1] and ys[i] > ys[i + 1]:
+            maxs_x.append(xs[i])
+            maxs_y.append(ys[i])
+    if count_borders and len(ys) > 1:
+        if ys[-1] > ys[-2]:
+            maxs_x.append(xs[len(ys) - 1])
+            maxs_y.append(ys[-1])
+        if ys[0] > ys[1]:
+            maxs_x.append(xs[0])
+            maxs_y.append(ys[0])
+
+    return maxs_x, maxs_y
+
+
 def find_local_extremums(smoothed_array, x_array):  # resources heavy
     local_max_x = []
     local_max_y = []
@@ -161,21 +292,31 @@ def find_local_extremums(smoothed_array, x_array):  # resources heavy
     return (local_min_x, local_min_y), (local_max_x, local_max_y)
 
 
-norm_signal, smoothed_data, starts_x, ends_x = rough_start_stop()
+norm_signal, smoothed_data, starts_x, ends_x = rough_start_stop("PinkPanther_Both.mp3")
 #  local_min, local_max = find_local_extremums(smoothed_data[1], smoothed_data[0])
 
-for i in range(len(starts_x)):
+for i in range(min(len(ends_x), len(starts_x))):
     print(f"start: {smoothed_data[0][starts_x[i]]}, end: {smoothed_data[0][ends_x[i]]}")
 
+bpm_data = estimate_bpm(smoothed_data[0], starts_x, ends_x)
+quarter_note = None
+bpm = None
+if bpm_data is not None:
+    quarter_note, bpm = bpm_data
+
+print(f"temps de la noire: {quarter_note}, bpm : {bpm}")
 
 plt.plot(norm_signal[0], norm_signal[1])
 plt.plot(smoothed_data[0], smoothed_data[1])
 plt.plot(smoothed_data[0][starts_x], smoothed_data[1][starts_x], "x")
 plt.plot(smoothed_data[0][ends_x], smoothed_data[1][ends_x], "x")
 
+
 # enhanced_start_stop(norm_signal[0], norm_signal[1])
 # plt.plot(local_min[0], local_min[1], "o")
 # plt.plot(local_max[0], local_max[1], "o")
+
+
 plt.show()
 
 """

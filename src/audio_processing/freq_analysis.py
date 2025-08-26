@@ -73,7 +73,7 @@ class Tools:
 
     @staticmethod
     def note_name(n):
-        return NOTE_NAMES[n % 12] + str(int(n / 12 - 1))
+        return NOTE_NAMES[n % 12] + str(int(n / 12 )) # previously ...12 - 1
 
 
 class Note:
@@ -481,8 +481,8 @@ class AudioAnalyzer:
         plt.close()
 
 
-# audioAnalyzer = AudioAnalyzer("PinkPanther_Trumpet_Only.mp3", False)
-# audioAnalyzer.convert_to_notes()
+#audioAnalyzer = AudioAnalyzer("Ecossaise_Piano.mp3", True)
+#audioAnalyzer.convert_to_notes()
 
 
 """
