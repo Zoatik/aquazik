@@ -195,7 +195,7 @@ class Bubble:
     def move_and_draw(self):
         # bouge +- en x et toujours - en y
         self.pos = (
-            self.pos[0] + (int(random() * 2 - 1) * 4),
+            self.pos[0] + (0 if randrange(0,11) <= 8 else -1 if randrange(2) % 2 == 0 else 1),
             self.pos[1] - int(randrange(2)),
         )
 

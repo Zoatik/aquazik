@@ -55,6 +55,7 @@ def main():
 
     # Loop that updates the display
 
+    # start timestamp, used for bpm sync
     start = time()
     last_notes = []
     bubbleList: list[Bubble] = []
@@ -111,15 +112,15 @@ def main():
         # draw aquarium background and details
         Aquarium.drawBackground(window)
 
-        Aquarium.drawFishes(fishList)
-        Aquarium.drawStarfish(starFishList)
-        for b in [x for x in bubbleList if not x.out_of_bounds]:
-            b.move_and_draw()
-
         Aquarium.drawPatrickHouse(window)
         Aquarium.drawSquidwardHouse(window)
         Aquarium.drawBobHouse(window)
         Aquarium.drawBobTopHouse(window)
+        
+        Aquarium.drawFishes(fishList)
+        Aquarium.drawStarfish(starFishList)
+        for b in [x for x in bubbleList if not x.out_of_bounds]:
+            b.move_and_draw()
 
         Aquarium.drawProgressBar(window, currentTime, mdi.totalTime)
 
