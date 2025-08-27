@@ -5,6 +5,7 @@ from constants import FishColors,Colors
 import animation.drawings 
 import math
 from constants import Direction
+import time
 
 class Fish:
     global listTriangles
@@ -59,14 +60,15 @@ class Fish:
             ),
         ]
         self.fishMouth = FishMouth(
-            window, 
-            cx = self.center[0] + (direction.value * 3) * length / 5,
-            cy = self.center[1],
+            window,
             length = 2 * self.length / 5,
             maxAngleDeg = 65,
-            direction = direction
+            parent = self
         )
         self.playing = True
+        self.speed = 70 + randrange(81) # pixels / second
+        self.lastNoteTime = time.time()
+        self.enabled = True
 
     def __str__(self):
         return f"{self.name}, {self.color}"
@@ -155,7 +157,20 @@ class Fish:
         self.fishMouth.draw()
 
     def animate(self, deltaTime):
+        if not self.enabled:
+            return
+        
+        if self.center[0] < - self.length / 2 or self.center[0] > self.window.get_size()[0] + self.length / 2:
+            self.enabled = False
+        
         self.fishMouth.animate(deltaTime)
+        self.center = (self.center[0] + (-1 if self.direction == Direction.LEFT else 1) * deltaTime * self.speed, self.center[1])
+        
+        if (time.time() - self.lastNoteTime < 5):
+            if self.center[0] <= - self.length:
+                self.direction = Direction.RIGHT
+            elif self.center[0] >= self.window.get_size()[0] - self.length:
+                self.direction = Direction.LEFT
     
     def openMouth(self, velocity, noteTime):
         # maximum de velocity est 127 ce qui correspondra à un angle de 70°
@@ -214,16 +229,14 @@ class Bubble:
             pygame.draw.polygon(self.window, Colors.white, t)
 
 class FishMouth:
-    def __init__(self, window, cx, cy, length, maxAngleDeg: int, direction = Direction):
+    def __init__(self, window, length, maxAngleDeg: int, parent = Fish):
         self.window = window
-        self.cx = cx
-        self.cy = cy
         self.length = length
         self.maxAngle = maxAngleDeg
         self.isOpening = False
         self.angleDeg = 0.05
-        self.direction = direction
         self.timeToClose = 0
+        self.parent = parent
     
     def animate(self, deltaTime):
         """
@@ -243,10 +256,13 @@ class FishMouth:
         if self.angleDeg == 0:
             return
         
+        cx = self.parent.center[0] + (self.parent.direction.value * 3) * self.parent.length / 5
+        cy = self.parent.center[1]
+
         triangle = [
-            (self.cx, self.cy),
-            (self.cx + (self.direction.value * self.length), self.cy - math.tan(math.radians(self.angleDeg / 2))*self.length),
-            (self.cx + (self.direction.value * self.length), self.cy + math.tan(math.radians(self.angleDeg / 2))*self.length)
+            (cx, cy),
+            (cx + (self.parent.direction.value * self.length), cy - math.tan(math.radians(self.angleDeg / 2))*self.length),
+            (cx + (self.parent.direction.value * self.length), cy + math.tan(math.radians(self.angleDeg / 2))*self.length)
         ]
 
         pygame.draw.polygon(self.window, Colors.bgColor, triangle)
