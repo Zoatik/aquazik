@@ -199,7 +199,7 @@ class Bubble:
             self.pos[1] - int(randrange(2)),
         )
 
-        if (self.pos[1] - self.radius <= 0):
+        if (self.pos[1] + self.radius <= 0):
             self.out_of_bounds = True
             return
 
