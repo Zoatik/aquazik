@@ -159,7 +159,8 @@ class Fish:
     
     def openMouth(self, velocity, noteTime):
         # maximum de velocity est 127 ce qui correspondra à un angle de 70°
-        self.fishMouth.maxAngle = (70 / 127) * velocity
+        # minimum de 20°
+        self.fishMouth.maxAngle = (50 / 127) * velocity + 20
         self.fishMouth.angleDeg = self.fishMouth.maxAngle
 
         # add 650 ms to time to close so the animation is more visible
@@ -176,7 +177,7 @@ class Fish:
             window,
             (
                 self.center[0] + self.direction.value * (self.length + random() * 5),
-                self.center[1],
+                self.center[1] - 10, # 10 pixels plus haut pour mieux voir la bouche
             ),
             radius = 5 + random() * 20,
         )
