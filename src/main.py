@@ -103,6 +103,7 @@ def main():
                     window,
                     note.get_real_note()[:-1],
                     FishColors.yellow,
+                    # TODO center.y du poisson à changer par rapport à la note
                     ((distance if direction == Direction.RIGHT else window.get_size()[0] - note.velocity / 6), random.randrange(int(window.get_size()[1] / 2))),
                     length = note.velocity / 3,
                     height = note.velocity / 4,
@@ -144,8 +145,8 @@ def main():
         Aquarium.drawBobHouse(window)
         Aquarium.drawBobTopHouse(window)
         
-        Aquarium.drawFishes(fishList)
         Aquarium.drawStarfish(starFishList)
+        Aquarium.drawFishes(fishList)
         for b in [x for x in bubbleList if not x.out_of_bounds]:
             b.move_and_draw()
 
