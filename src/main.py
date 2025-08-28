@@ -144,8 +144,8 @@ def main():
         Aquarium.drawBobHouse(window)
         Aquarium.drawBobTopHouse(window)
         
-        Aquarium.drawFishes(fishList)
         Aquarium.drawStarfish(starFishList)
+        Aquarium.drawFishes(fishList)
         for b in [x for x in bubbleList if not x.out_of_bounds]:
             b.move_and_draw()
 
