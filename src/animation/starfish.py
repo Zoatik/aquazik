@@ -1,6 +1,8 @@
 import pygame
 import math
 from constants import Colors,FishColors
+import animation.drawings
+import random
 
 
 class Starfish:
@@ -10,10 +12,10 @@ class Starfish:
         self.center = center
         self.color = FishColors.orange
         self.arm_count = 5
-        #self.arm_length = 50
         self.arm_length = length
-        #self.arm_width = 25
-        self.arm_width = length / 2
+        self.arm_width = random.randrange(int(length/4),length)
+
+        self.playing = True
 
     # Function to create a single triangle for an arm
     def triangle_arm(self, center, length, width, angle):
@@ -29,6 +31,7 @@ class Starfish:
         return [(tip_x, tip_y), (left_x, left_y), (right_x, right_y)]
 
     def draw(self, borders: bool = False):
+        self.color = Colors.patrick if self.playing else FishColors.orange
         if not borders:
             self.draw(borders=True)
         for i in range(self.arm_count):
@@ -41,13 +44,30 @@ class Starfish:
             else:
                 pygame.draw.polygon(self.window, self.color, points)
 
-    # change the color of the fish to a random color
-    def animStarfish(self):
-        """temp = pygame.time.get_ticks()
-        if pygame.time.get_ticks() - temp < 1000:
-            self.color = FishColors.yellow
-        else.color = FishColors.orange"""
-        if self.color == FishColors.orange:
-            self.color = FishColors.green
+        if self.playing and self.arm_count == 5:
+            self.drawPatrick()
         else:
-            self.color = FishColors.orange
+            pass
+
+
+    def drawPatrick(self):
+        cx,cy = self.center
+        length = self.arm_length
+        width = self.arm_width
+        
+        left_eye = animation.drawings.getEllipseTriangles(cx-length/15, cy-length/4, length/10/2, length/10)
+        right_eye = animation.drawings.getEllipseTriangles(cx+length/15, cy-length/4, length/10/2, length/10)
+        left_pupil = animation.drawings.getEllipseTriangles(cx-length/25, cy-length/4, length/20/2, width/20)
+        right_pupil = animation.drawings.getEllipseTriangles(cx+length/25, cy-length/4, length/20/2, width/20)
+
+        for triangle in left_eye:
+            pygame.draw.polygon(self.window, Colors.white, triangle)
+        for triangle in right_eye:
+            pygame.draw.polygon(self.window, Colors.white, triangle)
+        for triangle in left_pupil:
+            pygame.draw.polygon(self.window, Colors.black, triangle)
+        for triangle in right_pupil:
+            pygame.draw.polygon(self.window, Colors.black, triangle)
+        
+
+        

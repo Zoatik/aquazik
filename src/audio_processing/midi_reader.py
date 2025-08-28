@@ -6,9 +6,9 @@ DEBUG = False
 
 
 class Instrument(Enum):
-    PIANO = 0
-    TRUMPET = 1
-
+    PIANO = 11
+    TRUMPET = 2
+    UNKNOWN = -1
 
 class MidiFile:
     note_list = []
@@ -59,6 +59,9 @@ class MidiFile:
                 ret.append(x)
         return ret
 
+    def get_used_octaves(self) -> set[int]:
+        return set([int(x.get_real_note()[-1]) for x in self.note_list])
+
     # returns a list of unique used notes in the midi file
     def get_used_notes(self) -> list[str]:
         return list(set([x.get_real_note()[:-1] for x in self.note_list]))
@@ -73,14 +76,27 @@ class MidiNote:
         self.noteIndex = noteIndex
         self.velocity = velocity
         self.channel = channel
-        self.instrument = (Instrument.TRUMPET if self.channel % 2 == 1 else Instrument.PIANO) # 0: piano, 1: trumpet
         self.startTicks = timeTicks
         self.startSeconds = mido.tick2second(
             timeTicks, self.parent.ticks_per_beat, self.parent.tempo
         )
 
     def get_instrument(self):
-        return self.instrument
+        values = [Instrument[x] for x in Instrument.__dict__.keys()
+         if not x.__contains__("_")
+         and not x.__contains__("UNKNOWN")]
+        
+        for instr in values:
+            if instr.value == self.channel:
+                return instr
+        
+        reduced = self.channel % len(values)
+        if [x.value for x in values].__contains__(reduced):
+            for instr in values:
+                if instr.value == reduced:
+                    return instr
+                
+        return Instrument.UNKNOWN
 
     def set_end_ticks(self, endTicks):
         self.endTicks = endTicks

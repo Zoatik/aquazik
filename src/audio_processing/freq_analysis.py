@@ -575,8 +575,8 @@ class AudioAnalyzer:
         plt.close()
 
 
-audioAnalyzer = AudioAnalyzer("PinkPanther_Both.mp3", True, 5.0)
-audioAnalyzer.convert_to_notes()
+#audioAnalyzer = AudioAnalyzer("PinkPanther_Both.mp3", True, 5.0)
+#audioAnalyzer.convert_to_notes()
 
 
 """

@@ -9,21 +9,25 @@ import audio_processing.MidiV2
 from constants import Colors,FishColors, Direction
 import ctypes
 import platform
+import os
 
 def main():
-    FILE = "PinkPanther_Piano_Only.mp3"
+    FILE = "PinkPanther_Both.mp3"
 
     # Setup analysis
     print("-- Analysing audio --")
-    audio_analyser = AudioAnalyzer(FILE)
-    audio_data = audio_analyser.convert_to_notes()
+    #audio_analyser = AudioAnalyzer(FILE)
+    #audio_data = audio_analyser.convert_to_notes()
 
     print("-- Creating MIDI file --")
-    midi_path = audio_processing.MidiV2.midi_maker([(0,audio_data[1])], bpm=audio_data[0])
-    print(f"bpm = {audio_data[0]}")
+    #midi_path = audio_processing.MidiV2.midi_maker([(0,audio_data[1])], bpm=audio_data[0])
+    midi_path = "audio_in/PinkPanther.midi"
+    #print(f"bpm = {audio_data[0]}")
 
     # Create MidiFile instance
     print("-- Processing MIDI file --")
+
+
     mdi = MidiFile(midi_path)
 
     # -------Create the window--------------------------------------------------------------------------
@@ -71,20 +75,21 @@ def main():
         currentTime = runStartTime - start
 
         notes = mdi.find_note(currentTime)
-        # [:-1] enlève le dernier char du string (l'octave de la note)
-
+        
         result_piano = [
             x
             for x in notes
             if x not in last_notes and x.get_instrument() == Instrument.PIANO
         ]
         result_trumpet = [
-            x.get_real_note()[:-1]
+            x
             for x in notes
             if x not in last_notes and x.get_instrument() == Instrument.TRUMPET
         ]
 
+        # [:-1] enlève le dernier char du string (l'octave de la note)
         allnotes_piano = [x.get_real_note()[:-1] for x in notes if x.get_instrument() == Instrument.PIANO]
+        allnotes_trumpet = [x.get_real_note()[:-1] for x in notes if x.get_instrument() == Instrument.TRUMPET]
 
         last_notes = notes
 
@@ -104,7 +109,10 @@ def main():
                     note.get_real_note()[:-1],
                     FishColors.yellow,
                     # TODO center.y du poisson à changer par rapport à la note
-                    ((distance if direction == Direction.RIGHT else window.get_size()[0] - note.velocity / 6), random.randrange(int(window.get_size()[1] / 2))),
+                    (
+                        (distance if direction == Direction.RIGHT else window.get_size()[0] - note.velocity / 6),
+                        int(note.get_real_note()[-1]) * (window.get_size()[1] / (len(mdi.get_used_octaves()) * 2))
+                    ),
                     length = note.velocity / 3,
                     height = note.velocity / 4,
                     direction = direction
@@ -133,9 +141,18 @@ def main():
 
         # for each starfish
         for starfish in starFishList:
-            # if notes played contain fish name, change it's color
-            if result_trumpet.__contains__(starfish.name):
-                starfish.animStarfish()
+            starfish.playing = False
+            result_trumpet_starfish = [x for x in result_trumpet if x.get_real_note()[:-1] == starfish.name]
+
+            # new notes
+            if len(result_trumpet_starfish) != 0:
+                #I don't know if needed
+                #starfish.animStarfish()
+                print("Is Mayonnaise an Instrument?")
+
+            # all notes
+            if allnotes_trumpet.__contains__(starfish.name):
+                starfish.playing = True
 
         # draw aquarium background and details
         Aquarium.drawBackground(window)
@@ -144,7 +161,7 @@ def main():
         Aquarium.drawSquidwardHouse(window)
         Aquarium.drawBobHouse(window)
         Aquarium.drawBobTopHouse(window)
-        
+
         Aquarium.drawStarfish(starFishList)
         Aquarium.drawFishes(fishList)
         for b in [x for x in bubbleList if not x.out_of_bounds]:

@@ -20,6 +20,8 @@ class Colors:
     LEAF_DARK = (18, 102, 53)
     LEAF_LIGHT = (46, 181, 101)
 
+    patrick = (0xF8,0xAE,0xAF)
+
     
 class FishColors:
     yellow = (255, 255, 0)
@@ -30,6 +32,9 @@ class FishColors:
     green = (0, 255, 0)
     red = (255, 0, 0)
     blue = (0, 0, 255)
+    pinkTruite = (0xA9,0x83,0x80)
+    darkGrayTruite = (0x3B,0x45,0x44)
+    lightGrayTruite = (0xC9,0xC9,0xBF)
 
     def get_random_color():
         # Récupère tous les attributs de la classe sauf spéciaux (__xxx__)
