@@ -1,6 +1,6 @@
 from midiutil import MIDIFile
-from freq_analysis import Note
-from midi_reader import Instrument
+from audio_processing.freq_analysis import Note
+from audio_processing.midi_reader import Instrument
 
 #from freq_analysis import AudioAnalyzer
 
@@ -56,16 +56,16 @@ def midi_maker(macro : list[Note], bpm, outfile="music.mid"):
         midi_note = note_to_midi(note.name)
         time = note.start_bpm
         duration = note.length_bpm
-        volume = note.magnitude
+        volume = int(note.magnitude) * 127
         MyMIDI.addNote(track, channel, midi_note, time, duration, volume)
     
     #MyMIDI.addNote(track, channel, note, time, duration, volume)
     
     # create the .mid file
-    with open(f"music.mid", "wb") as output_file:
+    with open(f"music2.mid", "wb") as output_file:
         MyMIDI.writeFile(output_file)
 
-    return "music.mid"
+    return "music2.mid"
 
 
 #baba = AudioAnalyzer("PinkPanther_Trumpet_Only.mp3")
