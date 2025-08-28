@@ -6,8 +6,8 @@ DEBUG = False
 
 
 class Instrument(Enum):
-    PIANO = 0
-    TRUMPET = 1
+    PIANO = 11
+    TRUMPET = 2
     UNKNOWN = -1
 
 class MidiFile:
@@ -82,13 +82,23 @@ class MidiNote:
         )
 
     def get_instrument(self):
-        match self.channel:
-            case Instrument.PIANO.value:
-                return Instrument.PIANO
-            case Instrument.TRUMPET.value:
-                return Instrument.TRUMPET
-            case _:
-                return Instrument.UNKNOWN
+        values = [Instrument[x] for x in Instrument.__dict__.keys()
+         if not x.__contains__("_")
+         and not x.__contains__("UNKNOWN")]
+        
+        print(values)
+        
+        for instr in values:
+            if instr.value == self.channel:
+                return instr
+        
+        reduced = self.channel % len(values)
+        if [x.value for x in values].__contains__(reduced):
+            for instr in values:
+                if instr.value == reduced:
+                    return instr
+                
+        return Instrument.UNKNOWN
 
     def set_end_ticks(self, endTicks):
         self.endTicks = endTicks
