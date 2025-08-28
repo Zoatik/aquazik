@@ -104,7 +104,10 @@ def main():
                     note.get_real_note()[:-1],
                     FishColors.yellow,
                     # TODO center.y du poisson à changer par rapport à la note
-                    ((distance if direction == Direction.RIGHT else window.get_size()[0] - note.velocity / 6), random.randrange(int(window.get_size()[1] / 2))),
+                    (
+                        (distance if direction == Direction.RIGHT else window.get_size()[0] - note.velocity / 6),
+                        int(note.get_real_note()[-1]) * (window.get_size()[1] / (len(mdi.get_used_octaves()) * 2))
+                    ),
                     length = note.velocity / 3,
                     height = note.velocity / 4,
                     direction = direction
