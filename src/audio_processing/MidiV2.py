@@ -4,7 +4,6 @@ from audio_processing.midi_reader import Instrument
 
 #from freq_analysis import AudioAnalyzer
 
-
 # Mapping of note names to MIDI numbers
 NOTE_TO_MIDI = {
     "C": 0,
@@ -23,32 +22,40 @@ NOTE_TO_MIDI = {
 
 
 # Function to convert note and octave to MIDI number
-def note_to_midi(note):
-    note_name = note[:-1]  # Extract the note name (e.g., 'A', 'B', etc.)
-    octave = int(note[-1])  # Extract the octave (e.g., '0', '2', etc.)
+def note_to_midi(note : str):
+    """Finding the pitch according to the note
+
+    Args:
+        note (str): The note (ex. C4)
+
+    Returns:
+        Int: the pitch (ex. 60)
+    """
+    note_name = note[:-1] 
+    octave = int(note[-1])
     return NOTE_TO_MIDI[note_name] + 12 * (octave + 1)
 
-# (bpm, [(0, [["G4", 2, 60],["C4", 2, 60]]),(0, [None, 2]], [1, [None , 2])])
-
-def midi_maker(macro : list[Note], bpm, outfile="music.mid"):
+def midi_maker(macro : list[Note], bpm : int, outfile : str ="music.mid"):
     """Create a .mid file as music.mid
 
     Args:
-        macro (List[Tuple]): List made with the velocity, the duration and the note ([60, 2, "G4"], [None, 2])
-        bpm (Float): The tempo of the music
+        macro (list[Note]): List made with the velocity, the duration and the note ([60, 2, "G4"], [None, 2])
+        bpm (float): The tempo of the music
 
     Returns:
-        String: The path of the created file (music.mid)
+        str: The path of the created file (music.mid)
     """
 
-    # Creating a midi file and adding the tempo
+    # Initialising the midi file and adding the tempo
     track = 0
     MyMIDI = MIDIFile(1)
     MyMIDI.addTempo(track, 0, bpm)
+    
 
-    # Adding the notes to the sheet music => Note(start, duration, velocity, note_name)
+    # Adding the notes to the sheet music => Note(channel = instrument, pitch = midi note , time = starting time, duration, volume)
     sheet_music = sorted(macro, key=lambda note: note.start_bpm)
     for note in sheet_music:
+        # Temporary until the instrument detection
         try: 
             channel = 0 if note.instrument == Instrument.PIANO else 1
         except:
@@ -56,19 +63,12 @@ def midi_maker(macro : list[Note], bpm, outfile="music.mid"):
         midi_note = note_to_midi(note.name)
         time = note.start_bpm
         duration = note.length_bpm
-        volume = int(note.magnitude) * 127
-        MyMIDI.addNote(track, channel, midi_note, time, duration, volume)
+        volume = int((note.magnitude) * 127)
+        MyMIDI.addNote(track=track, channel=channel, pitch=midi_note, time=time, duration=duration, volume=volume)
     
-    #MyMIDI.addNote(track, channel, note, time, duration, volume)
-    
-    # create the .mid file
-    with open(f"music2.mid", "wb") as output_file:
+    # Creating the .mid file
+    with open(f"music.mid", "wb") as output_file:
         MyMIDI.writeFile(output_file)
 
-    return "music2.mid"
+    return "music.mid"
 
-
-#baba = AudioAnalyzer("PinkPanther_Trumpet_Only.mp3")
-#bpm, mama = baba.convert_to_notes()  # mama = [[C4, 1], [...]]
-#babar = [(1, mama)]
-#midi_maker(babar, bpm=bpm)
