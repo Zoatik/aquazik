@@ -42,7 +42,7 @@ class Aquarium:
                         int(starfishCenterList[ni][1]/20),
                         int((starfishCenterList[ni][1] + 30 )/20) 
                     ),
-                    randrange(5,7)
+                    randrange(5,8)
                 )
             )
         return starFishList
