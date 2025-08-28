@@ -86,8 +86,6 @@ class MidiNote:
          if not x.__contains__("_")
          and not x.__contains__("UNKNOWN")]
         
-        print(values)
-        
         for instr in values:
             if instr.value == self.channel:
                 return instr
