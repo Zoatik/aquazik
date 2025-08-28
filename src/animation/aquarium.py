@@ -16,38 +16,6 @@ class Aquarium:
         for i in range(0, len(fishList)):
             fishList[i].draw()
 
-    def createFishList(window):
-        # instance of fish --> change it so i don't do it manually
-        fishCenterList = [
-            (randrange(50, 350), randrange(50, 100)),
-            (randrange(50, 350), randrange(200, 250)),
-            (randrange(50, 350), randrange(350, 400)),
-            (randrange(450, 750), randrange(50, 100)),
-            (randrange(450, 750), randrange(200, 250)),
-            (randrange(450, 750), randrange(350, 400)),
-            (randrange(850, 1150), randrange(50, 100)),
-            (randrange(850, 1150), randrange(200, 250)),
-            (randrange(850, 1150), randrange(350, 400)),
-            (randrange(1250, 1550), randrange(50, 100)),
-            (randrange(1250, 1550), randrange(200, 250)),
-            (randrange(1250, 1550), randrange(350, 400)),
-        ]
-        fishList: list[Fish] = []
-        for ni in range(len(NOTE_NAMES)):
-            fishList.append(
-                Fish(
-                    window,
-                    NOTE_NAMES[ni],
-                    #(randrange(255), randrange(255), randrange(255)),
-                    FishColors.yellow,
-                    fishCenterList[ni],
-                    length = randrange(30,70),
-                    height = randrange(15,40),
-                    direction = random.choice([Direction.LEFT, Direction.RIGHT])
-                )
-            )
-        return fishList
-
     def createStarfishList(window):
         starFishList = []
         starfishCenterList = [
