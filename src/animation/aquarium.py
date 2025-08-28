@@ -16,38 +16,6 @@ class Aquarium:
         for i in range(0, len(fishList)):
             fishList[i].draw()
 
-    def createFishList(window):
-        # instance of fish --> change it so i don't do it manually
-        fishCenterList = [
-            (randrange(50, 350), randrange(50, 100)),
-            (randrange(50, 350), randrange(200, 250)),
-            (randrange(50, 350), randrange(350, 400)),
-            (randrange(450, 750), randrange(50, 100)),
-            (randrange(450, 750), randrange(200, 250)),
-            (randrange(450, 750), randrange(350, 400)),
-            (randrange(850, 1150), randrange(50, 100)),
-            (randrange(850, 1150), randrange(200, 250)),
-            (randrange(850, 1150), randrange(350, 400)),
-            (randrange(1250, 1550), randrange(50, 100)),
-            (randrange(1250, 1550), randrange(200, 250)),
-            (randrange(1250, 1550), randrange(350, 400)),
-        ]
-        fishList: list[Fish] = []
-        for ni in range(len(NOTE_NAMES)):
-            fishList.append(
-                Fish(
-                    window,
-                    NOTE_NAMES[ni],
-                    #(randrange(255), randrange(255), randrange(255)),
-                    FishColors.yellow,
-                    fishCenterList[ni],
-                    length = randrange(30,70),
-                    height = randrange(15,40),
-                    direction = random.choice([Direction.LEFT, Direction.RIGHT])
-                )
-            )
-        return fishList
-
     def createStarfishList(window):
         starFishList = []
         starfishCenterList = [
@@ -222,10 +190,9 @@ class Aquarium:
             ],
         )
 
-    def drawPatrickHouse(window:Surface):
+    def drawPatrickHouse(window:Surface, radius = 50):
         # Semi-circle parameters
         center_x, center_y = 80, window.get_size()[1] / 2 + 20
-        radius = 50
         num_triangles = 30  # more = smoother curve
         TRIANGLE_COLOR = (139, 69, 19)  # brown
 
@@ -238,6 +205,7 @@ class Aquarium:
             x2 = center_x + radius * math.cos(angle2)
             y2 = center_y - radius * math.sin(angle2)
             pygame.draw.polygon(window, TRIANGLE_COLOR, [(center_x, center_y), (x1, y1), (x2, y2)])
+        
         #Draw the pseudo antenna
         pygame.draw.polygon(window,Colors.white,[(center_x, center_y-radius),(center_x - radius/10, center_y-radius - radius/5),(center_x + radius/10, center_y -radius - radius/5)],)
 
@@ -294,12 +262,12 @@ class Aquarium:
             # eyebrow
             [
                 (base_x - (2*base_size) / 5 + 2, base_y - (base_size * height_ratio)*(2/3)),
-                (base_x + (2*base_size) / 5 - 2, base_y - (base_size * height_ratio)*(2/3) - 10),
+                (base_x + (2*base_size) / 5 - 2, base_y - (base_size * height_ratio)*(2/3) - base_size / 5),
                 (base_x + (2*base_size) / 5 - 2, base_y - (base_size * height_ratio)*(2/3))
             ],
             [
-                (base_x - (2*base_size) / 5 + 2, base_y - (base_size * height_ratio)*(2/3) - 10),
-                (base_x + (2*base_size) / 5 - 2, base_y - (base_size * height_ratio)*(2/3) - 10),
+                (base_x - (2*base_size) / 5 + 2, base_y - (base_size * height_ratio)*(2/3) - base_size / 5),
+                (base_x + (2*base_size) / 5 - 2, base_y - (base_size * height_ratio)*(2/3) - base_size / 5),
                 (base_x - (2*base_size) / 5 + 2, base_y - (base_size * height_ratio)*(2/3))
             ],
             # nose
@@ -324,12 +292,12 @@ class Aquarium:
         eye_pos_left = ((((base_x - 10) + base_x - (base_size / 6)) / 2) + (base_x - (2*base_size) / 5 + 2))/2
         eye_pos_right = base_x - (eye_pos_left - base_x)
         outer = [
-            animation.drawings.getPolygonPoints(15, eye_pos_left, base_y - (base_size * height_ratio)*(2/3) + 10, 7),
-            animation.drawings.getPolygonPoints(15, eye_pos_right, base_y - (base_size * height_ratio)*(2/3) + 10, 7)
+            animation.drawings.getPolygonPoints(15, eye_pos_left, base_y - (base_size * height_ratio)*(2/3) + base_size / 5, radius = base_size / 7),
+            animation.drawings.getPolygonPoints(15, eye_pos_right, base_y - (base_size * height_ratio)*(2/3) + base_size / 5, radius = base_size / 7)
         ]
         inner = [
-            animation.drawings.getPolygonPoints(15, eye_pos_left, base_y - (base_size * height_ratio)*(2/3) + 10, 3.5),
-            animation.drawings.getPolygonPoints(15, eye_pos_right, base_y - (base_size * height_ratio)*(2/3) + 10, 3.5)
+            animation.drawings.getPolygonPoints(15, eye_pos_left, base_y - (base_size * height_ratio)*(2/3) + base_size / 5, radius = base_size / 14),
+            animation.drawings.getPolygonPoints(15, eye_pos_right, base_y - (base_size * height_ratio)*(2/3) + base_size / 5, radius = base_size / 14)
         ]
 
         # door

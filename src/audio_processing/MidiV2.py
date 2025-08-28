@@ -1,4 +1,6 @@
 from midiutil import MIDIFile
+from audio_processing.freq_analysis import Note
+from audio_processing.midi_reader import Instrument
 
 #from freq_analysis import AudioAnalyzer
 
@@ -26,9 +28,9 @@ def note_to_midi(note):
     octave = int(note[-1])  # Extract the octave (e.g., '0', '2', etc.)
     return NOTE_TO_MIDI[note_name] + 12 * (octave + 1)
 
-# (bpm, [(0, [60, 2, "G4"],[60, 2, "C4"]),(0, [None, 2]], [1, [None , 2])])
+# (bpm, [(0, [["G4", 2, 60],["C4", 2, 60]]),(0, [None, 2]], [1, [None , 2])])
 
-def midi_maker(macro, bpm):
+def midi_maker(macro : list[Note], bpm, outfile="music.mid"):
     """Create a .mid file as music.mid
 
     Args:
@@ -36,79 +38,34 @@ def midi_maker(macro, bpm):
         bpm (Float): The tempo of the music
 
     Returns:
-        String: The path of the created file (ex. music_piano.mid)
+        String: The path of the created file (music.mid)
     """
 
-    # Separate in 2 tracks according to the instrument
-    track_piano = []
-    track_trumpet = [] 
-    for i in macro:
-        match i[0]:
-            case 0: track_piano.append(i)
-            case 1: track_trumpet.append(i), print(f"track trumpet: {track_trumpet}")
-            case _: continue
+    # Creating a midi file and adding the tempo
+    track = 0
+    MyMIDI = MIDIFile(1)
+    MyMIDI.addTempo(track, 0, bpm)
 
+    # Adding the notes to the sheet music => Note(start, duration, velocity, note_name)
+    sheet_music = sorted(macro, key=lambda note: note.start_bpm)
+    for note in sheet_music:
+        try: 
+            channel = 0 if note.instrument == Instrument.PIANO else 1
+        except:
+            channel = 0
+        midi_note = note_to_midi(note.name)
+        time = note.start_bpm
+        duration = note.length_bpm
+        volume = int(note.magnitude) * 127
+        MyMIDI.addNote(track, channel, midi_note, time, duration, volume)
+    
+    #MyMIDI.addNote(track, channel, note, time, duration, volume)
+    
+    # create the .mid file
+    with open(f"music2.mid", "wb") as output_file:
+        MyMIDI.writeFile(output_file)
 
-    volume = 100  # 0-127
-
-    # Detect wich instrument(s) are selected
-    track_selected = [0 if len(track_piano) == 0 else 1, 0 if len(track_trumpet) == 0 else 1]    
-
-    def sheet_music(track):
-        """Compose the midi file with the notes given
-
-        Args:
-            track (List[Tuple]): A track of a specific instrument (ex. [(0, [67, 1.5, "C4"],[None, 1]),(0, [80, 0.5, "G4"])]
-
-        Returns:
-            String: The path of the created file (ex. music_piano.mid)
-        """
-
-        nb_of_the_track = 0 
-        time = 0
-
-        MyMIDI = MIDIFile(1)
-        MyMIDI.addTempo(nb_of_the_track, time, bpm)
-
-        nb_channel = len(track)
-
-        # Adding the notes to the sheet music
-        # track = [(0, [[60, 2, "G4"],[60, 2, "C4"]]),(0, [None, 2]], [1, [None , 2])]
-        for c in range(0, nb_channel):
-            time = 0
-            channel = c
-            print(f"channel : {channel}")
-            track_channel = track[c]
-            print(f"track channel:{track_channel}")
-            channel_notes = track_channel[1]
-            print(f"channel notes: {channel_notes}")
-            for element in channel_notes:
-                for j in range(0, len(element), 3):
-                    if element[j] is None:
-                        time += element[j + 1]
-                        continue
-                    else:
-                        duration = element[j + 1]
-                        note = note_to_midi(element[j])
-                        MyMIDI.addNote(nb_of_the_track, channel, note, time, duration, volume)
-                        time += duration
-
-        # Extract the name of the instrument (0 = piano, 1 = trumpet)
-        ftuple = track[0]
-        n = ftuple[0]
-        name = "piano" if n == 0 else "trumpet"
-
-
-        with open(f"music_{name}.mid", "wb") as output_file:
-            MyMIDI.writeFile(output_file)
-
-        return f"music_{name}.mid"
-
-    match track_selected:
-        case [1,1]: return sheet_music(track_piano), sheet_music(track_trumpet)
-        case [1,0]: return sheet_music(track_piano)
-        case [0,1]: return sheet_music(track_trumpet)
-        case _: return 
+    return "music2.mid"
 
 
 #baba = AudioAnalyzer("PinkPanther_Trumpet_Only.mp3")

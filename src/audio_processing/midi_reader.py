@@ -1,4 +1,4 @@
-from enum import Enum, auto
+from enum import Enum
 import mido
 from constants import NOTE_NAMES
 
@@ -6,8 +6,8 @@ DEBUG = False
 
 
 class Instrument(Enum):
-    PIANO = auto()
-    TRUMPET = auto()
+    PIANO = 0
+    TRUMPET = 1
 
 
 class MidiFile:
@@ -73,16 +73,14 @@ class MidiNote:
         self.noteIndex = noteIndex
         self.velocity = velocity
         self.channel = channel
+        self.instrument = (Instrument.TRUMPET if self.channel % 2 == 1 else Instrument.PIANO) # 0: piano, 1: trumpet
         self.startTicks = timeTicks
         self.startSeconds = mido.tick2second(
             timeTicks, self.parent.ticks_per_beat, self.parent.tempo
         )
 
     def get_instrument(self):
-        if self.channel == 1:  # TODO: dynamicly choose a chanel
-            return Instrument.TRUMPET
-        if self.channel == 0:
-            return Instrument.PIANO
+        return self.instrument
 
     def set_end_ticks(self, endTicks):
         self.endTicks = endTicks

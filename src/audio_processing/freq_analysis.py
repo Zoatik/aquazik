@@ -10,7 +10,30 @@ import statistics
 import os
 import tqdm
 from datetime import datetime
+#from raw_signal_analysis import is_local_maximum
 
+#temp
+def is_local_maximum(x, arr):
+    if len(arr) < 1:
+        return False
+    y = arr[x]
+    left_y = arr[x - 1] if x > 1 else y - 1
+    right_y = arr[x + 1] if len(arr) > x + 1 else y - 1
+
+    l = 1
+    r = 1
+    while True:
+        if y < left_y or y < right_y:
+            return False
+        if y > left_y and y > right_y:
+            return True
+        if y == right_y:
+            r += 1
+        if y == left_y:
+            r += 1
+
+        left_y = arr[x - l] if x - l > 0 else y + 1
+        right_y = arr[x + r] if x + r < len(arr) else y + 1
 
 if not os.path.exists("output"):
     os.makedirs("output")
@@ -73,12 +96,20 @@ class Tools:
 
     @staticmethod
     def note_name(n):
-        return NOTE_NAMES[n % 12] + str(int(n / 12 )) # previously ...12 - 1
+        return NOTE_NAMES[n % 12] + str(int(n / 12 - 1)) 
+    
+    @staticmethod
+    def freq_to_note(f):
+        return Tools.note_name(Tools.freq_to_number(f))
 
 
 class Note:
-    def __init__(self, frequency, magnitude, variation=0.0):
+    def __init__(self, frequency, magnitude, start = 0.0, length = 0.0, variation=0.0):
         self.frequency = frequency
+        self.start_time = start
+        self.start_bpm = 0.0
+        self.length = length
+        self.length_bpm = 0.0
         self.midi_number = Tools.freq_to_number(self.frequency)
         self.name = Tools.note_name(self.midi_number)
         self.magnitude = magnitude
@@ -87,16 +118,16 @@ class Note:
         self.instrument = "Unknown"
 
     def __repr__(self):
-        return f"Note(frequency={self.frequency}, name='{self.name}', magnitude={self.magnitude})"
+        return f"Note(frequency={self.frequency}, name='{self.name}', start={self.start_time}, bpm start={self.start_bpm} , bpm length={self.length_bpm}, magnitude={self.magnitude})\n"
 
 
 class AudioAnalyzer:
     def __init__(
-        self, audio_name="PinkPanther_Trumpet_cut.mp3", DEBUG_OUTPUT_FILES=False
+        self, audio_name="PinkPanther_Trumpet_cut.mp3", DEBUG_OUTPUT_FILES=False, duration = None
     ):
         self.audio_name = audio_name
         self.audio_path = os.path.join(INPUT_FOLDER, audio_name)
-        self.audio_data, self.sample_rate = librosa.load(self.audio_path, mono=True)
+        self.audio_data, self.sample_rate = librosa.load(self.audio_path, mono=True, duration=duration)
         self.audio_length = librosa.get_duration(y=self.audio_data, sr=self.sample_rate)
         self.audio_bpm = 120
         self.beat_unit = 60 / self.audio_bpm
@@ -121,6 +152,7 @@ class AudioAnalyzer:
 
     def convert_to_notes(self):
         mx = 0.0
+        mx_buckets = 0.0
 
         # Calculate FFT for each frame and find the maximum value
         for frame_num in range(self.number_of_windows):
@@ -134,7 +166,11 @@ class AudioAnalyzer:
             # Skip empty frames
             if len(frame_audio) == 0:
                 continue
-            mx = max(mx, np.max(np.abs(np.fft.rfft(frame_audio))))
+
+            frame_fft = np.fft.rfft(frame_audio)
+            frame_fft = np.abs(frame_fft)
+            mx = max(mx, np.max(np.abs(frame_fft)))
+            mx_buckets = max(mx_buckets, np.max(self.__fft_to_notes_buckets(frame_fft)[1]))
 
         # Prepares output files directory
         current_time_formated = datetime.now().strftime("%d_%m_%Y-%H_%M_%S")
@@ -167,11 +203,24 @@ class AudioAnalyzer:
 
             fft = np.fft.rfft(frame_audio)
             fft = np.abs(fft)
+            midi_notes, notes_buckets = self.__fft_to_notes_buckets(fft)
+            notes_buckets = notes_buckets/mx_buckets
 
-            top_notes = self.__get_top_notes(fft, mx, prev_top_notes)
+            top_notes = self.__get_top_notes(midi_notes, notes_buckets, prev_top_notes)
             top_notes = sorted(top_notes, key=lambda x: x.frequency)
+            print("before: \n", top_notes) 
+            top_notes = self.__filter_notes_and_harmonics(top_notes)
+            print("after: \n", top_notes)
+
 
             if top_notes:
+                for top_note in top_notes:
+                    top_note.start_time = frame_num * WINDOW_TIME
+                    top_note.start_bpm = Tools.seconds_to_beat(top_note.start_time, self.audio_bpm)
+
+                notes_array.append(top_notes)
+            
+            """if top_notes:
 
                 dominant_note = top_notes[0]
                 if (
@@ -183,13 +232,15 @@ class AudioAnalyzer:
                 notes_array.append(dominant_note.name)
 
             else:
-                notes_array.append(None)
+                notes_array.append(None)"""
 
+            self.__build_fig_matplotlib(midi_notes, notes_buckets, top_notes, f"{frames_folder}/fft_frame_{frame_num:04d}.png")
             # draw and save the figure
-            self.__build_fig_matplotlib(
+            """self.__build_fig_matplotlib(
                 fft, mx, top_notes, f"{frames_folder}/fft_frame_{frame_num:04d}.png"
-            )
-
+            )"""
+        
+        #exit(0)
         # Create the mp4 video if debug_output_files is enabled
         if self.debug_output_files:
 
@@ -238,9 +289,46 @@ class AudioAnalyzer:
 
             print(f"Video with audio saved as: {final_video}")
 
-        print(self.__find_notes_length(notes_array))
+        #print(self.__find_notes_length(notes_array))
+        
         return self.audio_bpm, self.__find_notes_length(notes_array)
         # print(notes_array)
+
+    def __filter_notes_and_harmonics(self, top_notes_sorted: list[Note]):
+        if len(top_notes_sorted) < 1:
+            return None
+        nb_of_harmonics = 4
+        min_good_harmonics = 2
+        max_mag = np.max([note.magnitude for note in top_notes_sorted])
+        top_notes_isorted_midi = [note.midi_number for note in top_notes_sorted]
+        base_notes = []
+        already_used_harmonics = []
+        for base_note in top_notes_sorted:
+            if base_note.magnitude < 0.2 * max_mag or base_note.midi_number in already_used_harmonics:
+                continue
+            th_harmonics = self.__get_harmonics(base_note, nb_of_harmonics)
+
+            nb_wrong_harm = 0
+            for th_harmonic in th_harmonics:
+                if (not th_harmonic in top_notes_isorted_midi) or th_harmonic in already_used_harmonics:
+                    nb_wrong_harm += 1
+                else:
+                    already_used_harmonics.append(th_harmonic)
+                    print(Tools.note_name(th_harmonic))
+
+
+            if nb_of_harmonics - nb_wrong_harm >= min_good_harmonics:
+                base_notes.append(base_note)
+    
+        
+        return base_notes
+            
+    def __get_harmonics(self, note: Note, nb_of_harmonics = 2):
+        harmonics = []
+        for i in range(2, nb_of_harmonics + 2):
+            harmonics.append(Tools.freq_to_number(note.frequency*i))
+
+        return harmonics
 
     def __find_instrument(self, notes):
         distances = []
@@ -251,46 +339,53 @@ class AudioAnalyzer:
         distance_mean = np.mean(distances)
         distance_median = np.median(distances)
 
-    def __find_notes_length(self, notes: list):
-        notes_duration = []
-        prev_note = None
-        for note in notes:
-            if prev_note is None or note != prev_note:
-                prev_note = note
-                notes_duration.append([note, WINDOW_TIME])
-                continue
+    def __find_notes_length(self, notes: list[list[Note]]):
+        if len(notes) < 1:
+            return
+        prev_notes = notes[0] # first list of played note(s)
+        all_notes_with_duration:list[Note] = []
+        for note in prev_notes:
+            note.length = WINDOW_TIME
+            all_notes_with_duration.append(note)
 
-            if note == prev_note:
-                prev_duration = notes_duration[-1][
-                    1
-                ]  # retrieves the last note duration
-                notes_duration[-1][1] = notes_duration[-1][1] + WINDOW_TIME
-                continue
+        for simult_notes in notes[1:]:
+            for note in simult_notes:
+                for prev_note in all_notes_with_duration[-5:]:
+                    if (note.start_time == prev_note.start_time + prev_note.length
+                        and prev_note.name == note.name):
+                        prev_note.length += WINDOW_TIME
+                        break
+                else:
+                    note.length = WINDOW_TIME
+                    all_notes_with_duration.append(note)
 
-            prev_note = note
-
-        for i in range(len(notes_duration)):
-            beat_duration = Tools.seconds_to_beat(notes_duration[i][1], self.audio_bpm)
+        for note in all_notes_with_duration:
+            beat_duration = Tools.seconds_to_beat(note.length, self.audio_bpm)
             snapped_beat_duration = round(beat_duration * 8) / 8
-            notes_duration[i][1] = snapped_beat_duration
+            note.length_bpm = snapped_beat_duration
 
-        return notes_duration
+        #print(all_notes_with_duration)
+        return all_notes_with_duration
 
-    def __get_top_notes(self, fft, mx, prev_notes, top_n=TOP_NOTES) -> list:
+    def __fft_to_notes_buckets(self, fft):
+        all_midi_notes = [i for i in range (0, 127)]
+        notes_buckets = [0.0]*len(all_midi_notes) 
+        for i in range(1, len(fft)):
+            if fft[i] > 0:
+                note_number = Tools.freq_to_number(self.xf[i]) - 12
+                notes_buckets[note_number] += fft[i]
 
-        if np.max(fft.real) / mx < 0.01:
+        return all_midi_notes, notes_buckets
+    
+    def __get_top_notes(self, midi_notes, notes_buckets, prev_notes, top_n=TOP_NOTES) -> list:
+        if np.max(notes_buckets) < 0.1:
             return []
+        peak_indexes = self.__magnitude_filter(notes_buckets)
 
-        peak_indexes, properties = self.__magnitude_filter(fft / mx)
-        top_notes = []
 
-        i = 0
-        for peak_idx in peak_indexes:
-            peak_ratio = properties["prominences"][i] / properties["widths"][i]
-            if peak_ratio > 0.001:
-                top_notes.append(Note(self.xf[peak_idx], fft[peak_idx] / mx))
+        top_notes = [Note(Tools.number_to_freq(midi_notes[i]), notes_buckets[i]) for i in peak_indexes]
 
-            i += 1
+        
         # peak_freq = self.xf[fft[peak_indexes]]
         """print(peak_indexes)
 
@@ -308,7 +403,7 @@ class AudioAnalyzer:
 
         # top_notes = [Note(self.xf[i], fft[i] / mx) for i in peak_indexes]
 
-        print(top_notes)
+        #print(top_notes)
 
         return top_notes
 
@@ -432,20 +527,19 @@ class AudioAnalyzer:
 
         return found_notes
 
-    def __magnitude_filter(self, norm_signal: np.ndarray):
-        return find_peaks(
-            norm_signal,
-            width=1.0,
-            height=0.02,
-            distance=5,
-            threshold=0.0001,
-            prominence=0.03,
-        )
+    def __magnitude_filter(self, signal: np.ndarray):
+        peaks_indexes = []
+        norm_signal = signal.copy() / np.max(signal)
+
+        for i in range(len(norm_signal)):
+            if norm_signal[i] > 0.1 :
+                peaks_indexes.append(i)
+        return peaks_indexes
 
     def __build_fig_matplotlib(
         self,
-        fft: np.ndarray,
-        mx: float,
+        xf: np.ndarray,
+        yf: np.ndarray,
         notes: list[Note],
         filename: str,
         dimensions: tuple[int, int] = (16, 8),
@@ -462,27 +556,27 @@ class AudioAnalyzer:
         if not self.debug_output_files:
             return
         plt.figure(figsize=dimensions)
-        plt.plot(self.xf, fft / mx, color="steelblue")
-        plt.xlim(FREQ_MIN, FREQ_MAX)
+        plt.plot(xf, yf, color="steelblue")
         plt.ylim(0, 1)
         plt.xlabel("Frequency (note)")
         plt.ylabel("Magnitude")
         plt.title("frequency spectrum")
 
-        for note in notes:
-            plt.annotate(
-                text=note.name,
-                xy=(note.frequency, note.magnitude),
-                fontsize=12,
-                color="red",
-            )
+        if notes:
+            for note in notes:
+                plt.annotate(
+                    text=note.name,
+                    xy=(note.midi_number, note.magnitude),
+                    fontsize=12,
+                    color="red",
+                )
         plt.tight_layout()
         plt.savefig(filename)
         plt.close()
 
 
-#audioAnalyzer = AudioAnalyzer("Ecossaise_Piano.mp3", True)
-#audioAnalyzer.convert_to_notes()
+audioAnalyzer = AudioAnalyzer("PinkPanther_Both.mp3", True, 5.0)
+audioAnalyzer.convert_to_notes()
 
 
 """

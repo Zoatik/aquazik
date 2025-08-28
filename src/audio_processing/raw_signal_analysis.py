@@ -4,14 +4,14 @@ from matplotlib.collections import LineCollection
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import optimize, interpolate
-from scipy.signal import savgol_filter, medfilt
+from scipy.signal import savgol_filter, medfilt, detrend
 
 
 def rough_start_stop(audio_name="PinkPanther_Trumpet_Only.mp3"):
 
     INPUT_FOLDER = os.path.abspath("audio_in")
     audio_data, sr = librosa.load(
-        os.path.join(INPUT_FOLDER, audio_name), mono=True, sr=None
+        os.path.join(INPUT_FOLDER, audio_name), mono=True
     )
 
     audio_duration = librosa.get_duration(y=audio_data, sr=sr)
@@ -37,10 +37,32 @@ def rough_start_stop(audio_name="PinkPanther_Trumpet_Only.mp3"):
     chunk_x = np.arange(0, len(norm_audio_data), samples_per_chunk) / sr
     max_energy = np.max(energies)
 
+
+    print(len(norm_audio_data))
+    print(samples_per_chunk * nb_of_chunks)
+
+    sample_trend = medfilt(norm_audio_data, kernel_size=samples_per_chunk * 100 + 1)
+    sample_without_trend = norm_audio_data - sample_trend
+    sample_formatted_y = []
+    for el in sample_without_trend:
+        if el-0.001 > 0.0:
+            sample_formatted_y.append(el)
+
+    sample_formatted_x = np.arange(0, len(sample_formatted_y)) / sr
     # look for chunks start / end
     smoothed_energies = medfilt(energies, kernel_size=11)
+    #smoothed_energies_without_trend = smoothed_energies - sample_trend
     # smoothed_energies = medfilt(smoothed_energies, kernel_size=21)
     # smoothed_energies = savgol_filter(energies, window_length=11, polyorder=2)
+
+    #plt.plot(times, norm_audio_data)
+    #plt.plot(chunk_x, smoothed_energies)
+    #plt.plot(times, sample_trend)
+    plt.plot(sample_formatted_x, sample_formatted_y)
+    #plt.plot(times, sample_without_trend)
+    plt.show()
+    exit(0)
+
 
     starts_x = []
     starts_y = []
@@ -51,10 +73,10 @@ def rough_start_stop(audio_name="PinkPanther_Trumpet_Only.mp3"):
     sound_low_lim = 0.01 * sound_treshhold
     min_dist = 3 * audio_duration / len(chunk_x)
 
-    for i in range(len(chunk_x) - 3):
+    for i in range(len(chunk_x) - 19):
         if (
             smoothed_energies[i] < sound_treshhold
-            and np.max(smoothed_energies[i + 1 : i + 4]) > sound_treshhold
+            and np.max(smoothed_energies[i + 1 : i + 5]) > sound_treshhold
         ):
             if len(starts_x) - len(ends_x) < 1:  # must be in pairs
                 if len(starts_x) < 1 or chunk_x[i] - chunk_x[starts_x[-1]] > min_dist:

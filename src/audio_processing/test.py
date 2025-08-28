@@ -54,7 +54,7 @@ def note_relative_erors(ref_note: MidiNote, gen_note: MidiNote):
     return rel_start_diff, rel_end_diff, rel_length_diff
 
 
-audioAnalyzer = AudioAnalyzer("PinkPanther_Trumpet_Only.mp3", True)
+audioAnalyzer = AudioAnalyzer("PinkPanther_Trumpet_Only.mp3", False)
 bpm, notes_data = audioAnalyzer.convert_to_notes()
 
 midi_out = mdi.midi_maker(notes_data, bpm=bpm)
