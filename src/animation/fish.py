@@ -22,43 +22,6 @@ class Fish:
         self.color = color
         self.firstColor = color
         self.secondColor = (randrange(255), randrange(255), randrange(255))
-        self.listTriangles = [
-            (
-                (self.center[0] - 75, self.center[1] - 25),
-                (self.center[0] - 75, self.center[1] + 25),
-                (self.center[0], self.center[1]),
-            ),
-            (
-                (self.center[0] - 50, self.center[1] - 17),
-                (self.center[0] - 25, self.center[1] - 50),
-                (self.center[0], self.center[1]),
-            ),
-            (
-                (self.center[0] - 50, self.center[1] + 17),
-                (self.center[0] - 25, self.center[1] + 50),
-                (self.center[0], self.center[1]),
-            ),
-            (
-                (self.center[0] - 25, self.center[1] - 50),
-                (self.center[0] + 25, self.center[1] - 50),
-                (self.center[0], self.center[1]),
-            ),
-            (
-                (self.center[0] - 25, self.center[1] + 50),
-                (self.center[0] + 25, self.center[1] + 50),
-                (self.center[0], self.center[1]),
-            ),
-            (
-                (self.center[0] + 25, self.center[1] - 50),
-                (self.center[0] + 50, self.center[1] - 17),
-                (self.center[0], self.center[1]),
-            ),
-            (
-                (self.center[0] + 25, self.center[1] + 50),
-                (self.center[0] + 50, self.center[1] + 17),
-                (self.center[0], self.center[1]),
-            ),
-        ]
         self.playing = True
         self.speed = 70 + randrange(81) # pixels / second, max = 150
         self.lastNoteTime = time.time()
@@ -140,6 +103,7 @@ class Fish:
         if self.length > 50 and self.height < 30:
             pygame.draw.polygon(self.window, self.color, animation.drawings.pivotTriangle(self.center, [(cx, dorsalTopY),(dorsalRightX, dorsalDownY),(dorsalLeftX, dorsalDownY)], self.angleDeg))
         
+        #poisson lune
         if self.height>= 30:
             # top fin
             pygame.draw.polygon(self.window, self.color, animation.drawings.pivotTriangle(self.center, [(nageoireTopX, nageoireDownUpY),(nageoireRightX, nageoireInUpY),(nageoireLeftX, nageoireTopUpY)], self.angleDeg))
@@ -188,10 +152,7 @@ class Fish:
         self.fishMouth.timeToClose = noteTime + 0.65
     
     def drawBorder(self, bordersize = 1):
-        for i in range(len(self.listTriangles)):
-            pygame.draw.polygon(
-                self.window, Colors.black, self.listTriangles[i], width=(bordersize+3)
-            )
+        pass # TODO
     
     def createBubble(self, window):
         return Bubble(

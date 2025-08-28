@@ -304,7 +304,7 @@ class AudioAnalyzer:
         base_notes = []
         already_used_harmonics = []
         for base_note in top_notes_sorted:
-            if base_note.magnitude < 0.2 * max_mag or base_note.midi_number in already_used_harmonics:
+            if base_note.magnitude < 0.4 * max_mag or base_note.midi_number in already_used_harmonics:
                 continue
             th_harmonics = self.__get_harmonics(base_note, nb_of_harmonics)
 
@@ -556,7 +556,7 @@ class AudioAnalyzer:
         if not self.debug_output_files:
             return
         plt.figure(figsize=dimensions)
-        plt.plot(xf, yf, color="steelblue")
+        plt.bar(xf, yf, color="steelblue")
         plt.ylim(0, 1)
         plt.xlabel("Frequency (note)")
         plt.ylabel("Magnitude")
@@ -575,8 +575,8 @@ class AudioAnalyzer:
         plt.close()
 
 
-audioAnalyzer = AudioAnalyzer("PinkPanther_Both.mp3", True, 5.0)
-audioAnalyzer.convert_to_notes()
+#audioAnalyzer = AudioAnalyzer("PinkPanther_Both.mp3", True, 5.0)
+#audioAnalyzer.convert_to_notes()
 
 
 """
