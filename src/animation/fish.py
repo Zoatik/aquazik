@@ -21,43 +21,6 @@ class Fish:
         self.color = color
         self.firstColor = color
         self.secondColor = (randrange(255), randrange(255), randrange(255))
-        self.listTriangles = [
-            (
-                (self.center[0] - 75, self.center[1] - 25),
-                (self.center[0] - 75, self.center[1] + 25),
-                (self.center[0], self.center[1]),
-            ),
-            (
-                (self.center[0] - 50, self.center[1] - 17),
-                (self.center[0] - 25, self.center[1] - 50),
-                (self.center[0], self.center[1]),
-            ),
-            (
-                (self.center[0] - 50, self.center[1] + 17),
-                (self.center[0] - 25, self.center[1] + 50),
-                (self.center[0], self.center[1]),
-            ),
-            (
-                (self.center[0] - 25, self.center[1] - 50),
-                (self.center[0] + 25, self.center[1] - 50),
-                (self.center[0], self.center[1]),
-            ),
-            (
-                (self.center[0] - 25, self.center[1] + 50),
-                (self.center[0] + 25, self.center[1] + 50),
-                (self.center[0], self.center[1]),
-            ),
-            (
-                (self.center[0] + 25, self.center[1] - 50),
-                (self.center[0] + 50, self.center[1] - 17),
-                (self.center[0], self.center[1]),
-            ),
-            (
-                (self.center[0] + 25, self.center[1] + 50),
-                (self.center[0] + 50, self.center[1] + 17),
-                (self.center[0], self.center[1]),
-            ),
-        ]
         self.fishMouth = FishMouth(
             window, 
             cx = self.center[0] + (direction.value * 3) * length / 5,
@@ -146,6 +109,7 @@ class Fish:
         if self.length > 50 and self.height < 30:
             pygame.draw.polygon(self.window, self.color, ((cx, dorsalTopY),(dorsalRightX, dorsalDownY),(dorsalLeftX, dorsalDownY)))
         
+        #poisson lune
         if self.height>= 30:
             # top fin
             pygame.draw.polygon(self.window, self.color, ((nageoireTopX, nageoireDownUpY),(nageoireRightX, nageoireInUpY),(nageoireLeftX, nageoireTopUpY)))
@@ -166,10 +130,7 @@ class Fish:
         self.fishMouth.timeToClose = noteTime + 0.65
     
     def drawBorder(self, bordersize = 1):
-        for i in range(len(self.listTriangles)):
-            pygame.draw.polygon(
-                self.window, Colors.black, self.listTriangles[i], width=(bordersize+3)
-            )
+        pass # TODO
     
     def createBubble(self, window):
         return Bubble(
