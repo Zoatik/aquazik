@@ -34,6 +34,7 @@ class Fish:
         )
         self.fishTail = FishTail(self)
         self.spawnTime = time.time()
+        self.flowOffset = random() * 4 - 2
         self.angleDeg = 0
 
     def __str__(self):
@@ -123,8 +124,13 @@ class Fish:
         self.fishMouth.animate(deltaTime)
         self.fishTail.animate(deltaTime)
 
-        t = time.time() - self.spawnTime
-        amplitude = 1/3
+        t = time.time() - self.spawnTime + self.flowOffset
+
+        norm = (self.speed - 70) / (150 - 70)
+        # 70  -> 0
+        # 150 -> 1
+
+        amplitude = (1/2) + (1/15 - 1/2) * norm
         vx = (-1 if self.direction == Direction.LEFT else 1) * self.speed
         vy = math.cos(t) * amplitude  # dérivée de sin pour l'angle
 
