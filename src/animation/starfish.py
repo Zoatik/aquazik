@@ -69,5 +69,9 @@ class Starfish:
         for triangle in right_pupil:
             pygame.draw.polygon(self.window, Colors.black, triangle)
         
+        mouth = animation.drawings.getEllipseTriangles(cx,cy,width/15,length/18)
+        for triangle in mouth:
+            pygame.draw.polygon(self.window,Colors.black,triangle)
+        
 
         
