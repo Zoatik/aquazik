@@ -11,4 +11,4 @@ wheels/
 
 # Output files
 output/
-music.mid
+*.mid

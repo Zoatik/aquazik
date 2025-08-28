@@ -79,9 +79,9 @@ class MidiNote:
         )
 
     def get_instrument(self):
-        if self.channel == 1:  # TODO: dynamicly choose a chanel
+        if self.channel % 2 == 1:
             return Instrument.TRUMPET
-        if self.channel == 0:
+        else:
             return Instrument.PIANO
 
     def set_end_ticks(self, endTicks):
@@ -94,6 +94,9 @@ class MidiNote:
         octave = (self.noteIndex // 12) - 1
         note = NOTE_NAMES[self.noteIndex % 12]
         return f"{note}{octave}"
+    
+    def get_time(self) -> float:
+        return self.endSeconds - self.startSeconds
 
 
 # test case

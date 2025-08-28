@@ -5,6 +5,7 @@ from constants import FishColors,Colors
 import animation.drawings 
 import math
 from constants import Direction
+import time
 
 class Fish:
     global listTriangles
@@ -58,15 +59,17 @@ class Fish:
                 (self.center[0], self.center[1]),
             ),
         ]
+        self.playing = True
+        self.speed = 70 + randrange(81) # pixels / second, max = 150
+        self.lastNoteTime = time.time()
+        self.enabled = True
         self.fishMouth = FishMouth(
-            window, 
-            cx = self.center[0] + (direction.value * 3) * length / 5,
-            cy = self.center[1],
+            window,
             length = 2 * self.length / 5,
             maxAngleDeg = 65,
-            direction = direction
+            parent = self
         )
-        self.animate = False
+        self.fishTail = FishTail(self)
 
     def __str__(self):
         return f"{self.name}, {self.color}"
@@ -85,8 +88,6 @@ class Fish:
 
         if self.direction == Direction.LEFT:
             eyeCenter = (cx - rx/2, cy - ry/2)
-            endTail = cx + rx + self.length/4
-            midTail = cx + rx + self.length/8
 
             nageoireTopX = cx + rx/2
             nageoireLeftX = nageoireTopX - rx/4
@@ -97,8 +98,6 @@ class Fish:
             
         else : # right
             eyeCenter = (cx + rx/2, cy - ry/2)
-            endTail = cx - rx - self.length/4
-            midTail = cx - rx - self.length/8
 
             nageoireTopX = cx - rx/2
             nageoireLeftX = nageoireTopX + rx/4
@@ -106,9 +105,6 @@ class Fish:
             nageoireInDownY = cy + ry- ry/2
             nageoireInUpY = cy - ry + ry/2
             
-        
-        topTailY = cy - ry
-        downTailY = cy + ry
         dorsalTopY = cy - ry - ry/2
         dorsalDownY = cy - ry
         dorsalLeftX = cx - rx/4
@@ -121,19 +117,12 @@ class Fish:
         nageoireTopUpY = cy - ry
         nageoireDownUpY = nageoireTopUpY - ry/2
         
-        
-        self.color = Colors.red if self.animate else self.firstColor
-
-        self.fishMouth.isOpening = self.animate
+        self.color = self.secondColor if self.playing else self.firstColor
 
         # body
         Triangles = animation.drawings.getEllipseTriangles(cx, cy, rx, ry, segments)
         for triangle in Triangles:
             pygame.draw.polygon(self.window, self.color, triangle)
-
-        # tail
-        pygame.draw.polygon(self.window, self.color,((endTail, topTailY),(midTail, cy),(cx, cy)))
-        pygame.draw.polygon(self.window, self.color,((endTail, downTailY),(midTail, cy),(cx, cy)))
 
         # iris
         eyeTriangles = animation.drawings.getEllipseTriangles(eyeCenter[0], eyeCenter[1], irisRadius, irisRadius, segments=20)
@@ -156,13 +145,34 @@ class Fish:
             pygame.draw.polygon(self.window, self.color, ((nageoireTopX, nageoireDownDownY),(nageoireRightX, nageoireInDownY),(nageoireLeftX, nageoireTopDownY)))
         
         self.fishMouth.draw()
+        self.fishTail.draw()
 
-    # change the color of the fish to a random color
-    def changeColor(self):
-        if self.color == self.firstColor:
-            self.color = self.secondColor
-        else:
-            self.color = self.firstColor
+    def animate(self, deltaTime):
+        if not self.enabled:
+            return
+        
+        if self.center[0] < - self.length / 2 or self.center[0] > self.window.get_size()[0] + self.length / 2:
+            self.enabled = False
+        
+        self.fishMouth.animate(deltaTime)
+        self.fishTail.animate(deltaTime)
+
+        self.center = (self.center[0] + (-1 if self.direction == Direction.LEFT else 1) * deltaTime * self.speed, self.center[1])
+        
+        if (time.time() - self.lastNoteTime < 5):
+            if self.center[0] <= - self.length:
+                self.direction = Direction.RIGHT
+            elif self.center[0] >= self.window.get_size()[0] - self.length:
+                self.direction = Direction.LEFT
+    
+    def openMouth(self, velocity, noteTime):
+        # maximum de velocity est 127 ce qui correspondra à un angle de 70°
+        # minimum de 20°
+        self.fishMouth.maxAngle = (50 / 127) * velocity + 20
+        self.fishMouth.angleDeg = self.fishMouth.maxAngle
+
+        # add 650 ms to time to close so the animation is more visible
+        self.fishMouth.timeToClose = noteTime + 0.65
     
     def drawBorder(self, bordersize = 1):
         for i in range(len(self.listTriangles)):
@@ -175,7 +185,7 @@ class Fish:
             window,
             (
                 self.center[0] + self.direction.value * (self.length + random() * 5),
-                self.center[1],
+                self.center[1] - 10, # 10 pixels plus haut pour mieux voir la bouche
             ),
             radius = 5 + random() * 20,
         )
@@ -193,11 +203,11 @@ class Bubble:
     def move_and_draw(self):
         # bouge +- en x et toujours - en y
         self.pos = (
-            self.pos[0] + (int(random() * 2 - 1) * 4),
+            self.pos[0] + (0 if randrange(0,11) <= 8 else -1 if randrange(2) % 2 == 0 else 1),
             self.pos[1] - int(randrange(2)),
         )
 
-        if (self.pos[1] - self.radius <= 0):
+        if (self.pos[1] + self.radius <= 0):
             self.out_of_bounds = True
             return
 
@@ -212,32 +222,76 @@ class Bubble:
             pygame.draw.polygon(self.window, Colors.white, t)
 
 class FishMouth:
-    def __init__(self, window, cx, cy, length, maxAngleDeg: int, direction = Direction):
+    def __init__(self, window, length, maxAngleDeg: int, parent = Fish):
         self.window = window
-        self.cx = cx
-        self.cy = cy
         self.length = length
         self.maxAngle = maxAngleDeg
         self.isOpening = False
-        self.angleDeg = 0
-        self.direction = direction
+        self.angleDeg = 0.05
+        self.timeToClose = 0
+        self.parent = parent
     
+    def animate(self, deltaTime):
+        """
+        if self.angleDeg < self.maxAngle:
+            self.angleDeg += 20
+        else:
+            self.isOpening = False
+        """
+        if self.angleDeg > 0.05:
+            self.angleDeg -= (deltaTime / self.timeToClose) * self.angleDeg
+
+        self.timeToClose -= deltaTime
+
+
     # Calculates new angle and draws
     def draw(self):
-        if self.isOpening:
-            if self.angleDeg < self.maxAngle:
-                self.angleDeg += 0.25
-        else:
-            if self.angleDeg > 0:
-                self.angleDeg -= 0.25
-        
         if self.angleDeg == 0:
             return
         
+        cx = self.parent.center[0] + (self.parent.direction.value * 3) * self.parent.length / 5
+        cy = self.parent.center[1]
+
         triangle = [
-            (self.cx, self.cy),
-            (self.cx + (self.direction.value * self.length), self.cy - math.tan(math.radians(self.angleDeg / 2))*self.length),
-            (self.cx + (self.direction.value * self.length), self.cy + math.tan(math.radians(self.angleDeg / 2))*self.length)
+            (cx, cy),
+            (cx + (self.parent.direction.value * self.length), cy - math.tan(math.radians(self.angleDeg / 2))*self.length),
+            (cx + (self.parent.direction.value * self.length), cy + math.tan(math.radians(self.angleDeg / 2))*self.length)
         ]
 
         pygame.draw.polygon(self.window, Colors.bgColor, triangle)
+
+class FishTail:
+    def __init__(self, parent: Fish, angleMax = 6):
+        self.parent: Fish = parent
+        self.angleMax = angleMax
+        self.angleDeg: float = angleMax
+        self.animation = {
+            "currentSeconds": 0,
+            "fullTime": abs((self.parent.speed/150) * 1.5 - 1.6),
+            "up": False
+        }
+
+    def animate(self, deltaTime):
+        self.animation["currentSeconds"] += deltaTime
+        if self.animation["currentSeconds"] >= self.animation["fullTime"]:
+            self.animation["currentSeconds"] -= self.animation["fullTime"]
+            self.animation["up"] = not self.animation["up"]
+        self.angleDeg = (-1 if self.animation["up"] else 1) * self.angleMax * 2 * (self.animation["currentSeconds"] / self.animation["fullTime"]) + (1 if self.animation["up"] else -1) * self.angleMax
+
+    def draw(self):
+        topTailY = self.parent.center[1] - self.parent.height
+        downTailY = self.parent.center[1] + self.parent.height
+        
+        midTail = self.parent.center[0] - self.parent.direction.value * self.parent.length * (9/8)
+        endTail = self.parent.center[0] - self.parent.direction.value * self.parent.length * (5/4)
+
+        before_pivot = [
+            [
+                (endTail, topTailY),(midTail, self.parent.center[1]), self.parent.center
+            ],
+            [
+                (endTail, downTailY),(midTail, self.parent.center[1]), self.parent.center
+             ]
+        ]
+        for t in animation.drawings.pivotTriangles(self.parent.center, before_pivot, self.angleDeg):
+            pygame.draw.polygon(self.parent.window, self.parent.color, t)

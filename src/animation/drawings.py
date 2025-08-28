@@ -36,4 +36,20 @@ def getEllipseTriangles(cx, cy, rx, ry, segments=40):
         triangle.append([ (cx, cy), points[i], points[i+1] ])
     
     return triangle
-    
+
+def pivotTriangles(centerPoint: tuple[float, float], triangles: list[list[tuple[float, float]]], angleDeg: float):
+    newTriangleList = []
+    for t in triangles:
+        current_triangle = []
+        for point in t:
+            angle_rad = math.radians(angleDeg)
+            dx, dy = point[0] - centerPoint[0], point[1] - centerPoint[1]
+            x2 = centerPoint[0] + dx * math.cos(angle_rad) - dy * math.sin(angle_rad)
+            y2 = centerPoint[1] + dx * math.sin(angle_rad) + dy * math.cos(angle_rad)
+            current_triangle.append((x2, y2))
+        newTriangleList.append(current_triangle)
+    return newTriangleList
+
+
+def twoPointDistance(p1: tuple[float, float], p2: tuple[float, float]) -> float:
+    return math.sqrt(math.pow(p2[0] - p1[0],2) + math.pow(p2[1] - p1[1],2))
