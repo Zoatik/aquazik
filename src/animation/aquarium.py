@@ -401,6 +401,7 @@ class Aquarium:
             pygame.draw.polygon(surface, Colors.bobHouse, triangle)
             pygame.draw.polygon(surface, Colors.bobHouseLines, triangle, 2)
 
+    # pour animer la couronne il faut faire une classe bobHouse
     def drawBobTopHouse(surface):
         #surface, base_center, base_width, height,layers=3, spikes=9, tilt=0.15,jitter=0.12, seed=None
 
