@@ -52,3 +52,22 @@ def pivotPoint(centerPoint: tuple[float, float], point: tuple[float, float], ang
 
 def twoPointDistance(p1: tuple[float, float], p2: tuple[float, float]) -> float:
     return math.sqrt(math.pow(p2[0] - p1[0],2) + math.pow(p2[1] - p1[1],2))
+
+def getMiddleOfTwoPoints(p1: tuple[float, float], p2: tuple[float, float]) -> tuple[float,float]:
+    return ((p2[0]+p1[0])/2,(p2[1]+p1[1])/2)
+
+def getApexPointTriangle(p1: tuple[float, float], p2: tuple[float, float], height : float):
+    middle_x,middle_y = getMiddleOfTwoPoints(p1,p2)
+
+    x1,y1 = p1
+    x2,y2 = p2
+
+    dx, dy = x2 - x1, y2 - y1
+    d = math.hypot(dx, dy)
+
+    # Unit normal vector (perpendicular to base)
+    nx, ny = -dy / d, dx / d
+
+    apex = (int(middle_x - height * nx), int(middle_y - height * ny))
+
+    return apex

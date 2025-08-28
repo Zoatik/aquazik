@@ -29,23 +29,10 @@ class Starfish:
         for i in range (len(pentagone)):
             borderPoints.append((pentagone[i][1],pentagone[i][2]))
         triangles = []
-        '''for border in borderPoints:
-            triangles.append(()) '''
+        for border in borderPoints:
+            triangles.append((border[0],border[1],animation.drawings.getApexPointTriangle(border[0],border[1],self.arm_length/3*2))) 
 
-        return borderPoints
-
-    # Function to create a single triangle for an arm
-    def triangle_arm(self, center, length, width, angle):
-        x, y = center
-        # tip of the arm
-        tip_x = x + length * math.cos(math.radians(angle))
-        tip_y = y + length * math.sin(math.radians(angle))
-        # base corners
-        left_x = x + width / 2 * math.cos(math.radians(angle + 90))
-        left_y = y + width / 2 * math.sin(math.radians(angle + 90))
-        right_x = x + width / 2 * math.cos(math.radians(angle - 90))
-        right_y = y + width / 2 * math.sin(math.radians(angle - 90))
-        return [(tip_x, tip_y), (left_x, left_y), (right_x, right_y)]
+        return triangles
 
     def draw(self, borders: bool = False):
         self.color = Colors.patrick if self.playing else FishColors.orange
@@ -53,8 +40,10 @@ class Starfish:
         pentagone = self.body()
         for triangle in pentagone:
             pygame.draw.polygon(self.window,self.color,triangle)
-        
-        self.arms()
+            
+        arms = self.arms()
+        for triangle in arms:
+            pygame.draw.polygon(self.window,self.color,triangle)
 
         if self.playing and self.arm_count == 5:
             self.drawPatrick()
