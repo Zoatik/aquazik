@@ -34,7 +34,16 @@ class Aquarium:
         ]
         for ni in range(len(NOTE_NAMES)):
             starFishList.append(
-                Starfish(window, NOTE_NAMES[ni], starfishCenterList[ni], randrange(int(starfishCenterList[ni][1]/20) ,int((starfishCenterList[ni][1] + 30 )/20) ))
+                Starfish(
+                    window, 
+                    NOTE_NAMES[ni], 
+                    starfishCenterList[ni], 
+                    randrange(
+                        int(starfishCenterList[ni][1]/20),
+                        int((starfishCenterList[ni][1] + 30 )/20) 
+                    ),
+                    randrange(5,7)
+                )
             )
         return starFishList
 

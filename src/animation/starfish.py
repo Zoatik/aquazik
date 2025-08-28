@@ -6,12 +6,12 @@ import random
 
 
 class Starfish:
-    def __init__(self, window, name: str, center, length):
+    def __init__(self, window, name: str, center, length, arm_count = 5):
         self.window = window
         self.name = name
         self.center = center
         self.color = FishColors.orange
-        self.arm_count = 5
+        self.arm_count = arm_count
         self.arm_length = length
         self.arm_width = random.randrange(int(length/4),length)
         self.angle = random.randrange(45)
