@@ -16,11 +16,11 @@ def main():
 
     # Setup analysis
     print("-- Analysing audio --")
-    audio_analyser = AudioAnalyzer(FILE)
-    bpm, notes = audio_analyser.convert_to_notes()
+    #audio_analyser = AudioAnalyzer(FILE)
+    #bpm, notes = audio_analyser.convert_to_notes()
 
     print("-- Creating MIDI file --")
-    midi_path = audio_processing.MidiV2.midi_maker(notes, bpm)
+    #midi_path = audio_processing.MidiV2.midi_maker(notes, bpm)
     midi_path = "audio_in/PinkPanther.midi"
     #print(f"bpm = {audio_data[0]}")
 
