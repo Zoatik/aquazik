@@ -12,16 +12,17 @@ import platform
 import os
 
 def main():
-    FILE = "PinkPanther_Piano_Only.mp3"
+    FILE = "PinkPanther_Both.mp3"
 
     # Setup analysis
     print("-- Analysing audio --")
-    audio_analyser = AudioAnalyzer(FILE)
-    audio_data = audio_analyser.convert_to_notes()
+    #audio_analyser = AudioAnalyzer(FILE)
+    #audio_data = audio_analyser.convert_to_notes()
 
     print("-- Creating MIDI file --")
-    midi_path = audio_processing.MidiV2.midi_maker([(0,audio_data[1])], bpm=audio_data[0])
-    print(f"bpm = {audio_data[0]}")
+    #midi_path = audio_processing.MidiV2.midi_maker([(0,audio_data[1])], bpm=audio_data[0])
+    midi_path = "audio_in/PinkPanther.midi"
+    #print(f"bpm = {audio_data[0]}")
 
     # Create MidiFile instance
     print("-- Processing MIDI file --")
@@ -157,7 +158,7 @@ def main():
         Aquarium.drawSquidwardHouse(window)
         Aquarium.drawBobHouse(window)
         Aquarium.drawBobTopHouse(window)
-        
+
         Aquarium.drawStarfish(starFishList)
         Aquarium.drawFishes(fishList)
         for b in [x for x in bubbleList if not x.out_of_bounds]:
