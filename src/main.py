@@ -107,7 +107,7 @@ def main():
                 fishList.append(Fish(
                     window,
                     note.get_real_note()[:-1],
-                    FishColors.yellow,
+                    FishColors.darkGrayTruite,
                     # TODO center.y du poisson à changer par rapport à la note
                     (
                         (distance if direction == Direction.RIGHT else window.get_size()[0] - note.velocity / 6),

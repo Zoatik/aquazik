@@ -57,8 +57,8 @@ class Starfish:
         
         left_eye = animation.drawings.getEllipseTriangles(cx-length/15, cy-length/4, length/10/2, length/10)
         right_eye = animation.drawings.getEllipseTriangles(cx+length/15, cy-length/4, length/10/2, length/10)
-        left_pupil = animation.drawings.getEllipseTriangles(cx-length/25, cy-length/4, length/20/2, width/20)
-        right_pupil = animation.drawings.getEllipseTriangles(cx+length/25, cy-length/4, length/20/2, width/20)
+        left_pupil = animation.drawings.getEllipseTriangles(cx-length/18, cy-length/4, length/20/2, width/20)
+        right_pupil = animation.drawings.getEllipseTriangles(cx+length/18, cy-length/4, length/20/2, width/20)
 
         for triangle in left_eye:
             pygame.draw.polygon(self.window, Colors.white, triangle)
