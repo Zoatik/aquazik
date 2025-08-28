@@ -70,6 +70,8 @@ class Fish:
             parent = self
         )
         self.fishTail = FishTail(self)
+        self.spawnTime = time.time()
+        self.angleDeg = 0
 
     def __str__(self):
         return f"{self.name}, {self.color}"
@@ -122,27 +124,27 @@ class Fish:
         # body
         Triangles = animation.drawings.getEllipseTriangles(cx, cy, rx, ry, segments)
         for triangle in Triangles:
-            pygame.draw.polygon(self.window, self.color, triangle)
+            pygame.draw.polygon(self.window, self.color, animation.drawings.pivotTriangle(self.center, triangle, self.angleDeg))
 
         # iris
         eyeTriangles = animation.drawings.getEllipseTriangles(eyeCenter[0], eyeCenter[1], irisRadius, irisRadius, segments=20)
         for triangle in eyeTriangles:
-            pygame.draw.polygon(self.window, Colors.orange, triangle)
+            pygame.draw.polygon(self.window, Colors.orange, animation.drawings.pivotTriangle(self.center, triangle, self.angleDeg))
         
         # pupil
         eyeTriangles = animation.drawings.getEllipseTriangles(eyeCenter[0], eyeCenter[1], pupilRadius, pupilRadius, segments=20)
         for triangle in eyeTriangles:
-            pygame.draw.polygon(self.window, Colors.black, triangle)
+            pygame.draw.polygon(self.window, Colors.black, animation.drawings.pivotTriangle(self.center, triangle, self.angleDeg))
 
         # dorsal fin for long fish
         if self.length > 50 and self.height < 30:
-            pygame.draw.polygon(self.window, self.color, ((cx, dorsalTopY),(dorsalRightX, dorsalDownY),(dorsalLeftX, dorsalDownY)))
+            pygame.draw.polygon(self.window, self.color, animation.drawings.pivotTriangle(self.center, [(cx, dorsalTopY),(dorsalRightX, dorsalDownY),(dorsalLeftX, dorsalDownY)], self.angleDeg))
         
         if self.height>= 30:
             # top fin
-            pygame.draw.polygon(self.window, self.color, ((nageoireTopX, nageoireDownUpY),(nageoireRightX, nageoireInUpY),(nageoireLeftX, nageoireTopUpY)))
+            pygame.draw.polygon(self.window, self.color, animation.drawings.pivotTriangle(self.center, [(nageoireTopX, nageoireDownUpY),(nageoireRightX, nageoireInUpY),(nageoireLeftX, nageoireTopUpY)], self.angleDeg))
             # bottom fin
-            pygame.draw.polygon(self.window, self.color, ((nageoireTopX, nageoireDownDownY),(nageoireRightX, nageoireInDownY),(nageoireLeftX, nageoireTopDownY)))
+            pygame.draw.polygon(self.window, self.color, animation.drawings.pivotTriangle(self.center, [(nageoireTopX, nageoireDownDownY),(nageoireRightX, nageoireInDownY),(nageoireLeftX, nageoireTopDownY)], self.angleDeg))
         
         self.fishMouth.draw()
         self.fishTail.draw()
@@ -151,16 +153,27 @@ class Fish:
         if not self.enabled:
             return
         
-        if self.center[0] < - self.length / 2 or self.center[0] > self.window.get_size()[0] + self.length / 2:
+        if self.center[0] < - self.length or self.center[0] > self.window.get_size()[0] + self.length:
             self.enabled = False
         
         self.fishMouth.animate(deltaTime)
         self.fishTail.animate(deltaTime)
 
-        self.center = (self.center[0] + (-1 if self.direction == Direction.LEFT else 1) * deltaTime * self.speed, self.center[1])
+        t = time.time() - self.spawnTime
+        amplitude = 1/3
+        vx = (-1 if self.direction == Direction.LEFT else 1) * self.speed
+        vy = math.cos(t) * amplitude  # dérivée de sin pour l'angle
+
+        # mise à jour de la position
+        self.center = (
+            self.center[0] + vx * deltaTime,
+            self.center[1] + math.sin(t) * amplitude
+        )
+
+        self.angleDeg = (1 if self.direction == Direction.RIGHT else -1) * math.degrees(math.atan(vy))
         
         if (time.time() - self.lastNoteTime < 5):
-            if self.center[0] <= - self.length:
+            if self.center[0] <= self.length:
                 self.direction = Direction.RIGHT
             elif self.center[0] >= self.window.get_size()[0] - self.length:
                 self.direction = Direction.LEFT
@@ -222,7 +235,7 @@ class Bubble:
             pygame.draw.polygon(self.window, Colors.white, t)
 
 class FishMouth:
-    def __init__(self, window, length, maxAngleDeg: int, parent = Fish):
+    def __init__(self, window, length, maxAngleDeg: int, parent: Fish):
         self.window = window
         self.length = length
         self.maxAngle = maxAngleDeg
@@ -232,12 +245,6 @@ class FishMouth:
         self.parent = parent
     
     def animate(self, deltaTime):
-        """
-        if self.angleDeg < self.maxAngle:
-            self.angleDeg += 20
-        else:
-            self.isOpening = False
-        """
         if self.angleDeg > 0.05:
             self.angleDeg -= (deltaTime / self.timeToClose) * self.angleDeg
 
@@ -258,7 +265,7 @@ class FishMouth:
             (cx + (self.parent.direction.value * self.length), cy + math.tan(math.radians(self.angleDeg / 2))*self.length)
         ]
 
-        pygame.draw.polygon(self.window, Colors.bgColor, triangle)
+        pygame.draw.polygon(self.window, Colors.bgColor, animation.drawings.pivotTriangle(self.parent.center, triangle, self.parent.angleDeg))
 
 class FishTail:
     def __init__(self, parent: Fish, angleMax = 6):
@@ -272,12 +279,22 @@ class FishTail:
         }
 
     def animate(self, deltaTime):
+        parent_angle = self.parent.angleDeg
+
         self.animation["currentSeconds"] += deltaTime
         if self.animation["currentSeconds"] >= self.animation["fullTime"]:
             self.animation["currentSeconds"] -= self.animation["fullTime"]
             self.animation["up"] = not self.animation["up"]
-        self.angleDeg = (-1 if self.animation["up"] else 1) * self.angleMax * 2 * (self.animation["currentSeconds"] / self.animation["fullTime"]) + (1 if self.animation["up"] else -1) * self.angleMax
 
+        oscillation = (
+            (-1 if self.animation["up"] else 1)
+            * self.angleMax * 2
+            * (self.animation["currentSeconds"] / self.animation["fullTime"])
+            + (1 if self.animation["up"] else -1) * self.angleMax
+        )
+
+        # angle total = angle du corps + oscillation de la queue
+        self.angleDeg = parent_angle + oscillation
     def draw(self):
         topTailY = self.parent.center[1] - self.parent.height
         downTailY = self.parent.center[1] + self.parent.height
