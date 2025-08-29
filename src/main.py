@@ -16,11 +16,11 @@ def main():
 
     # Setup analysis
     print("-- Analysing audio --")
-    audio_analyser = AudioAnalyzer(FILE)
-    bpm, notes = audio_analyser.convert_to_notes()
+    #audio_analyser = AudioAnalyzer(FILE)
+    #bpm, notes = audio_analyser.convert_to_notes()
 
     print("-- Creating MIDI file --")
-    midi_path = audio_processing.MidiV2.midi_maker(notes, bpm)
+    #midi_path = audio_processing.MidiV2.midi_maker(notes, bpm)
     midi_path = "audio_in/PinkPanther.midi"
     #print(f"bpm = {audio_data[0]}")
 
@@ -101,21 +101,9 @@ def main():
                      and x.get_instrument() == Instrument.PIANO]:
             if len([x for x in fishList if x.name == note.get_real_note()[:-1]]) == 0:
                 # create fish
-                direction = random.choice([Direction.LEFT, Direction.RIGHT])
-                distance = note.velocity / 6
-
                 fishList.append(Fish(
                     window,
-                    note.get_real_note()[:-1],
-                    FishColors.yellow,
-                    # TODO center.y du poisson à changer par rapport à la note
-                    (
-                        (distance if direction == Direction.RIGHT else window.get_size()[0] - note.velocity / 6),
-                        int(note.get_real_note()[-1]) * (window.get_size()[1] / (len(mdi.get_used_octaves()) * 2))
-                    ),
-                    length = note.velocity / 3,
-                    height = note.velocity / 4,
-                    direction = direction
+                    base_note = note
                 ))
 
         last_nextNotes = nextNotes
@@ -153,6 +141,7 @@ def main():
             # all notes
             if allnotes_trumpet.__contains__(starfish.name):
                 starfish.playing = True
+                starfish.update()
 
         # draw aquarium background and details
         Aquarium.drawBackground(window)
