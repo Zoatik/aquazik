@@ -9,9 +9,10 @@ def getOctogonPoints(cx, cy, radius):
 def getPolygonPoints(sides: int, cx, cy, radius):
     points = []
     ret = []
+    offset = - math.radians(90 + 180 / sides)  # rotation pour mettre un côté en haut
     # recherche des sommets du triangle à l'aide des angles : 45° : octogone
     for i in range(sides):  # 8 sommets
-        angle = math.radians((360 / sides) * i)  # 45° * i
+        angle = math.radians((360 / sides) * i) + offset  # 45° * i
         x = cx + radius * math.cos(angle)
         y = cy + radius * math.sin(angle)
         points.append((x, y))

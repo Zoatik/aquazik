@@ -6,12 +6,12 @@ import random
 import time
 
 class Starfish:
-    def __init__(self, window, name: str, center, length):
+    def __init__(self, window, name: str, center, length, arm_count = 5):
         self.window = window
         self.name = name
         self.center = center
         self.color = FishColors.orange
-        self.arm_count = 5
+        self.arm_count = arm_count
         self.arm_length = length
         self.arm_width = random.randrange(int(length/4),length)
         self.angle = random.randrange(45)
@@ -77,11 +77,21 @@ class Starfish:
         
         return triangles
 
-    
-    def draw(self, borders: bool = False):
+    def draw(self, borders: bool = True):
         self.color = Colors.patrick if self.playing else FishColors.orange
 
+        # Get all needed triangles
+        arms = self.arms()
         pentagone = self.body()
+
+        # Draw all borders if any
+        if borders:
+            for t in arms:
+                pygame.draw.polygon(self.window,Colors.black,t,5)
+            for t in pentagone:
+                pygame.draw.polygon(self.window,Colors.black,t,5)
+
+        # Draw arms and body (always)
         for triangle in pentagone:
             pygame.draw.polygon(self.window,self.color,triangle)
 
@@ -91,6 +101,7 @@ class Starfish:
         
         if self.playing and self.arm_count == 5:
             self.drawPatrick()
+
 
     def drawPatrick(self):
         cx,cy = self.center
