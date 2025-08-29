@@ -49,11 +49,8 @@ def getEllipseTriangles(cx, cy, rx, ry, segments=40, angle = 0):
         points.append((x, y))
     for i in range(segments):
         triangle.append([ (cx, cy), points[i], points[i+1] ])
-    
-    if angle != 0:
-        triangle = pivotTriangles((x,y),triangle,angle)
 
-    return triangle
+    return pivotTriangles((x,y),triangle,angle) if angle != 0 else triangle
 
 def twoPointDistance(p1: tuple[float, float], p2: tuple[float, float]) -> float:
     return math.sqrt(math.pow(p2[0] - p1[0],2) + math.pow(p2[1] - p1[1],2))

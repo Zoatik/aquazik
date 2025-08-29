@@ -110,7 +110,9 @@ class Fish:
                 pygame.draw.polygon(self.window, Colors.black, t, width=5)
         if self.fishType == FishType.LONG:
             dorsalFinTriangle = animation.drawings.pivotTriangle(self.center, dorsalFinTriangle, self.angleDeg)
-            pygame.draw.polygon(self.window, Colors.black, t, width=5)
+            pygame.draw.polygon(self.window, Colors.black, dorsalFinTriangle, width=5)
+
+        self.fishTail.drawBorder()
 
         # draw body parts (real color)
         for t in bodyTriangles:
@@ -189,9 +191,6 @@ class Fish:
 
         # add 650 ms to time to close so the animation is more visible
         self.fishMouth.timeToClose = noteTime + 0.65
-    
-    def drawBorder(self, bordersize = 1):
-        pass # TODO
     
     def createBubble(self, window):
         return Bubble(
@@ -301,7 +300,8 @@ class FishTail:
 
         # angle total = angle du corps + oscillation de la queue
         self.angleDeg = parent_angle + oscillation
-    def draw(self):
+    
+    def getTriangles(self):
         topTailY = self.parent.center[1] - self.parent.height
         downTailY = self.parent.center[1] + self.parent.height
         
@@ -316,5 +316,13 @@ class FishTail:
                 (endTail, downTailY),(midTail, self.parent.center[1]), self.parent.center
              ]
         ]
-        for t in animation.drawings.pivotTriangles(self.parent.center, before_pivot, self.angleDeg):
+        return animation.drawings.pivotTriangles(self.parent.center, before_pivot, self.angleDeg)
+
+    
+    def draw(self):
+        for t in self.getTriangles():
             pygame.draw.polygon(self.parent.window, self.parent.color, t)
+    
+    def drawBorder(self, bordersize = 5):
+        for t in self.getTriangles():
+            pygame.draw.polygon(self.parent.window, Colors.black, t, width=bordersize)
