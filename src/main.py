@@ -153,6 +153,7 @@ def main():
             # all notes
             if allnotes_trumpet.__contains__(starfish.name):
                 starfish.playing = True
+                starfish.update()
 
         # draw aquarium background and details
         Aquarium.drawBackground(window)
