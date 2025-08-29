@@ -55,11 +55,7 @@ def midi_maker(macro : list[Note], bpm : int, outfile : str ="music.mid"):
     # Adding the notes to the sheet music => Note(channel = instrument, pitch = midi note , time = starting time, duration, volume)
     sheet_music = sorted(macro, key=lambda note: note.start_bpm)
     for note in sheet_music:
-        # Temporary until the instrument detection
-        try: 
-            channel = 0 if note.instrument == Instrument.PIANO else 1
-        except:
-            channel = 0
+        channel = note.instrument
         midi_note = note_to_midi(note.name)
         time = note.start_bpm
         duration = note.length_bpm

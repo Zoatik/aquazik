@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import os
 import tqdm
 from datetime import datetime
+from audio_processing.midi_reader import Instrument
 
 
 
@@ -113,7 +114,7 @@ class Note:
         self.magnitude = magnitude
         self.maximum = magnitude  # Store the maximum magnitude observed for this note
         self.variation = variation  # Indicates if the note is fading in or out (positive for fading in, negative for fading out)
-        self.instrument = "Unknown"
+        self.instrument = Instrument.PIANO.value
 
     def __repr__(self):
         return f"Note(frequency={self.frequency}, name='{self.name}', start={self.start_time}, bpm start={self.start_bpm} , bpm length={self.length_bpm}, magnitude={self.magnitude})\n"
