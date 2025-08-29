@@ -25,18 +25,6 @@ def getPolygonPoints(sides: int, cx, cy, radius):
 
     return ret
 
-def getEllipseTriangles(cx, cy, rx, ry, segments=40):
-    points = []
-    triangle = []
-    for i in range(segments + 1):
-        angle = 2 * math.pi * i / segments
-        x = cx + rx * math.cos(angle)
-        y = cy + ry * math.sin(angle)
-        points.append((x, y))
-    for i in range(segments):
-        triangle.append([ (cx, cy), points[i], points[i+1] ])
-    
-    return triangle
 
 def pivotTriangles(centerPoint: tuple[float, float], triangles: list[list[tuple[float, float]]], angleDeg: float):
     return [pivotTriangle(centerPoint, t, angleDeg) for t in triangles]
@@ -50,6 +38,22 @@ def pivotPoint(centerPoint: tuple[float, float], point: tuple[float, float], ang
         x2 = centerPoint[0] + dx * math.cos(angle_rad) - dy * math.sin(angle_rad)
         y2 = centerPoint[1] + dx * math.sin(angle_rad) + dy * math.cos(angle_rad)
         return (x2, y2)
+
+def getEllipseTriangles(cx, cy, rx, ry, segments=40, angle = 0):
+    points = []
+    triangle = []
+    for i in range(segments + 1):
+        angle = 2 * math.pi * i / segments
+        x = cx + rx * math.cos(angle)
+        y = cy + ry * math.sin(angle)
+        points.append((x, y))
+    for i in range(segments):
+        triangle.append([ (cx, cy), points[i], points[i+1] ])
+    
+    if angle != 0:
+        triangle = pivotTriangles((x,y),triangle,angle)
+
+    return triangle
 
 def twoPointDistance(p1: tuple[float, float], p2: tuple[float, float]) -> float:
     return math.sqrt(math.pow(p2[0] - p1[0],2) + math.pow(p2[1] - p1[1],2))

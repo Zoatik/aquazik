@@ -14,7 +14,7 @@ class Starfish:
         self.arm_count = arm_count
         self.arm_length = length
         self.arm_width = random.randrange(int(length/4),length)
-        self.angle = random.randrange(45)
+        self.angle = random.randrange(int(-(360/arm_count)),int(360/arm_count))
 
         self.playing = True
         
@@ -148,5 +148,9 @@ class Starfish:
             anim['current_length_multiplier'] = length_variation * anim['length_variation']
 
     
-    def update(self, move_arms=True):
-        self.moveArms(move_arms)
+    def update(self, move_arms=False):
+        move_arms = self.playing
+        if move_arms:
+            self.moveArms(move_arms)
+        else :
+            return
