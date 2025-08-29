@@ -1,16 +1,14 @@
 import librosa
 import librosa.feature.rhythm
 import numpy as np
-from scipy.io import wavfile
-from scipy.signal import find_peaks
 
-# from sklearn.decomposition import FastICA, PCA
 import matplotlib.pyplot as plt
-import statistics
 import os
 import tqdm
 from datetime import datetime
-#from raw_signal_analysis import is_local_maximum
+
+
+
 
 #temp
 def is_local_maximum(x, arr):
@@ -44,7 +42,7 @@ INPUT_FOLDER = os.path.abspath("audio_in")
 
 WINDOW_TIME = 0.125  # window time of each analysis
 
-FREQ_MIN = 100
+FREQ_MIN = 200
 FREQ_MAX = 7_000
 
 TOP_NOTES = 10  # how many notes are stored per analysis
@@ -123,11 +121,11 @@ class Note:
 
 class AudioAnalyzer:
     def __init__(
-        self, audio_name="PinkPanther_Trumpet_cut.mp3", DEBUG_OUTPUT_FILES=False, duration = None
+        self, audio_name="PinkPanther_Trumpet_cut.mp3", DEBUG_OUTPUT_FILES=False, duration = None, offset = None
     ):
         self.audio_name = audio_name
         self.audio_path = os.path.join(INPUT_FOLDER, audio_name)
-        self.audio_data, self.sample_rate = librosa.load(self.audio_path, mono=True, duration=duration)
+        self.audio_data, self.sample_rate = librosa.load(self.audio_path, mono=True, duration=duration, offset=offset)
         self.audio_length = librosa.get_duration(y=self.audio_data, sr=self.sample_rate)
         self.audio_bpm = 120
         self.beat_unit = 60 / self.audio_bpm
@@ -207,9 +205,8 @@ class AudioAnalyzer:
             notes_buckets = notes_buckets/mx_buckets
 
             top_notes = self.__get_top_notes(midi_notes, notes_buckets, prev_top_notes)
-            top_notes = sorted(top_notes, key=lambda x: x.frequency)
             print("before: \n", top_notes) 
-            top_notes = self.__filter_notes_and_harmonics(top_notes)
+            top_notes = self.__filter_notes_and_harmonics(top_notes, notes_buckets)
             print("after: \n", top_notes)
 
 
@@ -294,32 +291,43 @@ class AudioAnalyzer:
         return self.audio_bpm, self.__find_notes_length(notes_array)
         # print(notes_array)
 
-    def __filter_notes_and_harmonics(self, top_notes_sorted: list[Note]):
+    def __filter_notes_and_harmonics(self, top_notes_sorted: list[Note], notes_buckets: list[Note]):
         if len(top_notes_sorted) < 1:
             return None
-        nb_of_harmonics = 4
+        nb_of_harmonics = 6
         min_good_harmonics = 2
         max_mag = np.max([note.magnitude for note in top_notes_sorted])
-        top_notes_isorted_midi = [note.midi_number for note in top_notes_sorted]
+        mag_mean = np.mean([note.magnitude for note in top_notes_sorted])
+        all_notes_mean = np.mean(notes_buckets)
+        
+
+        top_notes_sorted_midi = [note.midi_number for note in top_notes_sorted]
         base_notes = []
         already_used_harmonics = []
         for base_note in top_notes_sorted:
-            if base_note.magnitude < 0.4 * max_mag or base_note.midi_number in already_used_harmonics:
+            if  base_note.midi_number in already_used_harmonics or base_note.magnitude < 0.7*mag_mean:
                 continue
+            pot_sub_harmonic = base_note.midi_number - 12
+        
+            
+            for note in top_notes_sorted:
+                if pot_sub_harmonic == note.midi_number and note.magnitude > 2*all_notes_mean:
+                    base_note = note
+            
             th_harmonics = self.__get_harmonics(base_note, nb_of_harmonics)
 
             nb_wrong_harm = 0
             for th_harmonic in th_harmonics:
-                if (not th_harmonic in top_notes_isorted_midi) or th_harmonic in already_used_harmonics:
+                if (not th_harmonic in top_notes_sorted_midi) or th_harmonic in already_used_harmonics:
                     nb_wrong_harm += 1
                 else:
                     already_used_harmonics.append(th_harmonic)
-                    print(Tools.note_name(th_harmonic))
-
+                    #print(Tools.note_name(th_harmonic))
+            
 
             if nb_of_harmonics - nb_wrong_harm >= min_good_harmonics:
+                print(base_note)
                 base_notes.append(base_note)
-    
         
         return base_notes
             
@@ -364,15 +372,14 @@ class AudioAnalyzer:
             snapped_beat_duration = round(beat_duration * 8) / 8
             note.length_bpm = snapped_beat_duration
 
-        #print(all_notes_with_duration)
         return all_notes_with_duration
 
     def __fft_to_notes_buckets(self, fft):
-        all_midi_notes = [i for i in range (0, 127)]
-        notes_buckets = [0.0]*len(all_midi_notes) 
+        all_midi_notes = np.array([i for i in range (0, 127)])
+        notes_buckets = np.array([0.0]*len(all_midi_notes))
         for i in range(1, len(fft)):
             if fft[i] > 0:
-                note_number = Tools.freq_to_number(self.xf[i]) - 12
+                note_number = Tools.freq_to_number(self.xf[i]) 
                 notes_buckets[note_number] += fft[i]
 
         return all_midi_notes, notes_buckets
@@ -385,154 +392,14 @@ class AudioAnalyzer:
 
         top_notes = [Note(Tools.number_to_freq(midi_notes[i]), notes_buckets[i]) for i in peak_indexes]
 
-        
-        # peak_freq = self.xf[fft[peak_indexes]]
-        """print(peak_indexes)
-
-        plt.plot(fft.real)
-        # plt.plot(peak_indexes, self.xf[peak_indexes], color="red")
-
-        plt.plot(peak_indexes, fft[peak_indexes], "x", color="red")
-        plt.vlines(
-            x=peak_indexes,
-            ymin=fft[peak_indexes] - properties["prominences"],
-            ymax=fft[peak_indexes],
-            color="C1",
-        )
-        plt.show()"""
-
-        # top_notes = [Note(self.xf[i], fft[i] / mx) for i in peak_indexes]
-
-        #print(top_notes)
-
         return top_notes
-
-        print(f"fisrt freq: {self.xf[0]}, last freq: {self.xf[-1]}")
-
-        lst = [x for x in enumerate(fft.real)]
-        lst_sorted = sorted(lst, key=lambda x: x[1], reverse=True)
-
-        idx = 0
-        found_notes = []
-        found_notes_probabilities = {}
-        while (idx < len(lst_sorted)) and (len(found_notes) < top_n):
-            try:
-                f = self.xf[lst_sorted[idx][0]]
-                y = lst_sorted[idx][1] / mx
-
-                if y < 0.02:  # Ignore very low magnitudes
-                    idx += 1
-                    continue
-
-                n = freq_to_number(f)
-
-                name = note_name(n)
-
-                note_above_freq = number_to_freq(n + 1)
-                note_below_freq = number_to_freq(n - 1)
-                upper_bound_offset = int(
-                    (note_above_freq - f - self.freq_dist_per_bin / 2)
-                    // self.freq_dist_per_bin
-                )
-                lower_bound_offset = int(
-                    (f - note_below_freq - self.freq_dist_per_bin / 2)
-                    // self.freq_dist_per_bin
-                )
-                upper_index = lst_sorted[idx][0] + upper_bound_offset
-                lower_index = lst_sorted[idx][0] - lower_bound_offset
-
-                if upper_index >= len(lst_sorted) or lower_index < 0:
-                    idx += 1
-                    continue
-
-                local_max = (
-                    max(lst[lower_index:upper_index], key=lambda x: x[1])[1] / mx
-                )
-                """print(f"y: {y}, before: {lst[idx-1][1]/mx}, after: {lst[idx+1][1]/mx}")
-                if y < lst[idx-1][1]/mx or y < lst[idx+1][1]/mx:
-                    idx += 1
-                    continue"""
-
-                # print(f"current index: {idx} of freq: {xf[idx]}, lower_index: {lower_index} of freq: {xf[lower_index]}, upper_index: {upper_index} of freq: {xf[upper_index]}")
-                # print(f"y: {y}, local_max: {local_max}")
-                """if y < local_max:  # Ignore if the current value is not a local maximum
-                    idx += 1
-                    continue"""
-
-                # diff = np.diff(lst[lower_index:lst_sorted[idx][0]][1])
-                x_indices = np.arange(lower_index, lst_sorted[idx][0] + 1)
-                y_values = [
-                    item[1] / mx for item in lst[lower_index : lst_sorted[idx][0] + 1]
-                ]
-                up_slope, intercept = np.polyfit(x_indices, y_values, 1)
-
-                x_indices = np.arange(lst_sorted[idx][0], upper_index)
-                y_values = [
-                    item[1] / mx for item in lst[lst_sorted[idx][0] : upper_index]
-                ]
-
-                down_slope, intercept = np.polyfit(x_indices, y_values, 1)
-
-                # stdev = statistics.stdev(lst[lower_index:upper_index][1]/mx)
-
-                print(
-                    f"idx: {idx}, freq: {f}, number: {n}, name: {name}, magnitude: {y}, up_slope: {up_slope}, down_slope: {down_slope}"
-                )
-                if up_slope < 0.0 or down_slope > 0.0:
-                    idx += 1
-                    continue
-                """if stdev > 2.0:
-                    idx += 1
-                    continue"""
-
-                square_area = len(x_indices) * y
-                signal_area = np.trapezoid(y_values, x_indices)
-
-                area_difference = (square_area - signal_area) / square_area
-
-                print(
-                    f"area_difference: {area_difference}, square_area: {square_area}, signal_area: {signal_area}"
-                )
-
-                found_note = Note(frequency=f, magnitude=y)
-                note_probability = area_difference
-
-                if name not in found_notes_probabilities:
-                    found_notes_probabilities[name] = [note_probability]
-                    for prev_note in prev_notes:
-                        if prev_note.name == name:
-                            found_note.variation = (
-                                found_note.magnitude - prev_note.magnitude
-                            )
-                            found_note.maximum = max(
-                                found_note.maximum, prev_note.maximum
-                            )
-                            break
-
-                    found_notes.append(found_note)
-                """else:
-                    found_notes_probabilities[name].append(note_probability)"""
-
-            except Exception as e:
-                pass
-            idx += 1
-
-        # Calculate the average probability for each note
-        for note in found_notes:
-            if note.name in found_notes_probabilities:
-                mean_proba = np.mean(found_notes_probabilities[note.name])
-                print(f"Note: {note.name}, Mean Probability: {mean_proba}")
-                if mean_proba < 0.01:
-                    found_notes.remove(note)
-
-        return found_notes
 
     def __magnitude_filter(self, signal: np.ndarray):
         peaks_indexes = []
-        norm_signal = signal.copy() / np.max(signal)
+        sig_mean = np.mean(signal)
 
-        for i in range(len(norm_signal)):
-            if norm_signal[i] > 0.1 :
+        for i in range(len(signal)):
+            if signal[i] > sig_mean * 2 :
                 peaks_indexes.append(i)
         return peaks_indexes
 
@@ -562,6 +429,9 @@ class AudioAnalyzer:
         plt.ylabel("Magnitude")
         plt.title("frequency spectrum")
 
+        
+        plt.hlines(np.mean(yf), 0, xf[-1])
+
         if notes:
             for note in notes:
                 plt.annotate(
@@ -574,15 +444,8 @@ class AudioAnalyzer:
         plt.savefig(filename)
         plt.close()
 
+    
 
-#audioAnalyzer = AudioAnalyzer("PinkPanther_Both.mp3", True, 5.0)
-#audioAnalyzer.convert_to_notes()
-
-
-"""
-{timestamp: [notes]}
-None durée
-
-notes:
-    velocity, durée, C#
-"""
+if __name__ == "__main__":
+    audioAnalyzer = AudioAnalyzer("PinkPanther_Trumpet_Only.mp3", False)
+    audioAnalyzer.convert_to_notes()
