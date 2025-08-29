@@ -32,7 +32,8 @@ class Fish:
         distance = base_note.velocity / 6
         self.center = (
             (distance if direction == Direction.RIGHT else window.get_size()[0] - base_note.velocity / 6),
-            int(base_note.get_real_note()[-1]) * (window.get_size()[1] / 9)
+            randrange(50, int(window.get_size()[1] / 2 - 50))
+            #int(base_note.get_real_note()[-1]) * (window.get_size()[1] / 9)
         )
 
         # random values
