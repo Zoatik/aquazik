@@ -101,21 +101,9 @@ def main():
                      and x.get_instrument() == Instrument.PIANO]:
             if len([x for x in fishList if x.name == note.get_real_note()[:-1]]) == 0:
                 # create fish
-                direction = random.choice([Direction.LEFT, Direction.RIGHT])
-                distance = note.velocity / 6
-
                 fishList.append(Fish(
                     window,
-                    note.get_real_note()[:-1],
-                    FishColors.darkGrayTruite,
-                    # TODO center.y du poisson à changer par rapport à la note
-                    (
-                        (distance if direction == Direction.RIGHT else window.get_size()[0] - note.velocity / 6),
-                        int(note.get_real_note()[-1]) * (window.get_size()[1] / (len(mdi.get_used_octaves()) * 2))
-                    ),
-                    length = note.velocity / 3,
-                    height = note.velocity / 4,
-                    direction = direction
+                    base_note = note
                 ))
 
         last_nextNotes = nextNotes
