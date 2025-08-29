@@ -39,7 +39,7 @@ def pivotPoint(centerPoint: tuple[float, float], point: tuple[float, float], ang
         y2 = centerPoint[1] + dx * math.sin(angle_rad) + dy * math.cos(angle_rad)
         return (x2, y2)
 
-def getEllipseTriangles(cx, cy, rx, ry, segments=40, angle = 0):
+def getEllipseTriangles(cx, cy, rx, ry, segments=40, angleDeg = 0):
     points = []
     triangle = []
     for i in range(segments + 1):
@@ -50,7 +50,7 @@ def getEllipseTriangles(cx, cy, rx, ry, segments=40, angle = 0):
     for i in range(segments):
         triangle.append([ (cx, cy), points[i], points[i+1] ])
 
-    return pivotTriangles((x,y),triangle,angle) if angle != 0 else triangle
+    return triangle if angleDeg == 0 else pivotTriangles((x,y),triangle,angleDeg)
 
 def twoPointDistance(p1: tuple[float, float], p2: tuple[float, float]) -> float:
     return math.sqrt(math.pow(p2[0] - p1[0],2) + math.pow(p2[1] - p1[1],2))
