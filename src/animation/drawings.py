@@ -34,7 +34,7 @@ def debugPointsDoubles(triangle) -> bool:
     p1, p2, p3 = triangle
     lll = [twoPointDistance(p1,p2), twoPointDistance(p2,p3), twoPointDistance(p1,p3)]
     if max(lll) > 200:
-        print("⚠️⚠️⚠️ CHEFFFFFFFFFFFFFFFFFFFFF")
+        print("⚠️⚠️⚠️ Points doubles trouvés")
         traceback.print_stack()
     
     return min(lll) == 0
@@ -81,6 +81,36 @@ def getEllipseTriangles(cx, cy, rx, ry, segments=40, angleDeg = 0):
         triangle.append([ (cx, cy), points[i], points[i+1] ])
 
     return triangle if angleDeg == 0 else pivotTriangles((x,y),triangle,angleDeg)
+
+def getEllipseArcTriangles(cx, cy, rx, ry, start_angle_deg, end_angle_deg, segments = 20, center_offset_x=0, center_offset_y=0):
+    points = []
+    triangles = []
+    
+    # Point central décalé pour les triangles
+    center_point = (cx + center_offset_x, cy + center_offset_y)
+    
+    # Convertir en radians
+    start_angle_rad = math.radians(start_angle_deg)
+    end_angle_rad = math.radians(end_angle_deg)
+    
+    # Gérer le cas où l'arc traverse 0°
+    if end_angle_rad < start_angle_rad:
+        end_angle_rad += 2 * math.pi
+    
+    # Générer les points de l'arc (toujours sur l'ellipse originale)
+    for i in range(segments + 1):
+        t = i / segments
+        angle = start_angle_rad + t * (end_angle_rad - start_angle_rad)
+        
+        x = cx + rx * math.cos(angle)
+        y = cy + ry * math.sin(angle)
+        points.append((x, y))
+    
+    # Créer les triangles avec le centre décalé
+    for i in range(segments):
+        triangles.append([center_point, points[i], points[i + 1]])
+    
+    return triangles
 
 def twoPointDistance(p1: tuple[float, float], p2: tuple[float, float]) -> float:
     return math.sqrt(math.pow(p2[0] - p1[0],2) + math.pow(p2[1] - p1[1],2))
