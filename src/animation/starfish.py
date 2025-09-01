@@ -88,8 +88,6 @@ class Starfish:
         if borders:
             for t in arms:
                 pygame.draw.polygon(self.window,Colors.black,t,5)
-            for t in pentagone:
-                pygame.draw.polygon(self.window,Colors.black,t,5)
 
         # Draw arms and body (always)
         for triangle in pentagone:

@@ -1,6 +1,6 @@
 import math
 from random import random
-
+import traceback
 
 def getOctogonPoints(cx, cy, radius):
     return getPolygonPoints(8, cx, cy, radius)
@@ -29,15 +29,45 @@ def getPolygonPoints(sides: int, cx, cy, radius):
 def pivotTriangles(centerPoint: tuple[float, float], triangles: list[list[tuple[float, float]]], angleDeg: float):
     return [pivotTriangle(centerPoint, t, angleDeg) for t in triangles]
 
-def pivotTriangle(centerPoint: tuple[float, float], triangle: list[tuple[float, float]], angleDeg: float):
-    return [pivotPoint(centerPoint, point, angleDeg) for point in triangle]
+# TODO SUPPRIMER
+def debugPointsDoubles(triangle) -> bool:
+    p1, p2, p3 = triangle
+    lll = [twoPointDistance(p1,p2), twoPointDistance(p2,p3), twoPointDistance(p1,p3)]
+    if max(lll) > 200:
+        print("⚠️⚠️⚠️ CHEFFFFFFFFFFFFFFFFFFFFF")
+        traceback.print_stack()
+    
+    return min(lll) == 0
 
-def pivotPoint(centerPoint: tuple[float, float], point: tuple[float, float], angleDeg: float) -> tuple[float, float]:
-        angle_rad = math.radians(angleDeg)
-        dx, dy = point[0] - centerPoint[0], point[1] - centerPoint[1]
-        x2 = centerPoint[0] + dx * math.cos(angle_rad) - dy * math.sin(angle_rad)
-        y2 = centerPoint[1] + dx * math.sin(angle_rad) + dy * math.cos(angle_rad)
-        return (x2, y2)
+def pivotTriangle(centerPoint: tuple[float, float], tt: list[tuple[float, float]], angleDeg: float):
+    if debugPointsDoubles(tt):
+        print("Points doubles trouvés !!!")
+
+    triangle = [pivotPoint(centerPoint, point, angleDeg) for point in tt]
+
+    p1, p2, p3 = triangle
+    
+    # Vérifier points distincts
+    if debugPointsDoubles(tt):
+        print(f"🔴 Points identiques: {triangle}")
+        traceback.print_stack()
+        return tt
+    
+    # Vérifier aire non nulle (points non alignés)
+    area = abs((p2[0] - p1[0]) * (p3[1] - p1[1]) - (p3[0] - p1[0]) * (p2[1] - p1[1]))
+    if area < 0.1:  # Quasi-alignés
+        print(f"🔴 Triangle dégénéré (aire={area}): {triangle}")
+        traceback.print_stack()
+
+    return triangle
+
+def pivotPoint(centerPoint: tuple[float, float], point: tuple[float, float], angleDeg: float) -> tuple[int, int]:
+    angle_rad = math.radians(angleDeg)
+    dx, dy = point[0] - centerPoint[0], point[1] - centerPoint[1]
+    x2 = centerPoint[0] + dx * math.cos(angle_rad) - dy * math.sin(angle_rad)
+    y2 = centerPoint[1] + dx * math.sin(angle_rad) + dy * math.cos(angle_rad)
+
+    return (round(x2), round(y2))
 
 def getEllipseTriangles(cx, cy, rx, ry, segments=40, angleDeg = 0):
     points = []

@@ -98,7 +98,7 @@ class Fish:
         # get all needed triangles
         bodyTriangles = animation.drawings.pivotTriangles(
             self.center,
-            animation.drawings.getEllipseTriangles(cx, cy, self.length, self.height, segments = 80),
+            animation.drawings.getEllipseTriangles(cx, cy, self.length, self.height, segments = 20),
             self.angleDeg
         )
         
@@ -122,7 +122,7 @@ class Fish:
         # iris
         eyeIrisTriangles = animation.drawings.pivotTriangles(
             self.center,
-            animation.drawings.getEllipseTriangles(eyeCenter[0], eyeCenter[1], irisRadius, irisRadius, segments=20),
+            animation.drawings.getPolygonPoints(8, eyeCenter[0], eyeCenter[1], irisRadius), 
             self.angleDeg
         )
         for t in eyeIrisTriangles:
@@ -131,7 +131,7 @@ class Fish:
         # pupils
         eyePupilsTriangles = animation.drawings.pivotTriangles(
             self.center,
-            animation.drawings.getEllipseTriangles(eyeCenter[0], eyeCenter[1], pupilRadius, pupilRadius, segments=20),
+            animation.drawings.getPolygonPoints(8, eyeCenter[0], eyeCenter[1], pupilRadius), 
             self.angleDeg
         )
         for t in eyePupilsTriangles:
@@ -235,6 +235,8 @@ class Bubble:
             pygame.draw.polygon(self.window, Colors.white, t)
 
 class FishMouth:
+    LIMIT = 5
+
     def __init__(self, window, maxAngleDeg: int, parent: Fish):
         # saved parameters
         self.window = window
@@ -246,11 +248,11 @@ class FishMouth:
 
         # default values
         self.isOpening = False
-        self.angleDeg = 0.01
+        self.angleDeg = 0
         self.timeToClose = 0
     
     def animate(self, deltaTime):
-        if self.angleDeg > 0.01:
+        if self.angleDeg > self.LIMIT:
             self.angleDeg -= (deltaTime / self.timeToClose) * self.angleDeg
 
         self.timeToClose -= deltaTime
@@ -258,7 +260,7 @@ class FishMouth:
 
     # Calculates new angle and draws
     def draw(self):
-        if self.angleDeg == 0:
+        if self.angleDeg <= self.LIMIT:
             return
         
         cx = self.parent.center[0] + (self.parent.direction.value * 3) * self.parent.length / 5
