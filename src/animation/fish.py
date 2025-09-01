@@ -95,10 +95,13 @@ class Fish:
             [(nageoireTopX, nageoireDownDownY),(nageoireRightX, nageoireInDownY),(nageoireLeftX, nageoireTopDownY)]
         ]
 
+        firstAngle = (0 if self.direction == Direction.RIGHT else 180) + self.fishMouth.angleDeg / 2
+        endAngle = (360 if self.direction == Direction.RIGHT else 180) - self.fishMouth.angleDeg / 2
+
         # get all needed triangles
         bodyTriangles = animation.drawings.pivotTriangles(
             self.center,
-            animation.drawings.getEllipseTriangles(cx, cy, self.length, self.height, segments = 20),
+            animation.drawings.getEllipseArcTriangles(cx, cy, self.length, self.height, firstAngle, endAngle, segments = 20, center_offset_x= (1 if self.direction == Direction.RIGHT else -1)*(self.length - self.fishMouth.length)),
             self.angleDeg
         )
         
@@ -147,7 +150,6 @@ class Fish:
                 pygame.draw.polygon(self.window, self.color, t)
         
         # rest of body parts
-        self.fishMouth.draw()
         self.fishTail.draw()
 
     def animate(self, deltaTime):
@@ -244,11 +246,11 @@ class FishMouth:
         self.parent = parent
 
         # calculated parameters
-        self.length = (2.15/5) * self.parent.length
+        self.length = ((random()*1.25+1.75)/5) * self.parent.length # random mouth size
 
         # default values
         self.isOpening = False
-        self.angleDeg = 0
+        self.angleDeg = 1   # if angle was 0, first ellipse arc will not be rendered correctly
         self.timeToClose = 0
     
     def animate(self, deltaTime):
@@ -256,24 +258,6 @@ class FishMouth:
             self.angleDeg -= (deltaTime / self.timeToClose) * self.angleDeg
 
         self.timeToClose -= deltaTime
-
-
-    # Calculates new angle and draws
-    def draw(self):
-        if self.angleDeg <= self.LIMIT:
-            return
-        
-        cx = self.parent.center[0] + (self.parent.direction.value * 3) * self.parent.length / 5
-        cy = self.parent.center[1]
-
-        triangle = [
-            (cx, cy),
-            (cx + (self.parent.direction.value * self.length), cy - math.tan(math.radians(self.angleDeg / 2))*self.length),
-            (cx + (self.parent.direction.value * self.length), cy + math.tan(math.radians(self.angleDeg / 2))*self.length)
-        ]
-
-        # TODO BORDER
-        pygame.draw.polygon(self.window, Colors.bgColor, animation.drawings.pivotTriangle(self.parent.center, triangle, self.parent.angleDeg))
 
 class FishTail:
     def __init__(self, parent: Fish, angleMax = 6):
