@@ -167,168 +167,76 @@ class Arm:
         length_variation = 1.0 + math.sin(length_wave_time) * 0.1  # ±10% length variation
         anim['current_length_multiplier'] = length_variation * anim['length_variation']
 
-    '''def drawPatrick(self):
-        cx,cy = animation.drawings.centerOfTriangle(self.triangles[0]) #head always first
-        length = self.arm_length
-        width = self.arm_width
-        angle = self.angle
-        
+    def drawPatrick(self):
         if self.name == "Head":
-            left_eye = animation.drawings.getEllipseTriangles(cx-length/15, cy, length/20/2, width/10)
-            right_eye = animation.drawings.getEllipseTriangles(cx+length/15, cy, length/20/2, length/10)
-            left_pupil = animation.drawings.getEllipseTriangles(cx-length/18, cy, length/20/2, width/20)
-            right_pupil = animation.drawings.getEllipseTriangles(cx+length/18, cy, length/20/2, width/20)
+            head_triangle = self.triangles[0]
+            cx, cy = animation.drawings.centerOfTriangle(head_triangle)
+            
+            eye_size = self.arm_length / 15
+            pupil_size = eye_size * 0.4
+            mouth_size = self.arm_length / 20
 
+            eye_separation = self.arm_length / 20  
+            eyes_toward_tip = self.arm_length / 15
+            pupils_separation = 0.2
+            mouth_toward_center = self.arm_length / 12 
+            
+            # direction center-apex
+            direction_x = cx - self.starCenter[0]
+            direction_y = cy - self.starCenter[1]
+            
+            # ||direction||
+            length = math.sqrt(direction_x**2 + direction_y**2)
+            if length > 0:
+                norm_x = direction_x / length
+                norm_y = direction_y / length
+            else:
+                norm_x, norm_y = 0, 1
+            
+            perp_x = -norm_y
+            perp_y = norm_x
+            
+            #eyes pos
+            eye_center_x = cx + norm_x * eyes_toward_tip
+            eye_center_y = cy + norm_y * eyes_toward_tip
+            
+            left_eye_x = eye_center_x + perp_x * eye_separation
+            left_eye_y = eye_center_y + perp_y * eye_separation
+            right_eye_x = eye_center_x - perp_x * eye_separation
+            right_eye_y = eye_center_y - perp_y * eye_separation
 
-            left_eye = animation.drawings.pivotTriangles(animation.drawings.getMiddleOfTwoPoints(self.triangles[0][1],self.triangles[0][2]), left_eye,angle)
-            right_eye = animation.drawings.pivotTriangles(animation.drawings.getMiddleOfTwoPoints(self.triangles[0][1],self.triangles[0][2]), right_eye,angle)
-            left_pupil = animation.drawings.pivotTriangles(animation.drawings.getMiddleOfTwoPoints(self.triangles[0][1],self.triangles[0][2]), left_pupil,angle)
-            right_pupil = animation.drawings.pivotTriangles(animation.drawings.getMiddleOfTwoPoints(self.triangles[0][1],self.triangles[0][2]), right_pupil,angle)
+            
 
+            pupil_offset = eye_separation * pupils_separation
+            left_pupil_x = left_eye_x - perp_x * pupil_offset    # Move left (toward center)
+            left_pupil_y = left_eye_y - perp_y * pupil_offset
+            right_pupil_x = right_eye_x + perp_x * pupil_offset  # Move right (toward center)  
+            right_pupil_y = right_eye_y + perp_y * pupil_offset
+            
+            # mouth pos
+            mouth_x = cx - norm_x * mouth_toward_center
+            mouth_y = cy - norm_y * mouth_toward_center
+            
+            # Create
+            left_eye = animation.drawings.getEllipseTriangles(left_eye_x, left_eye_y, eye_size, eye_size)
+            right_eye = animation.drawings.getEllipseTriangles(right_eye_x, right_eye_y, eye_size, eye_size)
+            left_pupil = animation.drawings.getEllipseTriangles(left_pupil_x, left_pupil_y, pupil_size, pupil_size)
+            right_pupil= animation.drawings.getEllipseTriangles(right_pupil_x, right_pupil_y, pupil_size, pupil_size)
+            mouth = animation.drawings.getEllipseTriangles(mouth_x, mouth_y, mouth_size, mouth_size)
+                    
+            # Draw
             for triangle in left_eye:
                 pygame.draw.polygon(self.window, Colors.white, triangle)
             for triangle in right_eye:
-                pygame.draw.polygon(self.window, Colors.green, triangle)
+                pygame.draw.polygon(self.window, Colors.white, triangle)
             for triangle in left_pupil:
                 pygame.draw.polygon(self.window, Colors.black, triangle)
             for triangle in right_pupil:
                 pygame.draw.polygon(self.window, Colors.black, triangle)
-            
-            mouth = animation.drawings.getEllipseTriangles(cx,cy+length/4,width/15,length/18)
-            mouth = animation.drawings.pivotTriangles(animation.drawings.getMiddleOfTwoPoints(self.triangles[0][1],self.triangles[0][2]), mouth,angle)
             for triangle in mouth:
-                pygame.draw.polygon(self.window,Colors.black,triangle)'''
-    
-
-    
-    def drawPatrick(self):
-        if self.name == "Head":
-            # Get the head triangle center as base position
-            head_triangle = self.triangles[0]
-            base_cx, base_cy = animation.drawings.centerOfTriangle(head_triangle)
+                pygame.draw.polygon(self.window, Colors.black, triangle)
             
-            # Create face relative to base center, then transform it
-            face_features = self._createBaseFace(base_cx, base_cy)
             
-            # Apply the same transformation that was applied to the head
-            transformed_features = self._transformFace(face_features, base_cx, base_cy)
-            
-            # Draw the transformed facial features
-            self._drawFaceFeatures(transformed_features)
-
-    def _createBaseFace(self, center_x, center_y):
-        """Create facial features at base position (no animation applied yet)"""
-        # Scale factors based on arm length
-        eye_size = self.arm_length / 12
-        pupil_size = eye_size * 0.4
-        mouth_width = self.arm_length / 10
-        mouth_height = self.arm_length / 15
-        
-        # Position features in a more natural face layout
-        # Eyes should be higher up and wider apart
-        eye_separation = self.arm_length / 5  # Much wider separation
-        eye_height_offset = self.arm_length / 12  # Move eyes up from center
-        mouth_down_offset = self.arm_length / 8   # Move mouth down from center
-        
-        # Calculate base arm direction (without animation)
-        base_angle = self.arm_animation['base_angle']
-        base_rad = math.radians(base_angle + self.angle)
-        base_norm_x = math.cos(base_rad)
-        base_norm_y = math.sin(base_rad)
-        
-        # Perpendicular vector for eye separation (horizontal when arm points up)
-        perp_x = -base_norm_y
-        perp_y = base_norm_x
-        
-        # Eye positions (higher up from center, well separated)
-        eye_center_x = center_x + base_norm_x * eye_height_offset
-        eye_center_y = center_y + base_norm_y * eye_height_offset
-        
-        left_eye_x = eye_center_x + perp_x * eye_separation * 0.5
-        left_eye_y = eye_center_y + perp_y * eye_separation * 0.5
-        right_eye_x = eye_center_x - perp_x * eye_separation * 0.5
-        right_eye_y = eye_center_y - perp_y * eye_separation * 0.5
-        
-        # Mouth position (below center)
-        mouth_x = center_x - base_norm_x * mouth_down_offset
-        mouth_y = center_y - base_norm_y * mouth_down_offset
-        
-        # Create the triangles for each feature
-        left_eye = animation.drawings.getEllipseTriangles(left_eye_x, left_eye_y, eye_size, eye_size)
-        right_eye = animation.drawings.getEllipseTriangles(right_eye_x, right_eye_y, eye_size, eye_size)
-        left_pupil = animation.drawings.getEllipseTriangles(left_eye_x, left_eye_y, pupil_size, pupil_size)
-        right_pupil = animation.drawings.getEllipseTriangles(right_eye_x, right_eye_y, pupil_size, pupil_size)
-        mouth = animation.drawings.getEllipseTriangles(mouth_x, mouth_y, mouth_width, mouth_height)
-        
-        return {
-            'left_eye': left_eye,
-            'right_eye': right_eye,
-            'left_pupil': left_pupil,
-            'right_pupil': right_pupil,
-            'mouth': mouth,
-            'center': (center_x, center_y)
-        }
-
-    def _transformFace(self, face_features, base_center_x, base_center_y):
-        """Apply the same transformation to the face that was applied to the head arm"""
-        
-        # Get the current animated head triangle
-        current_triangle = self.triangles[0]
-        current_cx, current_cy = animation.drawings.centerOfTriangle(current_triangle)
-        
-        # Calculate the transformation: translation + rotation
-        translation_x = current_cx - base_center_x
-        translation_y = current_cy - base_center_y
-        
-        # Get the current angle offset from animation
-        angle_offset = self.arm_animation['current_angle_offset']
-        
-        transformed_features = {}
-        
-        for feature_name, triangles in face_features.items():
-            if feature_name == 'center':
-                continue
-                
-            # First translate all triangles
-            translated_triangles = []
-            for triangle in triangles:
-                translated_triangle = []
-                for point in triangle:
-                    new_x = point[0] + translation_x
-                    new_y = point[1] + translation_y
-                    translated_triangle.append((new_x, new_y))
-                translated_triangles.append(tuple(translated_triangle))
-            
-            # Then rotate around the new center if there's an angle offset
-            if angle_offset != 0:
-                rotated_triangles = animation.drawings.pivotTriangles(
-                    (current_cx, current_cy), 
-                    translated_triangles, 
-                    angle_offset
-                )
-                transformed_features[feature_name] = rotated_triangles
-            else:
-                transformed_features[feature_name] = translated_triangles
-        
-        return transformed_features
-
-    def _drawFaceFeatures(self, features):
-        """Draw all the facial features"""
-        # Draw eyes (white background)
-        for triangle in features['left_eye']:
-            pygame.draw.polygon(self.window, Colors.white, triangle)
-        for triangle in features['right_eye']:
-            pygame.draw.polygon(self.window, Colors.white, triangle)
-        
-        # Draw pupils (black)
-        for triangle in features['left_pupil']:
-            pygame.draw.polygon(self.window, Colors.black, triangle)
-        for triangle in features['right_pupil']:
-            pygame.draw.polygon(self.window, Colors.black, triangle)
-        
-        # Draw mouth (black)
-        for triangle in features['mouth']:
-            pygame.draw.polygon(self.window, Colors.black, triangle)
 
     def update(self, move_arms=False):
         move_arms = self.star.playing
