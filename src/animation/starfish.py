@@ -219,15 +219,16 @@ class Arm:
     def _createBaseFace(self, center_x, center_y):
         """Create facial features at base position (no animation applied yet)"""
         # Scale factors based on arm length
-        eye_size = self.arm_length / 20
-        pupil_size = eye_size * 0.5
-        mouth_width = self.arm_length / 15
-        mouth_height = self.arm_length / 20
+        eye_size = self.arm_length / 12
+        pupil_size = eye_size * 0.4
+        mouth_width = self.arm_length / 10
+        mouth_height = self.arm_length / 15
         
-        # Position features relative to the head center
-        eye_separation = self.arm_length / 8
-        eye_forward_offset = self.arm_length / 10
-        mouth_back_offset = self.arm_length / 8
+        # Position features in a more natural face layout
+        # Eyes should be higher up and wider apart
+        eye_separation = self.arm_length / 5  # Much wider separation
+        eye_height_offset = self.arm_length / 12  # Move eyes up from center
+        mouth_down_offset = self.arm_length / 8   # Move mouth down from center
         
         # Calculate base arm direction (without animation)
         base_angle = self.arm_animation['base_angle']
@@ -235,22 +236,22 @@ class Arm:
         base_norm_x = math.cos(base_rad)
         base_norm_y = math.sin(base_rad)
         
-        # Perpendicular vector for eye separation
+        # Perpendicular vector for eye separation (horizontal when arm points up)
         perp_x = -base_norm_y
         perp_y = base_norm_x
         
-        # Eye positions (forward from center, separated perpendicular to arm)
-        eye_center_x = center_x + base_norm_x * eye_forward_offset
-        eye_center_y = center_y + base_norm_y * eye_forward_offset
+        # Eye positions (higher up from center, well separated)
+        eye_center_x = center_x + base_norm_x * eye_height_offset
+        eye_center_y = center_y + base_norm_y * eye_height_offset
         
-        left_eye_x = eye_center_x + perp_x * eye_separation
-        left_eye_y = eye_center_y + perp_y * eye_separation
-        right_eye_x = eye_center_x - perp_x * eye_separation
-        right_eye_y = eye_center_y - perp_y * eye_separation
+        left_eye_x = eye_center_x + perp_x * eye_separation * 0.5
+        left_eye_y = eye_center_y + perp_y * eye_separation * 0.5
+        right_eye_x = eye_center_x - perp_x * eye_separation * 0.5
+        right_eye_y = eye_center_y - perp_y * eye_separation * 0.5
         
-        # Mouth position (back from center)
-        mouth_x = center_x - base_norm_x * mouth_back_offset
-        mouth_y = center_y - base_norm_y * mouth_back_offset
+        # Mouth position (below center)
+        mouth_x = center_x - base_norm_x * mouth_down_offset
+        mouth_y = center_y - base_norm_y * mouth_down_offset
         
         # Create the triangles for each feature
         left_eye = animation.drawings.getEllipseTriangles(left_eye_x, left_eye_y, eye_size, eye_size)
