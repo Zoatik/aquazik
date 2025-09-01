@@ -80,11 +80,10 @@ class Starfish:
     def draw(self, borders: bool = True):
         self.color = Colors.patrick if self.playing else FishColors.orange
 
-        # Get all needed triangles
         arms = self.arms()
         pentagone = self.body()
 
-        # Draw all borders if any
+        # Draw borders
         if borders:
             for t in arms:
                 pygame.draw.polygon(self.window,Colors.black,t,5)
@@ -95,7 +94,6 @@ class Starfish:
         for triangle in pentagone:
             pygame.draw.polygon(self.window,self.color,triangle)
 
-        arms = self.arms()
         for triangle in arms:
             pygame.draw.polygon(self.window,self.color,triangle)
         
@@ -107,16 +105,24 @@ class Starfish:
         cx,cy = self.center
         length = self.arm_length
         width = self.arm_width
+
+        arms = self.arms()
         
-        left_eye = animation.drawings.getEllipseTriangles(cx-length/15, cy-length/4, length/10/2, length/10)
-        right_eye = animation.drawings.getEllipseTriangles(cx+length/15, cy-length/4, length/10/2, length/10)
+        middles = []
+        for arm in arms:
+            middles.append(animation.drawings.centerOfTriangle(arm))
+
+        print(middles)
+        
+        left_eye = animation.drawings.getEllipseTriangles(middles[0][0]-math.cos(self.angle), middles[0][1]-math.sin(self.angle), length/10/2, length/10)
+        right_eye = animation.drawings.getEllipseTriangles(middles[0][0]+math.cos(self.angle), middles[0][1]+math.sin(self.angle), length/10/2, length/10)
         left_pupil = animation.drawings.getEllipseTriangles(cx-length/18, cy-length/4, length/20/2, width/20)
         right_pupil = animation.drawings.getEllipseTriangles(cx+length/18, cy-length/4, length/20/2, width/20)
 
         for triangle in left_eye:
             pygame.draw.polygon(self.window, Colors.white, triangle)
         for triangle in right_eye:
-            pygame.draw.polygon(self.window, Colors.white, triangle)
+            pygame.draw.polygon(self.window, Colors.green, triangle)
         for triangle in left_pupil:
             pygame.draw.polygon(self.window, Colors.black, triangle)
         for triangle in right_pupil:
@@ -147,7 +153,7 @@ class Starfish:
             length_variation = 1.0 + math.sin(length_wave_time) * 0.1  # ±10% length variation
             anim['current_length_multiplier'] = length_variation * anim['length_variation']
 
-    
+
     def update(self, move_arms=False):
         move_arms = self.playing
         if move_arms:
