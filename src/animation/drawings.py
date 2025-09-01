@@ -34,7 +34,7 @@ def debugPointsDoubles(triangle) -> bool:
     p1, p2, p3 = triangle
     lll = [twoPointDistance(p1,p2), twoPointDistance(p2,p3), twoPointDistance(p1,p3)]
     if max(lll) > 200:
-        print("⚠️⚠️⚠️ CHEFFFFFFFFFFFFFFFFFFFFF")
+        print("⚠️⚠️⚠️ Points doubles trouvés")
         traceback.print_stack()
     
     return min(lll) == 0
