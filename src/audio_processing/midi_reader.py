@@ -38,7 +38,7 @@ class MidiNote:
             for instr in values:
                 if instr.value == reduced:
                     return instr
-                
+
         return Instrument.UNKNOWN
 
     def set_end_ticks(self, endTicks):

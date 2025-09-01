@@ -32,7 +32,8 @@ class Fish:
         distance = base_note.velocity / 6
         self.center = (
             (distance if direction == Direction.RIGHT else window.get_size()[0] - base_note.velocity / 6),
-            int(base_note.get_real_note()[-1]) * (window.get_size()[1] / 9)
+            randrange(50, int(window.get_size()[1] / 2 - 50))
+            #int(base_note.get_real_note()[-1]) * (window.get_size()[1] / 9)
         )
 
         # random values
@@ -97,7 +98,7 @@ class Fish:
         # get all needed triangles
         bodyTriangles = animation.drawings.pivotTriangles(
             self.center,
-            animation.drawings.getEllipseTriangles(cx, cy, self.length, self.height, segments = 80),
+            animation.drawings.getEllipseTriangles(cx, cy, self.length, self.height, segments = 20),
             self.angleDeg
         )
         
@@ -110,7 +111,9 @@ class Fish:
                 pygame.draw.polygon(self.window, Colors.black, t, width=5)
         if self.fishType == FishType.LONG:
             dorsalFinTriangle = animation.drawings.pivotTriangle(self.center, dorsalFinTriangle, self.angleDeg)
-            pygame.draw.polygon(self.window, Colors.black, t, width=5)
+            pygame.draw.polygon(self.window, Colors.black, dorsalFinTriangle, width=5)
+
+        self.fishTail.drawBorder()
 
         # draw body parts (real color)
         for t in bodyTriangles:
@@ -119,7 +122,7 @@ class Fish:
         # iris
         eyeIrisTriangles = animation.drawings.pivotTriangles(
             self.center,
-            animation.drawings.getEllipseTriangles(eyeCenter[0], eyeCenter[1], irisRadius, irisRadius, segments=20),
+            animation.drawings.getPolygonPoints(8, eyeCenter[0], eyeCenter[1], irisRadius), 
             self.angleDeg
         )
         for t in eyeIrisTriangles:
@@ -128,7 +131,7 @@ class Fish:
         # pupils
         eyePupilsTriangles = animation.drawings.pivotTriangles(
             self.center,
-            animation.drawings.getEllipseTriangles(eyeCenter[0], eyeCenter[1], pupilRadius, pupilRadius, segments=20),
+            animation.drawings.getPolygonPoints(8, eyeCenter[0], eyeCenter[1], pupilRadius), 
             self.angleDeg
         )
         for t in eyePupilsTriangles:
@@ -190,9 +193,6 @@ class Fish:
         # add 650 ms to time to close so the animation is more visible
         self.fishMouth.timeToClose = noteTime + 0.65
     
-    def drawBorder(self, bordersize = 1):
-        pass # TODO
-    
     def createBubble(self, window):
         return Bubble(
             window,
@@ -235,6 +235,8 @@ class Bubble:
             pygame.draw.polygon(self.window, Colors.white, t)
 
 class FishMouth:
+    LIMIT = 5
+
     def __init__(self, window, maxAngleDeg: int, parent: Fish):
         # saved parameters
         self.window = window
@@ -246,11 +248,11 @@ class FishMouth:
 
         # default values
         self.isOpening = False
-        self.angleDeg = 0.01
+        self.angleDeg = 0
         self.timeToClose = 0
     
     def animate(self, deltaTime):
-        if self.angleDeg > 0.01:
+        if self.angleDeg > self.LIMIT:
             self.angleDeg -= (deltaTime / self.timeToClose) * self.angleDeg
 
         self.timeToClose -= deltaTime
@@ -258,7 +260,7 @@ class FishMouth:
 
     # Calculates new angle and draws
     def draw(self):
-        if self.angleDeg == 0:
+        if self.angleDeg <= self.LIMIT:
             return
         
         cx = self.parent.center[0] + (self.parent.direction.value * 3) * self.parent.length / 5
@@ -301,7 +303,8 @@ class FishTail:
 
         # angle total = angle du corps + oscillation de la queue
         self.angleDeg = parent_angle + oscillation
-    def draw(self):
+    
+    def getTriangles(self):
         topTailY = self.parent.center[1] - self.parent.height
         downTailY = self.parent.center[1] + self.parent.height
         
@@ -316,5 +319,13 @@ class FishTail:
                 (endTail, downTailY),(midTail, self.parent.center[1]), self.parent.center
              ]
         ]
-        for t in animation.drawings.pivotTriangles(self.parent.center, before_pivot, self.angleDeg):
+        return animation.drawings.pivotTriangles(self.parent.center, before_pivot, self.angleDeg)
+
+    
+    def draw(self):
+        for t in self.getTriangles():
             pygame.draw.polygon(self.parent.window, self.parent.color, t)
+    
+    def drawBorder(self, bordersize = 5):
+        for t in self.getTriangles():
+            pygame.draw.polygon(self.parent.window, Colors.black, t, width=bordersize)
