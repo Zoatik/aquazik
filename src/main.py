@@ -166,15 +166,16 @@ def main():
         Aquarium.drawBobTopHouse(window)
 
         Aquarium.drawStarfish(starFishList)
+
+        #draw algues
+        Aquarium.drawSeaweed(window,fronds,start)
+
         crab.move(deltaTime, starFishList)
         crab.draw()
         Aquarium.drawFishes(fishList)
 
         for b in [x for x in bubbleList if not x.out_of_bounds]:
             b.move_and_draw()
-
-        #draw algues
-        Aquarium.drawSeaweed(window,fronds,start)
 
         Aquarium.drawProgressBar(window, currentTime, mdi.totalTime)
 
