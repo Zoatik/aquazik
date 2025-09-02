@@ -41,8 +41,8 @@ class Starfish:
             borderPoints.append((pentagone[i][1],pentagone[i][2]))
         
         triangles = []
-        for i, arm in enumerate(self.armList):
-            arm_triangles = arm.create(borderPoints, i)  # Pass the arm index
+        for armNb, arm in enumerate(self.armList):
+            arm_triangles = arm.create(borderPoints, armNb)
             triangles.extend(arm_triangles)
         
         return triangles
@@ -67,38 +67,16 @@ class Starfish:
         
         
         if self.playing and self.arm_count == 5:
-            self.drawPatrick()
+            #self.drawPatrick()
+            for arm in self.armList :
+                #if arm.name == "Head":
+                    #arm.drawHead()
+                arm.drawPatrick()
 
 
-    def drawPatrick(self):
-        cx,cy = self.center
-        length = self.arm_length
-        width = self.arm_width
+   
 
-        arms = self.arms()
-        
-        middles = []
-        for arm in arms:
-            middles.append(animation.drawings.centerOfTriangle(arm))
 
-        left_eye = animation.drawings.getEllipseTriangles(cx-length/15, cy-length/4, length/10/2, length/10)
-        right_eye = animation.drawings.getEllipseTriangles(cx+length/15, cy-length/4, length/10/2, length/10)
-        left_pupil = animation.drawings.getEllipseTriangles(cx-length/18, cy-length/4, length/20/2, width/20)
-        right_pupil = animation.drawings.getEllipseTriangles(cx+length/18, cy-length/4, length/20/2, width/20)
-
-        for triangle in left_eye:
-            pygame.draw.polygon(self.window, Colors.white, triangle)
-        for triangle in right_eye:
-            pygame.draw.polygon(self.window, Colors.green, triangle)
-        for triangle in left_pupil:
-            pygame.draw.polygon(self.window, Colors.black, triangle)
-        for triangle in right_pupil:
-            pygame.draw.polygon(self.window, Colors.black, triangle)
-        
-        mouth = animation.drawings.getEllipseTriangles(cx,cy,width/15,length/18)
-        for triangle in mouth:
-            pygame.draw.polygon(self.window,Colors.black,triangle)
-        
     def update(self,):
         if self.playing:
             for arm in self.armList:
@@ -106,7 +84,7 @@ class Starfish:
 
 
 class Arm:
-    def __init__(self, window, name : str, length, arm_count, starCenter, star, arm_index):
+    def __init__(self, window, name : str, length, arm_count, starCenter, star :Starfish, arm_index):
         self.window = window
         self.name = name
         self.color = FishColors.orange
@@ -116,8 +94,8 @@ class Arm:
         self.arm_width = random.randrange(int(length/4),length)
         self.starCenter = starCenter
         self.star = star
+        self.angle = star.angle
         self.arm_index = arm_index  # Which arm this object represents
-        
 
         # Animation properties for this specific arm
         self.arm_animation = {
@@ -178,16 +156,87 @@ class Arm:
         
         current_time = time.time() - self.base_time
         
-        # Update this arm's animation
+        # Update this arm anim
         anim = self.arm_animation
         wave_time = current_time * anim['wave_frequency'] + anim['phase_offset']
         angle_wave = math.sin(wave_time) * anim['wave_amplitude']
         anim['current_angle_offset'] = angle_wave
         
-        # Calculate subtle length variation (breathing effect)
+        # Calculate length variation
         length_wave_time = current_time * (anim['wave_frequency'] * 0.5) + anim['phase_offset']
         length_variation = 1.0 + math.sin(length_wave_time) * 0.1  # ±10% length variation
         anim['current_length_multiplier'] = length_variation * anim['length_variation']
+
+    def drawPatrick(self):
+        if self.name == "Head":
+            head_triangle = self.triangles[0]
+            cx, cy = animation.drawings.centerOfTriangle(head_triangle)
+            
+            eye_size = self.arm_length / 15
+            pupil_size = eye_size * 0.4
+            mouth_size = self.arm_length / 20
+
+            eye_separation = self.arm_length / 20  
+            eyes_toward_tip = self.arm_length / 15
+            pupils_separation = 0.2
+            mouth_toward_center = self.arm_length / 12 
+            
+            # direction center-apex
+            direction_x = cx - self.starCenter[0]
+            direction_y = cy - self.starCenter[1]
+            
+            # ||direction||
+            length = math.sqrt(direction_x**2 + direction_y**2)
+            if length > 0:
+                norm_x = direction_x / length
+                norm_y = direction_y / length
+            else:
+                norm_x, norm_y = 0, 1
+            
+            perp_x = -norm_y
+            perp_y = norm_x
+            
+            #eyes pos
+            eye_center_x = cx + norm_x * eyes_toward_tip
+            eye_center_y = cy + norm_y * eyes_toward_tip
+            
+            left_eye_x = eye_center_x + perp_x * eye_separation
+            left_eye_y = eye_center_y + perp_y * eye_separation
+            right_eye_x = eye_center_x - perp_x * eye_separation
+            right_eye_y = eye_center_y - perp_y * eye_separation
+
+            
+
+            pupil_offset = eye_separation * pupils_separation
+            left_pupil_x = left_eye_x - perp_x * pupil_offset    # Move left (toward center)
+            left_pupil_y = left_eye_y - perp_y * pupil_offset
+            right_pupil_x = right_eye_x + perp_x * pupil_offset  # Move right (toward center)  
+            right_pupil_y = right_eye_y + perp_y * pupil_offset
+            
+            # mouth pos
+            mouth_x = cx - norm_x * mouth_toward_center
+            mouth_y = cy - norm_y * mouth_toward_center
+            
+            # Create
+            left_eye = animation.drawings.getEllipseTriangles(left_eye_x, left_eye_y, eye_size, eye_size)
+            right_eye = animation.drawings.getEllipseTriangles(right_eye_x, right_eye_y, eye_size, eye_size)
+            left_pupil = animation.drawings.getEllipseTriangles(left_pupil_x, left_pupil_y, pupil_size, pupil_size)
+            right_pupil= animation.drawings.getEllipseTriangles(right_pupil_x, right_pupil_y, pupil_size, pupil_size)
+            mouth = animation.drawings.getEllipseTriangles(mouth_x, mouth_y, mouth_size, mouth_size)
+                    
+            # Draw
+            for triangle in left_eye:
+                pygame.draw.polygon(self.window, Colors.white, triangle)
+            for triangle in right_eye:
+                pygame.draw.polygon(self.window, Colors.white, triangle)
+            for triangle in left_pupil:
+                pygame.draw.polygon(self.window, Colors.black, triangle)
+            for triangle in right_pupil:
+                pygame.draw.polygon(self.window, Colors.black, triangle)
+            for triangle in mouth:
+                pygame.draw.polygon(self.window, Colors.black, triangle)
+            
+            
 
     def update(self, move_arms=False):
         move_arms = self.star.playing

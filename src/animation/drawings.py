@@ -134,7 +134,7 @@ def getApexPointTriangle(p1: tuple[float, float], p2: tuple[float, float], heigh
 
     return apex
 
-def centerOfTriangle(points : list[tuple[tuple,tuple,tuple]]):
+def centerOfTriangle(points : tuple[tuple[float, float], tuple[float, float], tuple[float, float]]) -> tuple[int, int]:
     x_sum = sum(point[0] for point in points)
     y_sum = sum(point[1] for point in points)
     
