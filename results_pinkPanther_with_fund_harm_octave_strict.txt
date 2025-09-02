@@ -1,0 +1,87 @@
+---- Résultats ----
+Fichier réf : /home/axelh/development/aquazik/audio_in/PinkPanther.midi
+Fichier gen : /home/axelh/development/aquazik/audio_out/PinkPanther_Both.mid
+Notes réf      : 451
+Notes générées : 456
+Appariées      : 308
+Similarité globale (rappel) : 68.3%
+Précision                       : 67.5%
+F1                              : 67.9%
+Début (attaque)                 : 50.3%  (tol 50 ms)
+Fin   (relâchement)             : 17.5%  (tol 80 ms)
+Justesse de note (pitch exact)  : 100.0% (±0 st)
+MAE attaque : 104.4 ms
+MAE fin     : 288.5 ms
+Fausses notes (FP) : 148
+Notes manquées (FN): 143
+Substitutions (mauvais pitch apparié): 0
+Notes manquées isolées : 0
+Notes manquées dans accords : 143
+Fausses notes isolées : 1
+Fausses notes simultanées : 147
+
+---- Résultats ----
+Fichier réf : /home/axelh/development/aquazik/audio_in/PinkPanther_Piano_Only.mid
+Fichier gen : /home/axelh/development/aquazik/audio_out/PinkPanther_Piano_Only.mid
+Notes réf      : 230
+Notes générées : 303
+Appariées      : 190
+Similarité globale (rappel) : 82.6%
+Précision                       : 62.7%
+F1                              : 71.3%
+Début (attaque)                 : 40.0%  (tol 50 ms)
+Fin   (relâchement)             : 16.8%  (tol 80 ms)
+Justesse de note (pitch exact)  : 100.0% (±0 st)
+MAE attaque : 102.8 ms
+MAE fin     : 329.4 ms
+Fausses notes (FP) : 113
+Notes manquées (FN): 40
+Substitutions (mauvais pitch apparié): 0
+Notes manquées isolées : 1
+Notes manquées dans accords : 39
+Fausses notes isolées : 3
+Fausses notes simultanées : 110
+
+---- Résultats ----
+Fichier réf : /home/axelh/development/aquazik/audio_in/PinkPanther_Trumpet_Only.mid
+Fichier gen : /home/axelh/development/aquazik/audio_in/PinkPanther_Trumpet_Only.mid
+Notes réf      : 221
+Notes générées : 221
+Appariées      : 221
+Similarité globale (rappel) : 100.0%
+Précision                       : 100.0%
+F1                              : 100.0%
+Début (attaque)                 : 100.0%  (tol 50 ms)
+Fin   (relâchement)             : 100.0%  (tol 80 ms)
+Justesse de note (pitch exact)  : 100.0% (±0 st)
+MAE attaque : 0.0 ms
+MAE fin     : 0.0 ms
+Fausses notes (FP) : 0
+Notes manquées (FN): 0
+Substitutions (mauvais pitch apparié): 0
+Notes manquées isolées : 0
+Notes manquées dans accords : 0
+Fausses notes isolées : 0
+Fausses notes simultanées : 0
+
+---- Résultats ----
+Fichier réf : /home/axelh/development/aquazik/audio_in/PinkPanther_Trumpet_Only.mid
+Fichier gen : /home/axelh/development/aquazik/audio_out/PinkPanther_Trumpet_Only.mid
+Notes réf      : 221
+Notes générées : 273
+Appariées      : 209
+Similarité globale (rappel) : 94.6%
+Précision                       : 76.6%
+F1                              : 84.6%
+Début (attaque)                 : 65.6%  (tol 50 ms)
+Fin   (relâchement)             : 14.4%  (tol 80 ms)
+Justesse de note (pitch exact)  : 100.0% (±0 st)
+MAE attaque : 45.9 ms
+MAE fin     : 162.1 ms
+Fausses notes (FP) : 64
+Notes manquées (FN): 12
+Substitutions (mauvais pitch apparié): 0
+Notes manquées isolées : 7
+Notes manquées dans accords : 5
+Fausses notes isolées : 11
+Fausses notes simultanées : 53

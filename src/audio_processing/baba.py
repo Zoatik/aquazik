@@ -1,141 +1,16 @@
-from enum import Enum
 import math
+import os
 import librosa
 import numpy as np
 import matplotlib.pyplot as plt
 from midiutil import MIDIFile
+from audio_processing.audio_utils import Tools, Instrument, Note
+from audio_processing.MidiV2 import midi_maker
 
 
-WINDOW_TIME = 0.01
+WINDOW_TIME = 0.025
 FREQ_MIN = 100
 FREQ_MAX = 7000
-
-NOTE_NAMES_12 = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
-
-
-class Instrument(Enum):
-    PIANO = 11
-    TRUMPET = 2
-    UNKNOWN = -1
-
-
-class Tools:
-    NOTE_NAMES = NOTE_NAMES_12
-    NOTE_TO_MIDI = {
-        "C": 0,
-        "C#": 1,
-        "D": 2,
-        "D#": 3,
-        "E": 4,
-        "F": 5,
-        "F#": 6,
-        "G": 7,
-        "G#": 8,
-        "A": 9,
-        "A#": 10,
-        "B": 11,
-    }
-
-    @staticmethod
-    def note_to_midi(note: str) -> int:
-        # "C#4" → name="C#", octave=4 → MIDI = 1 + 12*(4+1) = 61
-        note_name = note[:-1]
-        octave = int(note[-1])
-        return Tools.NOTE_TO_MIDI[note_name] + 12 * (octave + 1)
-
-    @staticmethod
-    def seconds_to_beat(sec: float, bpm: float) -> float:
-        return sec * (bpm / 60.0)
-
-    @staticmethod
-    def freq_to_number(f: float) -> int:
-        # MIDI number
-        return int(np.round(69 + 12 * np.log2(f / 440.0)))
-
-    @staticmethod
-    def number_to_freq(n: int) -> float:
-        return 440.0 * (2.0 ** ((n - 69) / 12.0))
-
-    @staticmethod
-    def note_name(n: int) -> str:
-        return NOTE_NAMES_12[n % 12] + str(int(n / 12 - 1))
-
-    @staticmethod
-    def freq_to_note(f: float) -> str:
-        return Tools.note_name(Tools.freq_to_number(f))
-
-
-class Note:
-    def __init__(
-        self,
-        frequency: float,
-        magnitudes: list[float],
-        times: list[float],
-        start=0.0,
-        length=0.0,
-    ):
-        self.frequency = frequency
-        self.start_time = start
-        self.start_bpm = 0.0
-        self.length = length
-        self.length_bpm = 0.0
-        self.midi_number = Tools.freq_to_number(self.frequency)
-        self.name = Tools.note_name(self.midi_number)
-        self.magnitudes = magnitudes  # List of magnitudes over time for this note
-        self.times = times  # Times (in seconds) corresponding to each magnitude
-        self.maximum = np.max(
-            magnitudes
-        )  # Store the maximum magnitude observed for this note
-        self.instrument = Instrument.PIANO.value
-
-    def __repr__(self):
-        return f"Note(frequency={self.frequency}, name='{self.name}', start={self.start_time}, bpm start={self.start_bpm} , bpm length={self.length_bpm}, magnitude={self.magnitudes})\n"
-
-    def set_bpm(self, bpm: int):
-        self.start_bpm = round(Tools.seconds_to_beat(self.start_time, bpm) * 8) / 8
-        self.length_bpm = round(Tools.seconds_to_beat(self.length, bpm) * 8) / 8
-
-
-def midi_maker(macro: list[Note], bpm: int, outfile: str = "music.mid"):
-    """Create a .mid file as music.mid
-
-    Args:
-        macro (list[Note]): List made with the velocity, the duration and the note ([60, 2, "G4"], [None, 2])
-        bpm (float): The tempo of the music
-
-    Returns:
-        str: The path of the created file (music.mid)
-    """
-
-    # Initialising the midi file and adding the tempo
-    track = 0
-    MyMIDI = MIDIFile(1)
-    MyMIDI.addTempo(track, 0, bpm)
-
-    # Adding the notes to the sheet music => Note(channel = instrument, pitch = midi note , time = starting time, duration, volume)
-    sheet_music = sorted(macro, key=lambda note: note.start_bpm)
-    for note in sheet_music:
-        channel = note.instrument
-        time = note.start_bpm
-        duration = note.length_bpm
-        if duration <= 0.1 or duration > 10.0:
-            continue
-
-        volume = int((note.magnitudes[0]) * 127)
-        MyMIDI.addNote(
-            track=track,
-            channel=channel,
-            pitch=note.midi_number,
-            time=time,
-            duration=duration,
-            volume=volume,
-        )
-
-    # Creating the .mid file
-    with open(outfile, "wb") as output_file:
-        MyMIDI.writeFile(output_file)
-
-    return "music.mid"
 
 
 def estimate_bpm_from_wavelet(
@@ -210,7 +85,8 @@ def wavelet_mag(audio_data, sample_rate, use_vqt=False, bins_per_octave=12):
     """
     n_bins = bins_per_octave * 9  # octaves 0..8 → 9 * 12 = 108
     fmin = librosa.note_to_hz("C0")
-    hop_length = max(1, int(sample_rate * WINDOW_TIME))
+    hop_length = int(sample_rate * WINDOW_TIME)
+    audio_data = librosa.util.normalize(audio_data)
 
     if use_vqt:
         C = librosa.vqt(
@@ -222,7 +98,7 @@ def wavelet_mag(audio_data, sample_rate, use_vqt=False, bins_per_octave=12):
             bins_per_octave=bins_per_octave,
         )
     else:
-        C = librosa.cqt(
+        C = librosa.hybrid_cqt(
             audio_data,
             sr=sample_rate,
             hop_length=hop_length,
@@ -1157,6 +1033,7 @@ def harmonic_clean_and_octave_promote(
     max_harm=8,  # harmoniques à considérer (2..K)
     tol_bins=1,  # tolérance d’accordage ± tol_bins
     rel_thresh=0.12,  # seuil relatif (vs max de la frame) pour considérer une harmonique
+    octave_factor=2.0,  # score d’octave doit être supérieur à factor * score f0
     # Atténuation des harmoniques
     attenuate_harmonics=True,
     harmonic_atten=0.35,  # multiplier les harmoniques identifiées par ce facteur (0..1)
@@ -1276,6 +1153,7 @@ def harmonic_clean_and_octave_promote(
             for p in peaks:
                 best_f0 = None
                 best_support = -1.0
+
                 # Candidats fondamentaux en dessous: p - off(k)
                 for _, off in harm_off:
                     f0 = p - off
@@ -1293,7 +1171,40 @@ def harmonic_clean_and_octave_promote(
                         best_support = score
                         best_f0 = f0
 
-                # Si un f0 plausible explique p, p est probablement une harmonique -> on atténue
+                # --- Règle spéciale "octave" (1ʳᵉ harmonique) ---
+                # Si p ≈ 2 * best_f0 (± tol_bins) et que l'octave n'est pas assez forte,
+                # on SUPPRIME l'harmonique (mise à zéro) au lieu de simplement l'atténuer.
+                if (
+                    best_f0 is not None
+                    and best_support > 0.2
+                    and abs((p - best_f0) - bins_per_octave) <= tol_bins
+                ):
+                    # Fenêtres locales robustes
+                    j0_f0 = max(0, best_f0 - tol_bins)
+                    j1_f0 = min(n_bins, best_f0 + tol_bins + 1)
+
+                    oct_ix = int(round(best_f0 + bins_per_octave))
+                    j0_oct = max(0, oct_ix - tol_bins)
+                    j1_oct = min(n_bins, oct_ix + tol_bins + 1)
+
+                    # Énergies max locales (tu peux utiliser .mean() si tu préfères)
+                    f0_energy = col[j0_f0:j1_f0].max() if j1_f0 > j0_f0 else 0.0
+                    oct_energy = col[j0_oct:j1_oct].max() if j1_oct > j0_oct else 0.0
+
+                    # Si l'octave n'est pas >= octave_factor × fondamentale -> suppression de TOUTE la bande d'octave
+                    if (
+                        f0_energy > 0.0
+                        and oct_energy < octave_factor * f0_energy
+                        and j1_oct > j0_oct
+                    ):
+                        removed = float(col[j0_oct:j1_oct].sum())
+                        col[j0_oct:j1_oct] = 0.0
+                        if energy_conserve and removed > 0.0 and j1_f0 > j0_f0:
+                            col[j0_f0:j1_f0] += removed / (j1_f0 - j0_f0)
+                        # Octave traitée : passer au pic suivant (ne pas appliquer l'atténuation générique)
+                        continue
+
+                # --- Cas général: atténuation des harmoniques expliquées par une f0 plausible ---
                 if best_f0 is not None and best_support > 0.2 and harmonic_atten < 1.0:
                     removed = col[p] * (1.0 - harmonic_atten)
                     col[p] *= harmonic_atten
@@ -1444,41 +1355,27 @@ def plot_note_tracks(
     plt.tight_layout()
 
 
-if __name__ == "__main__":
-    audio_data, sr = librosa.load("audio_in/Gamme.mp3")
-    print(audio_data)
+def convert_to_midi(audio_path: str, output_midi_path: str | None, debug: bool = False):
+    if not os.path.isfile(audio_path):
+        raise FileNotFoundError(f"Le fichier audio '{audio_path}' est introuvable.")
+
+    audio_data, sr = librosa.load(audio_path, mono=True)
+
     bpm, beat_times = estimate_bpm_from_wavelet(audio_data, sr, use_vqt=False)
     bpm = round(bpm)
     print("BPM estimé:", bpm)
-    print("Battements (s):", beat_times[:10])
 
     print("Calcul de la CQT...")
     mag, times, note_labels = wavelet_mag(
-        audio_data, sr, use_vqt=False, bins_per_octave=36
+        audio_data, sr, use_vqt=False, bins_per_octave=48
     )
 
     mag[mag < 0.01] = 0.0  # seuil numérique
 
-    # Lissage doux pour transcription
-    """mag_s = smooth_wavelet_mag(
-        mag,
-        times,
-        note_labels,
-        time_s=0.04,  # 40 ms
-        freq_bins=3,  # ±1 bin
-        method="box",
-        renormalize=False,
-    )"""
-
-    mag_h = harmonic_clean_and_octave_promote(
-        mag, bins_per_octave=36, max_harm=6, max_octave_shift=4, harmonic_atten=0.35
-    )
-
-    mag_h[mag_h < 0.01] = 0.0
-
+    print("Renforcement des fondamentales...")
     mag_fund = reinforce_fundamentals(
-        mag_h,
-        bins_per_octave=36,
+        mag,
+        bins_per_octave=48,
         max_harm=6,
         presence_thresh=0.15,
         neigh_bins=1,
@@ -1489,11 +1386,24 @@ if __name__ == "__main__":
 
     mag_fund[mag_fund < 0.4] = 0.0
 
-    print("Suivi de notes...")
-    tracks = track_notes(
+    print("Nettoyage harmonique et promotion d’octaves...")
+    mag_h = harmonic_clean_and_octave_promote(
         mag_fund,
+        bins_per_octave=48,
+        max_harm=6,
+        max_octave_shift=4,
+        harmonic_atten=0.35,
+        tol_bins=2,
+        octave_factor=2.0,
+    )
+
+    mag_h[mag_h < 0.01] = 0.0
+
+    print("Génération des pistes de notes...")
+    tracks = track_notes(
+        mag_h,
         times,
-        bins_per_octave=36,
+        bins_per_octave=48,
         max_harm=6,
         peak_rel_thresh=0.2,
         max_jump_bins=3,
@@ -1506,26 +1416,31 @@ if __name__ == "__main__":
 
     notes = tracks_to_notes(tracks, times, bpm=bpm)
 
-    midi_maker(notes, bpm)
+    midi_maker(notes, bpm, output_midi_path if output_midi_path else "music.mid")
 
-    """plot_pianoroll(mag, times, note_labels, "piano-roll sans smooth", threshold=0.00)
-    plot_pianoroll(
-        mag_fund,
-        times,
-        note_labels,
-        "piano-roll avec renforcement des fondamentales",
-        threshold=0.00,
-    )
-    plot_pianoroll(
-        mag_h,
-        times,
-        note_labels,
-        "piano-roll avec nettoyage harmonique",
-        threshold=0.00,
-    )"""
+    if debug:
+        plot_pianoroll(mag, times, note_labels, "piano-roll brut", threshold=0.00)
+        plot_pianoroll(
+            mag_fund,
+            times,
+            note_labels,
+            "piano-roll avec renforcement des fondamentales",
+            threshold=0.00,
+        )
+        plot_pianoroll(
+            mag_h,
+            times,
+            note_labels,
+            "piano-roll avec nettoyage harmonique",
+            threshold=0.00,
+        )
 
-    plot_note_tracks(
-        tracks, times=times, y_mode="midi", title="Trajectoires de notes détectées"
-    )
+        plot_note_tracks(
+            tracks, times=times, y_mode="midi", title="Trajectoires de notes détectées"
+        )
 
-    plt.show()
+        plt.show()
+
+
+if __name__ == "__main__":
+    convert_to_midi("audio_in/Gamme.mp3", "test.mid", debug=True)
