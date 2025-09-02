@@ -21,7 +21,7 @@ class Starfish:
         # Create arms 
         self.armList : list[Arm] = []
         if arm_count == 5 :
-            typeArm = ["Head","Arm","Leg","Leg","Arm"]
+            typeArm = ["Head","Arm","LLeg","RLeg","Arm"]
         else :
             typeArm = ["Arm" for i in range(arm_count)]
         for armNb, arm_type in enumerate(typeArm):
@@ -72,10 +72,6 @@ class Starfish:
                 #if arm.name == "Head":
                     #arm.drawHead()
                 arm.drawPatrick()
-
-
-   
-
 
     def update(self,):
         if self.playing:
@@ -167,63 +163,128 @@ class Arm:
         length_variation = 1.0 + math.sin(length_wave_time) * 0.1  # ±10% length variation
         anim['current_length_multiplier'] = length_variation * anim['length_variation']
 
+    def drawHead(self):
+        head_triangle = self.triangles[0]
+        cx, cy = animation.drawings.centerOfTriangle(head_triangle)
+            
+        eye_size = self.arm_length / 15
+        pupil_size = eye_size * 0.4
+        mouth_size = self.arm_length / 20
+
+        eye_separation = self.arm_length / 20  
+        eyes_toward_tip = self.arm_length / 15
+        pupils_separation = 0.2
+        mouth_toward_center = self.arm_length / 12 
+           
+        # direction center-apex
+        direction_x = cx - self.starCenter[0]
+        direction_y = cy - self.starCenter[1]
+            
+        # ||direction||
+        length = math.sqrt(direction_x**2 + direction_y**2)
+        if length > 0:
+            norm_x = direction_x / length
+            norm_y = direction_y / length
+        else:
+            norm_x, norm_y = 0, 1
+            
+        perp_x = -norm_y
+        perp_y = norm_x
+            
+        #eyes pos
+        eye_center_x = cx + norm_x * eyes_toward_tip
+        eye_center_y = cy + norm_y * eyes_toward_tip
+            
+        left_eye_x = eye_center_x + perp_x * eye_separation
+        left_eye_y = eye_center_y + perp_y * eye_separation
+        right_eye_x = eye_center_x - perp_x * eye_separation
+        right_eye_y = eye_center_y - perp_y * eye_separation
+
+            
+
+        pupil_offset = eye_separation * pupils_separation
+        left_pupil_x = left_eye_x - perp_x * pupil_offset    # Move left (toward center)
+        left_pupil_y = left_eye_y - perp_y * pupil_offset
+        right_pupil_x = right_eye_x + perp_x * pupil_offset  # Move right (toward center)  
+        right_pupil_y = right_eye_y + perp_y * pupil_offset
+            
+        # mouth pos
+        mouth_x = cx - norm_x * mouth_toward_center
+        mouth_y = cy - norm_y * mouth_toward_center
+            
+        # Create
+        left_eye = animation.drawings.getEllipseTriangles(left_eye_x, left_eye_y, eye_size, eye_size)
+        right_eye = animation.drawings.getEllipseTriangles(right_eye_x, right_eye_y, eye_size, eye_size)
+        left_pupil = animation.drawings.getEllipseTriangles(left_pupil_x, left_pupil_y, pupil_size, pupil_size)
+        right_pupil= animation.drawings.getEllipseTriangles(right_pupil_x, right_pupil_y, pupil_size, pupil_size)
+        mouth = animation.drawings.getEllipseTriangles(mouth_x, mouth_y, mouth_size, mouth_size)
+        
+        return left_eye,right_eye,left_pupil,right_pupil,mouth
+
+    def drawShorts(self, horizontal_offset=0):
+        leg_triangle = self.triangles[0]
+        cx, cy = animation.drawings.centerOfTriangle(leg_triangle)
+        
+        # direction to star center
+        direction_x = cx - self.starCenter[0]
+        direction_y = cy - self.starCenter[1]
+        
+        # ||direction||
+        length = math.sqrt(direction_x**2 + direction_y**2)
+        if length > 0:
+            norm_x = direction_x / length
+            norm_y = direction_y / length
+        else:
+            norm_x, norm_y = 0, 1
+        
+        # Perp
+        perp_x = -norm_y
+        perp_y = norm_x
+        
+        # Shorts dimensions
+        shorts_width = self.arm_length/2
+        shorts_height = self.arm_length/4
+        shorts_toStarCenter = self.arm_length / 22
+        
+        # + star center
+        shorts_center_x = cx - norm_x * shorts_toStarCenter
+        shorts_center_y = cy - norm_y * shorts_toStarCenter
+        
+        # horizontal offset
+        if self.arm_index == 2:  # Left leg
+            shorts_center_x += perp_x * horizontal_offset * self.arm_length
+            shorts_center_y += perp_y * horizontal_offset * self.arm_length
+        elif self.arm_index == 3:  # Right leg
+            shorts_center_x -= perp_x * horizontal_offset * self.arm_length
+            shorts_center_y -= perp_y * horizontal_offset * self.arm_length
+        
+       
+        half_width = shorts_width / 2
+        half_height = shorts_height / 2
+        
+        # Top corners
+        top_left_x = shorts_center_x - perp_x * half_width - norm_x * half_height
+        top_left_y = shorts_center_y - perp_y * half_width - norm_y * half_height
+        top_right_x = shorts_center_x + perp_x * half_width - norm_x * half_height
+        top_right_y = shorts_center_y + perp_y * half_width - norm_y * half_height
+        
+        # Bottom corners
+        bottom_left_x = shorts_center_x - perp_x * half_width + norm_x * half_height
+        bottom_left_y = shorts_center_y - perp_y * half_width + norm_y * half_height
+        bottom_right_x = shorts_center_x + perp_x * half_width + norm_x * half_height
+        bottom_right_y = shorts_center_y + perp_y * half_width + norm_y * half_height
+        
+        # Create two triangles to form a rectangle
+        triangle1 = [(top_left_x, top_left_y), (top_right_x, top_right_y), (bottom_left_x, bottom_left_y)]
+        triangle2 = [(top_right_x, top_right_y), (bottom_right_x, bottom_right_y), (bottom_left_x, bottom_left_y)]
+        
+        return triangle1, triangle2
+
     def drawPatrick(self):
         if self.name == "Head":
-            head_triangle = self.triangles[0]
-            cx, cy = animation.drawings.centerOfTriangle(head_triangle)
             
-            eye_size = self.arm_length / 15
-            pupil_size = eye_size * 0.4
-            mouth_size = self.arm_length / 20
+            left_eye,right_eye,left_pupil,right_pupil,mouth = self.drawHead()
 
-            eye_separation = self.arm_length / 20  
-            eyes_toward_tip = self.arm_length / 15
-            pupils_separation = 0.2
-            mouth_toward_center = self.arm_length / 12 
-            
-            # direction center-apex
-            direction_x = cx - self.starCenter[0]
-            direction_y = cy - self.starCenter[1]
-            
-            # ||direction||
-            length = math.sqrt(direction_x**2 + direction_y**2)
-            if length > 0:
-                norm_x = direction_x / length
-                norm_y = direction_y / length
-            else:
-                norm_x, norm_y = 0, 1
-            
-            perp_x = -norm_y
-            perp_y = norm_x
-            
-            #eyes pos
-            eye_center_x = cx + norm_x * eyes_toward_tip
-            eye_center_y = cy + norm_y * eyes_toward_tip
-            
-            left_eye_x = eye_center_x + perp_x * eye_separation
-            left_eye_y = eye_center_y + perp_y * eye_separation
-            right_eye_x = eye_center_x - perp_x * eye_separation
-            right_eye_y = eye_center_y - perp_y * eye_separation
-
-            
-
-            pupil_offset = eye_separation * pupils_separation
-            left_pupil_x = left_eye_x - perp_x * pupil_offset    # Move left (toward center)
-            left_pupil_y = left_eye_y - perp_y * pupil_offset
-            right_pupil_x = right_eye_x + perp_x * pupil_offset  # Move right (toward center)  
-            right_pupil_y = right_eye_y + perp_y * pupil_offset
-            
-            # mouth pos
-            mouth_x = cx - norm_x * mouth_toward_center
-            mouth_y = cy - norm_y * mouth_toward_center
-            
-            # Create
-            left_eye = animation.drawings.getEllipseTriangles(left_eye_x, left_eye_y, eye_size, eye_size)
-            right_eye = animation.drawings.getEllipseTriangles(right_eye_x, right_eye_y, eye_size, eye_size)
-            left_pupil = animation.drawings.getEllipseTriangles(left_pupil_x, left_pupil_y, pupil_size, pupil_size)
-            right_pupil= animation.drawings.getEllipseTriangles(right_pupil_x, right_pupil_y, pupil_size, pupil_size)
-            mouth = animation.drawings.getEllipseTriangles(mouth_x, mouth_y, mouth_size, mouth_size)
-                    
             # Draw
             for triangle in left_eye:
                 pygame.draw.polygon(self.window, Colors.white, triangle)
@@ -235,8 +296,16 @@ class Arm:
                 pygame.draw.polygon(self.window, Colors.black, triangle)
             for triangle in mouth:
                 pygame.draw.polygon(self.window, Colors.black, triangle)
-            
-            
+        
+        elif self.name == "LLeg" or self.name == "RLeg":
+            #(0.05-0.2) toward center / (-0.05 to -0.2)away from center
+            shorts_horizontal_offset = 0.02
+        
+            triangle1, triangle2 = self.drawShorts(shorts_horizontal_offset)
+
+            # Draw
+            pygame.draw.polygon(self.window, Colors.green, triangle1)
+            pygame.draw.polygon(self.window, Colors.green, triangle2)
 
     def update(self, move_arms=False):
         move_arms = self.star.playing
