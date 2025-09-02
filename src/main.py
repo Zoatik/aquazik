@@ -3,6 +3,7 @@ from time import time
 import random
 from animation.aquarium import Aquarium
 from animation.fish import Fish, Bubble
+from animation.crab import Crab
 from audio_processing.midi_reader import MidiFile, Instrument
 from audio_processing.freq_analysis import AudioAnalyzer
 import audio_processing.MidiV2
@@ -57,6 +58,8 @@ def main():
     pygame.mixer.music.play()
     pygame.event.wait()
 
+    music_start_time = time()
+
     # Loop that updates the display
 
     # start timestamp, used for bpm sync
@@ -66,6 +69,8 @@ def main():
     #fishList = Aquarium.createFishList(window)
     fishList = []
     starFishList = Aquarium.createStarfishList(window)
+
+    crab = Crab(window, (500, 500), 50, music_start_time, bpm)
     last_nextNotes = []
 
     deltaTime = 0
@@ -152,7 +157,10 @@ def main():
         Aquarium.drawBobTopHouse(window)
 
         Aquarium.drawStarfish(starFishList)
+        crab.move(deltaTime, starFishList)
+        crab.draw()
         Aquarium.drawFishes(fishList)
+
         for b in [x for x in bubbleList if not x.out_of_bounds]:
             b.move_and_draw()
 

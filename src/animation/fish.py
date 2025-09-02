@@ -256,6 +256,8 @@ class FishMouth:
     def animate(self, deltaTime):
         if self.angleDeg > self.LIMIT:
             self.angleDeg -= (deltaTime / self.timeToClose) * self.angleDeg
+            if self.angleDeg == 0:
+                self.angleDeg = 1
 
         self.timeToClose -= deltaTime
 
