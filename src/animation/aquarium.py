@@ -1,6 +1,6 @@
 from animation.fish import Fish
 from pygame import draw, Surface
-from constants import NOTE_NAMES, Colors, FishColors
+from constants import Colors, FishColors
 from animation.starfish import Starfish
 import animation.drawings
 from random import randrange
@@ -9,6 +9,7 @@ import pygame
 import random
 from constants import Direction
 from animation.algues import Seaweed
+from audio_processing.audio_utils import NOTE_NAMES
 
 
 class Aquarium:
