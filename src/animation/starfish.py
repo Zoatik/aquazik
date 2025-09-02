@@ -21,7 +21,7 @@ class Starfish:
         # Create arms 
         self.armList : list[Arm] = []
         if arm_count == 5 :
-            typeArm = ["Head","Arm","LLeg","RLeg","Arm"]
+            typeArm = ["Head","Arm","Leg","Leg","Arm"]
         else :
             typeArm = ["Arm" for i in range(arm_count)]
         for armNb, arm_type in enumerate(typeArm):
@@ -297,7 +297,7 @@ class Arm:
             for triangle in mouth:
                 pygame.draw.polygon(self.window, Colors.black, triangle)
         
-        elif self.name == "LLeg" or self.name == "RLeg":
+        elif self.name == "Leg":
             #(0.05-0.2) toward center / (-0.05 to -0.2)away from center
             shorts_horizontal_offset = 0.02
         
@@ -306,6 +306,16 @@ class Arm:
             # Draw
             pygame.draw.polygon(self.window, Colors.green, triangle1)
             pygame.draw.polygon(self.window, Colors.green, triangle2)
+
+            
+            for _ in range(2):
+                fx = random.randint(int(min([p[0] for p in triangle1])),
+                                    int(max([p[0] for p in triangle2])))
+                fy = random.randint(int(min([p[1] for p in triangle1])),
+                                    int(max([p[1] for p in triangle2])))
+                boules = animation.drawings.getEllipseTriangles(fx,fy,int(self.arm_length/10),int(self.arm_length/10))
+            for tri in boules :
+                pygame.draw.polygon(self.window, Colors.purple, tri)
 
     def update(self, move_arms=False):
         move_arms = self.star.playing
