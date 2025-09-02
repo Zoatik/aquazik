@@ -21,6 +21,8 @@ class Colors:
     LEAF_LIGHT = (46, 181, 101)
 
     patrick = (0xF8,0xAE,0xAF)
+    purple = (160, 32, 240)
+    algues_green = (38, 180, 120)
 
     
 class FishColors:

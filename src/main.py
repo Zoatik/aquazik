@@ -68,6 +68,15 @@ def main():
     starFishList = Aquarium.createStarfishList(window)
     last_nextNotes = []
 
+    #create the seaweed (algues)
+    fronds = []
+    num_clusters = random.randint(8, 20)
+    for _ in range(num_clusters):
+        x = random.randint(50, width - 50)    # avoid going out of screen
+        y = random.randint(height // 2, height - 50)  # bottom half of the screen
+        count = random.randint(3, 8)          # how many fronds in this cluster
+        fronds.extend(Aquarium.createSeaweed(x, y, count))
+
     deltaTime = 0
 
     while run:
@@ -155,6 +164,9 @@ def main():
         Aquarium.drawFishes(fishList)
         for b in [x for x in bubbleList if not x.out_of_bounds]:
             b.move_and_draw()
+
+        #draw algues
+        Aquarium.drawSeaweed(window,fronds,start)
 
         Aquarium.drawProgressBar(window, currentTime, mdi.totalTime)
 
