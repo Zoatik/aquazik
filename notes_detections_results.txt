@@ -1,0 +1,390 @@
+---- Résultats ----
+Fichier réf : /Users/axelhall/Documents/GitHub/aquazik/audio_in/PinkPanther.midi
+Fichier gen : /Users/axelhall/Documents/GitHub/aquazik/audio_out/PinkPanther_Both.mid
+Notes réf      : 451
+Notes générées : 3123
+Appariées      : 337
+Similarité globale (rappel) : 74.7%
+Précision                       : 10.8%
+F1                              : 18.9%
+Début (attaque)                 : 66.8%  (tol 50 ms)
+Fin   (relâchement)             : 29.1%  (tol 80 ms)
+Justesse de note (pitch exact)  : 100.0% (±0 st)
+MAE attaque : 280.3 ms
+MAE fin     : 461.6 ms
+Fausses notes (FP) : 2786
+Notes manquées (FN): 114
+Substitutions (mauvais pitch apparié): 0
+Notes manquées isolées : 0
+Notes manquées dans accords : 114
+Fausses notes isolées : 0
+Fausses notes simultanées : 2786
+Harmoniques manquées (jusqu'à 3x) : 0
+
+---- Résultats ----
+Fichier réf : /Users/axelhall/Documents/GitHub/aquazik/audio_in/Ecossaise_Beethoven.midi
+Fichier gen : /Users/axelhall/Documents/GitHub/aquazik/src/music.mid
+Notes réf      : 747
+Notes générées : 811
+Appariées      : 359
+Similarité globale (rappel) : 48.1%
+Précision                       : 44.3%
+F1                              : 46.1%
+Début (attaque)                 : 47.4%  (tol 50 ms)
+Fin   (relâchement)             : 41.5%  (tol 80 ms)
+Justesse de note (pitch exact)  : 100.0% (±0 st)
+MAE attaque : 104.3 ms
+MAE fin     : 189.7 ms
+Fausses notes (FP) : 452
+Notes manquées (FN): 388
+Substitutions (mauvais pitch apparié): 0
+Notes manquées isolées : 5
+Notes manquées dans accords : 383
+Fausses notes isolées : 2
+Fausses notes simultanées : 450
+Harmoniques manquées (jusqu'à 3x) : 1
+
+---- Résultats ----
+Fichier réf : /Users/axelhall/Documents/GitHub/aquazik/audio_in/PinkPanther.midi
+Fichier gen : /Users/axelhall/Documents/GitHub/aquazik/audio_out/PinkPanther_Both.mid
+Notes réf      : 451
+Notes générées : 1632
+Appariées      : 287
+Similarité globale (rappel) : 63.6%
+Précision                       : 17.6%
+F1                              : 27.6%
+Début (attaque)                 : 53.7%  (tol 50 ms)
+Fin   (relâchement)             : 38.7%  (tol 80 ms)
+Justesse de note (pitch exact)  : 100.0% (±0 st)
+MAE attaque : 374.2 ms
+MAE fin     : 486.5 ms
+Fausses notes (FP) : 1345
+Notes manquées (FN): 164
+Substitutions (mauvais pitch apparié): 0
+Notes manquées isolées : 0
+Notes manquées dans accords : 164
+Fausses notes isolées : 0
+Fausses notes simultanées : 1345
+Harmoniques manquées (jusqu'à 3x) : 0
+
+---- Résultats ----
+Fichier réf : /Users/axelhall/Documents/GitHub/aquazik/audio_in/Ecossaise_Beethoven.midi
+Fichier gen : /Users/axelhall/Documents/GitHub/aquazik/audio_out/Ecossaise_Both.mid
+Notes réf      : 747
+Notes générées : 1206
+Appariées      : 309
+Similarité globale (rappel) : 41.4%
+Précision                       : 25.6%
+F1                              : 31.6%
+Début (attaque)                 : 38.5%  (tol 50 ms)
+Fin   (relâchement)             : 57.9%  (tol 80 ms)
+Justesse de note (pitch exact)  : 100.0% (±0 st)
+MAE attaque : 188.1 ms
+MAE fin     : 510.2 ms
+Fausses notes (FP) : 897
+Notes manquées (FN): 438
+Substitutions (mauvais pitch apparié): 0
+Notes manquées isolées : 3
+Notes manquées dans accords : 435
+Fausses notes isolées : 0
+Fausses notes simultanées : 897
+Harmoniques manquées (jusqu'à 3x) : 0
+
+---- Résultats ----
+Fichier réf : /Users/axelhall/Documents/GitHub/aquazik/audio_in/Ecossaise_Beethoven.midi
+Fichier gen : /Users/axelhall/Documents/GitHub/aquazik/audio_out/Ecossaise_Both.mid
+Notes réf      : 747
+Notes générées : 468
+Appariées      : 287
+Similarité globale (rappel) : 38.4%
+Précision                       : 61.3%
+F1                              : 47.2%
+Début (attaque)                 : 47.7%  (tol 50 ms)
+Fin   (relâchement)             : 60.6%  (tol 80 ms)
+Justesse de note (pitch exact)  : 100.0% (±0 st)
+MAE attaque : 131.8 ms
+MAE fin     : 448.1 ms
+Fausses notes (FP) : 181
+Notes manquées (FN): 460
+Substitutions (mauvais pitch apparié): 0
+Notes manquées isolées : 3
+Notes manquées dans accords : 457
+Fausses notes isolées : 0
+Fausses notes simultanées : 181
+Harmoniques manquées (jusqu'à 3x) : 0
+
+---- Résultats ----
+Fichier réf : /Users/axelhall/Documents/GitHub/aquazik/audio_in/Ecossaise_Beethoven.midi
+Fichier gen : /Users/axelhall/Documents/GitHub/aquazik/audio_out/Ecossaise_Both.mid
+Notes réf      : 747
+Notes générées : 469
+Appariées      : 287
+Similarité globale (rappel) : 38.4%
+Précision                       : 61.2%
+F1                              : 47.2%
+Début (attaque)                 : 47.7%  (tol 50 ms)
+Fin   (relâchement)             : 60.6%  (tol 80 ms)
+Justesse de note (pitch exact)  : 100.0% (±0 st)
+MAE attaque : 131.9 ms
+MAE fin     : 448.1 ms
+Fausses notes (FP) : 182
+Notes manquées (FN): 460
+Substitutions (mauvais pitch apparié): 0
+Notes manquées isolées : 3
+Notes manquées dans accords : 457
+Fausses notes isolées : 0
+Fausses notes simultanées : 182
+Harmoniques manquées (jusqu'à 3x) : 0
+
+---- Résultats ----
+Fichier réf : /Users/axelhall/Documents/GitHub/aquazik/audio_in/Ecossaise_Beethoven.midi
+Fichier gen : /Users/axelhall/Documents/GitHub/aquazik/audio_out/Ecossaise_Both.mid
+Notes réf      : 747
+Notes générées : 457
+Appariées      : 271
+Similarité globale (rappel) : 36.3%
+Précision                       : 59.3%
+F1                              : 45.0%
+Début (attaque)                 : 48.7%  (tol 50 ms)
+Fin   (relâchement)             : 59.4%  (tol 80 ms)
+Justesse de note (pitch exact)  : 100.0% (±0 st)
+MAE attaque : 114.8 ms
+MAE fin     : 457.7 ms
+Fausses notes (FP) : 186
+Notes manquées (FN): 476
+Substitutions (mauvais pitch apparié): 0
+Notes manquées isolées : 2
+Notes manquées dans accords : 474
+Fausses notes isolées : 0
+Fausses notes simultanées : 186
+Harmoniques manquées (jusqu'à 3x) : 0
+
+---- Résultats ----
+Fichier réf : /Users/axelhall/Documents/GitHub/aquazik/audio_in/Ecossaise_Beethoven.midi
+Fichier gen : /Users/axelhall/Documents/GitHub/aquazik/audio_out/Ecossaise_Both.mid
+Notes réf      : 747
+Notes générées : 463
+Appariées      : 287
+Similarité globale (rappel) : 38.4%
+Précision                       : 62.0%
+F1                              : 47.4%
+Début (attaque)                 : 43.9%  (tol 50 ms)
+Fin   (relâchement)             : 64.5%  (tol 80 ms)
+Justesse de note (pitch exact)  : 100.0% (±0 st)
+MAE attaque : 125.1 ms
+MAE fin     : 444.0 ms
+Fausses notes (FP) : 176
+Notes manquées (FN): 460
+Substitutions (mauvais pitch apparié): 0
+Notes manquées isolées : 3
+Notes manquées dans accords : 457
+Fausses notes isolées : 0
+Fausses notes simultanées : 176
+Harmoniques manquées (jusqu'à 3x) : 0
+
+---- Résultats ----
+Fichier réf : /Users/axelhall/Documents/GitHub/aquazik/audio_in/Ecossaise_Beethoven.midi
+Fichier gen : /Users/axelhall/Documents/GitHub/aquazik/audio_out/Ecossaise_Both.mid
+Notes réf      : 747
+Notes générées : 509
+Appariées      : 311
+Similarité globale (rappel) : 41.6%
+Précision                       : 61.1%
+F1                              : 49.5%
+Début (attaque)                 : 43.7%  (tol 50 ms)
+Fin   (relâchement)             : 59.5%  (tol 80 ms)
+Justesse de note (pitch exact)  : 100.0% (±0 st)
+MAE attaque : 125.0 ms
+MAE fin     : 434.5 ms
+Fausses notes (FP) : 198
+Notes manquées (FN): 436
+Substitutions (mauvais pitch apparié): 0
+Notes manquées isolées : 3
+Notes manquées dans accords : 433
+Fausses notes isolées : 0
+Fausses notes simultanées : 198
+Harmoniques manquées (jusqu'à 3x) : 0
+
+---- Résultats ----
+Fichier réf : /Users/axelhall/Documents/GitHub/aquazik/audio_in/Ecossaise_Beethoven.midi
+Fichier gen : /Users/axelhall/Documents/GitHub/aquazik/audio_out/Ecossaise_Both.mid
+Notes réf      : 747
+Notes générées : 459
+Appariées      : 288
+Similarité globale (rappel) : 38.6%
+Précision                       : 62.7%
+F1                              : 47.8%
+Début (attaque)                 : 46.9%  (tol 50 ms)
+Fin   (relâchement)             : 63.2%  (tol 80 ms)
+Justesse de note (pitch exact)  : 100.0% (±0 st)
+MAE attaque : 119.9 ms
+MAE fin     : 431.1 ms
+Fausses notes (FP) : 171
+Notes manquées (FN): 459
+Substitutions (mauvais pitch apparié): 0
+Notes manquées isolées : 3
+Notes manquées dans accords : 456
+Fausses notes isolées : 0
+Fausses notes simultanées : 171
+Harmoniques manquées (jusqu'à 3x) : 0
+
+---- Résultats ----
+Fichier réf : /Users/axelhall/Documents/GitHub/aquazik/audio_in/Ecossaise_Beethoven.midi
+Fichier gen : /Users/axelhall/Documents/GitHub/aquazik/audio_out/Ecossaise_Both.mid
+Notes réf      : 747
+Notes générées : 449
+Appariées      : 276
+Similarité globale (rappel) : 36.9%
+Précision                       : 61.5%
+F1                              : 46.2%
+Début (attaque)                 : 49.6%  (tol 50 ms)
+Fin   (relâchement)             : 62.3%  (tol 80 ms)
+Justesse de note (pitch exact)  : 100.0% (±0 st)
+MAE attaque : 121.8 ms
+MAE fin     : 442.3 ms
+Fausses notes (FP) : 173
+Notes manquées (FN): 471
+Substitutions (mauvais pitch apparié): 0
+Notes manquées isolées : 3
+Notes manquées dans accords : 468
+Fausses notes isolées : 0
+Fausses notes simultanées : 173
+Harmoniques manquées (jusqu'à 3x) : 0
+
+---- Résultats ----
+Fichier réf : /Users/axelhall/Documents/GitHub/aquazik/audio_in/Ecossaise_Beethoven.midi
+Fichier gen : /Users/axelhall/Documents/GitHub/aquazik/audio_out/Ecossaise_Both.mid
+Notes réf      : 747
+Notes générées : 458
+Appariées      : 287
+Similarité globale (rappel) : 38.4%
+Précision                       : 62.7%
+F1                              : 47.6%
+Début (attaque)                 : 47.0%  (tol 50 ms)
+Fin   (relâchement)             : 63.1%  (tol 80 ms)
+Justesse de note (pitch exact)  : 100.0% (±0 st)
+MAE attaque : 122.8 ms
+MAE fin     : 432.3 ms
+Fausses notes (FP) : 171
+Notes manquées (FN): 460
+Substitutions (mauvais pitch apparié): 0
+Notes manquées isolées : 3
+Notes manquées dans accords : 457
+Fausses notes isolées : 0
+Fausses notes simultanées : 171
+Harmoniques manquées (jusqu'à 3x) : 0
+
+---- Résultats ----
+Fichier réf : /Users/axelhall/Documents/GitHub/aquazik/audio_in/Ecossaise_Beethoven.midi
+Fichier gen : /Users/axelhall/Documents/GitHub/aquazik/audio_out/Ecossaise_Both.mid
+Notes réf      : 747
+Notes générées : 464
+Appariées      : 288
+Similarité globale (rappel) : 38.6%
+Précision                       : 62.1%
+F1                              : 47.6%
+Début (attaque)                 : 46.9%  (tol 50 ms)
+Fin   (relâchement)             : 63.2%  (tol 80 ms)
+Justesse de note (pitch exact)  : 100.0% (±0 st)
+MAE attaque : 119.7 ms
+MAE fin     : 431.1 ms
+Fausses notes (FP) : 176
+Notes manquées (FN): 459
+Substitutions (mauvais pitch apparié): 0
+Notes manquées isolées : 3
+Notes manquées dans accords : 456
+Fausses notes isolées : 0
+Fausses notes simultanées : 176
+Harmoniques manquées (jusqu'à 3x) : 0
+
+---- Résultats ----
+Fichier réf : /Users/axelhall/Documents/GitHub/aquazik/audio_in/Ecossaise_Beethoven.midi
+Fichier gen : /Users/axelhall/Documents/GitHub/aquazik/audio_out/Ecossaise_Both.mid
+Notes réf      : 747
+Notes générées : 459
+Appariées      : 288
+Similarité globale (rappel) : 38.6%
+Précision                       : 62.7%
+F1                              : 47.8%
+Début (attaque)                 : 46.9%  (tol 50 ms)
+Fin   (relâchement)             : 63.2%  (tol 80 ms)
+Justesse de note (pitch exact)  : 100.0% (±0 st)
+MAE attaque : 119.9 ms
+MAE fin     : 431.1 ms
+Fausses notes (FP) : 171
+Notes manquées (FN): 459
+Substitutions (mauvais pitch apparié): 0
+Notes manquées isolées : 3
+Notes manquées dans accords : 456
+Fausses notes isolées : 0
+Fausses notes simultanées : 171
+Harmoniques manquées (jusqu'à 3x) : 0
+
+---- Résultats ----
+Fichier réf : /Users/axelhall/Documents/GitHub/aquazik/audio_in/Ecossaise_Beethoven.midi
+Fichier gen : /Users/axelhall/Documents/GitHub/aquazik/audio_out/Ecossaise_Both.mid
+Notes réf      : 747
+Notes générées : 459
+Appariées      : 288
+Similarité globale (rappel) : 38.6%
+Précision                       : 62.7%
+F1                              : 47.8%
+Début (attaque)                 : 46.9%  (tol 50 ms)
+Fin   (relâchement)             : 63.2%  (tol 80 ms)
+Justesse de note (pitch exact)  : 100.0% (±0 st)
+MAE attaque : 119.9 ms
+MAE fin     : 431.1 ms
+Fausses notes (FP) : 171
+Notes manquées (FN): 459
+Substitutions (mauvais pitch apparié): 0
+Notes manquées isolées : 3
+Notes manquées dans accords : 456
+Fausses notes isolées : 0
+Fausses notes simultanées : 171
+Harmoniques manquées (jusqu'à 3x) : 0
+
+---- Résultats ----
+Fichier réf : /Users/axelhall/Documents/GitHub/aquazik/audio_in/Ecossaise_Beethoven.midi
+Fichier gen : /Users/axelhall/Documents/GitHub/aquazik/audio_out/Ecossaise_Both.mid
+Notes réf      : 747
+Notes générées : 513
+Appariées      : 297
+Similarité globale (rappel) : 39.8%
+Précision                       : 57.9%
+F1                              : 47.1%
+Début (attaque)                 : 44.4%  (tol 50 ms)
+Fin   (relâchement)             : 47.8%  (tol 80 ms)
+Justesse de note (pitch exact)  : 100.0% (±0 st)
+MAE attaque : 131.7 ms
+MAE fin     : 1000.0 ms
+Fausses notes (FP) : 216
+Notes manquées (FN): 450
+Substitutions (mauvais pitch apparié): 0
+Notes manquées isolées : 3
+Notes manquées dans accords : 447
+Fausses notes isolées : 0
+Fausses notes simultanées : 216
+Harmoniques manquées (jusqu'à 3x) : 0
+
+---- Résultats ----
+Fichier réf : /Users/axelhall/Documents/GitHub/aquazik/audio_in/Ecossaise_Beethoven.midi
+Fichier gen : /Users/axelhall/Documents/GitHub/aquazik/audio_out/Ecossaise_Both.mid
+Notes réf      : 747
+Notes générées : 531
+Appariées      : 274
+Similarité globale (rappel) : 36.7%
+Précision                       : 51.6%
+F1                              : 42.9%
+Début (attaque)                 : 48.9%  (tol 50 ms)
+Fin   (relâchement)             : 46.0%  (tol 80 ms)
+Justesse de note (pitch exact)  : 100.0% (±0 st)
+MAE attaque : 122.8 ms
+MAE fin     : 542.5 ms
+Fausses notes (FP) : 257
+Notes manquées (FN): 473
+Substitutions (mauvais pitch apparié): 0
+Notes manquées isolées : 5
+Notes manquées dans accords : 468
+Fausses notes isolées : 0
+Fausses notes simultanées : 257
+Harmoniques manquées (jusqu'à 3x) : 0
