@@ -1,6 +1,6 @@
 from animation.fish import Fish
 from pygame import draw, Surface
-from constants import NOTE_NAMES, Colors, FishColors
+from constants import Colors, FishColors
 from animation.starfish import Starfish
 import animation.drawings
 from random import randrange
@@ -8,9 +8,17 @@ import math
 import pygame
 import random
 from constants import Direction
+from animation.algues import Seaweed
+from audio_processing.audio_utils import NOTE_NAMES
 
 
 class Aquarium:
+    def __init__(self, width, height):
+        self.width = width
+        self.height = height
+        self.start_time = pygame.time.get_ticks() / 1000.0
+        self.fronds = []
+
     # -----Functions to create the fishes --------------------------------------------------------------
     def drawFishes(fishList):
         for i in range(0, len(fishList)):
@@ -38,10 +46,7 @@ class Aquarium:
                     window, 
                     NOTE_NAMES[ni], 
                     starfishCenterList[ni], 
-                    randrange(
-                        int(starfishCenterList[ni][1]/20),
-                        int((starfishCenterList[ni][1] + 30 )/20) 
-                    ),
+                    randrange(int(starfishCenterList[ni][1]/20),int((starfishCenterList[ni][1] + 30 )/20) ),
                     randrange(5,8)
                 )
             )
@@ -496,3 +501,23 @@ class Aquarium:
         pygame.draw.polygon(surface, Colors.SAND, [(cx - base_width / 2, cy + 95), (cx + base_width / 2, cy + 95), (cx + base_width / 2, cy + 80)])
         pygame.draw.polygon(surface, Colors.SAND, [(cx - base_width / 2, cy + 95), (cx - base_width / 2, cy + 80), (cx + base_width / 2, cy + 80)])
 
+    def createSeaweed(startX, lowY, count):
+        fronds = []
+        width = 5
+        endX = startX + count * width
+        step = width
+        topY = lowY + 20
+
+        for x in range(startX, endX, step):
+            y = random.randint(lowY, topY)
+            height = random.randint(20, 60) 
+            speed = random.uniform(0.5, 2.0)
+            sway_amp = random.randint(15, 35)
+            fronds.append(Seaweed(x, y, height, width, speed, sway_amp))
+        
+        return fronds
+
+    def drawSeaweed(surface, fronds,start_time):
+        t = pygame.time.get_ticks() / 1000.0 - start_time
+        for frond in fronds:
+            frond.draw(surface, t)

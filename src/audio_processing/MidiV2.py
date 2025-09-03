@@ -1,41 +1,11 @@
 from midiutil import MIDIFile
-from audio_processing.freq_analysis import Note
-from audio_processing.midi_reader import Instrument
-
-#from freq_analysis import AudioAnalyzer
-
-# Mapping of note names to MIDI numbers
-NOTE_TO_MIDI = {
-    "C": 0,
-    "C#": 1,
-    "D": 2,
-    "D#": 3,
-    "E": 4,
-    "F": 5,
-    "F#": 6,
-    "G": 7,
-    "G#": 8,
-    "A": 9,
-    "A#": 10,
-    "B": 11,
-}
+from audio_processing.audio_utils import Tools, Instrument, Note
 
 
-# Function to convert note and octave to MIDI number
-def note_to_midi(note : str):
-    """Finding the pitch according to the note
+# from freq_analysis import AudioAnalyzer
 
-    Args:
-        note (str): The note (ex. C4)
 
-    Returns:
-        Int: the pitch (ex. 60)
-    """
-    note_name = note[:-1] 
-    octave = int(note[-1])
-    return NOTE_TO_MIDI[note_name] + 12 * (octave + 1)
-
-def midi_maker(macro : list[Note], bpm : int, outfile : str ="music.mid"):
+def midi_maker(macro: list[Note], bpm: int, outfile: str = "music.mid") -> str:
     """Create a .mid file as music.mid
 
     Args:
@@ -50,21 +20,63 @@ def midi_maker(macro : list[Note], bpm : int, outfile : str ="music.mid"):
     track = 0
     MyMIDI = MIDIFile(1)
     MyMIDI.addTempo(track, 0, bpm)
-    
+
+    #slope_list = []
 
     # Adding the notes to the sheet music => Note(channel = instrument, pitch = midi note , time = starting time, duration, volume)
     sheet_music = sorted(macro, key=lambda note: note.start_bpm)
     for note in sheet_music:
-        channel = note.instrument
-        midi_note = note_to_midi(note.name)
+        midi_note = Tools.note_to_midi(note.name)
         time = note.start_bpm
         duration = note.length_bpm
-        volume = int((note.magnitude) * 127)
-        MyMIDI.addNote(track=track, channel=channel, pitch=midi_note, time=time, duration=duration, volume=volume)
-    
+        volume = int((note.maximum) * 127)
+        get_instrument(note)
+        channel = note.instrument
+        MyMIDI.addNote(
+            track=track,
+            channel=channel,
+            pitch=midi_note,
+            time=time,
+            duration=duration,
+            volume=volume,
+        )
+
+    def get_slope(note : Note):
+        # list note.magnitudes note.times
+        y0 = note.magnitudes[0]
+        x0 = note.times[0]
+        y = note.maximum
+        index_x = note.magnitudes.index(y)
+        x = note.times[index_x]
+        print(f"note magnitudes : {note.magnitudes}")
+        print(f"note time : {note.times}")
+        #print(f"y : {y}, y0 : {y0}, x : {x}, x0 : {x0}")
+        return (y - y0)/(x - x0)
+
+        #slope_list.append(slope)
+
+    def get_instrument(note : Note, piano_range : tuple = (0,0), trumpet_range : tuple = (0,0)):
+        slope = get_slope(note)
+        try:
+            if piano_range[1] >= slope >= piano_range[0]:
+                note.instrument = Instrument.PIANO.value
+            elif trumpet_range[1] >= slope >= trumpet_range[0]:
+                note.instrument = Instrument.TRUMPET.value
+            else: note.instrument
+        except:
+            print("Ranges are not well defined")
+
+        return
+        
     # Creating the .mid file
-    with open(f"music.mid", "wb") as output_file:
+    with open(outfile, "wb") as output_file:
         MyMIDI.writeFile(output_file)
 
     return "music.mid"
 
+
+''' 
+print(f"piano slopes : {slope_list}")
+print(f"max : {max(slope_list)}")
+print(f"min : {min(slope_list)}")
+    '''

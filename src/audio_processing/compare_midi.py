@@ -10,6 +10,7 @@ from scipy.optimize import linear_sum_assignment
 
 # ======== Logique de comparaison (reprend le script précédent) ========
 
+
 def load_notes(path, programs=None, drums=False):
     midi = pm.PrettyMIDI(path)
     notes = []
@@ -19,18 +20,29 @@ def load_notes(path, programs=None, drums=False):
         if programs is not None and inst.program not in programs:
             continue
         for n in inst.notes:
-            notes.append({
-                "pitch": int(n.pitch),
-                "start": float(n.start),
-                "end": float(n.end),
-                "vel": int(n.velocity),
-                "program": int(inst.program),
-                "is_drum": bool(inst.is_drum),
-            })
+            notes.append(
+                {
+                    "pitch": int(n.pitch),
+                    "start": float(n.start),
+                    "end": float(n.end),
+                    "vel": int(n.velocity),
+                    "program": int(inst.program),
+                    "is_drum": bool(inst.is_drum),
+                }
+            )
     notes.sort(key=lambda x: (x["start"], x["pitch"]))
     return notes
 
-def make_cost_matrix(ref, hyp, onset_tol=0.05, offset_tol=0.08, max_pitch_diff=0, min_overlap=0.3, large=1e6):
+
+def make_cost_matrix(
+    ref,
+    hyp,
+    onset_tol=0.05,
+    offset_tol=0.08,
+    max_pitch_diff=0,
+    min_overlap=0.3,
+    large=1e6,
+):
     R, H = len(ref), len(hyp)
     C = np.full((R, H), large, dtype=float)
     for i, r in enumerate(ref):
@@ -48,10 +60,15 @@ def make_cost_matrix(ref, hyp, onset_tol=0.05, offset_tol=0.08, max_pitch_diff=0
             if not ok_time:
                 continue
             offset_diff = abs(re - he)
-            C[i, j] = (onset_diff / max(onset_tol, 1e-9)) + (offset_diff / max(offset_tol, 1e-9))
+            C[i, j] = (onset_diff / max(onset_tol, 1e-9)) + (
+                offset_diff / max(offset_tol, 1e-9)
+            )
     return C
 
-def match_notes(ref, hyp, onset_tol=0.05, offset_tol=0.08, max_pitch_diff=0, min_overlap=0.3):
+
+def match_notes(
+    ref, hyp, onset_tol=0.05, offset_tol=0.08, max_pitch_diff=0, min_overlap=0.3
+):
     if len(ref) == 0 or len(hyp) == 0:
         return [], list(range(len(ref))), list(range(len(hyp)))
     C = make_cost_matrix(ref, hyp, onset_tol, offset_tol, max_pitch_diff, min_overlap)
@@ -63,8 +80,8 @@ def match_notes(ref, hyp, onset_tol=0.05, offset_tol=0.08, max_pitch_diff=0, min
             continue
         r, h = ref[i], hyp[j]
         onset_err = abs(r["start"] - h["start"])
-        offset_err = abs(r["end"]   - h["end"])
-        pitch_ok = (r["pitch"] == h["pitch"])
+        offset_err = abs(r["end"] - h["end"])
+        pitch_ok = r["pitch"] == h["pitch"]
         pairs.append((i, j, onset_err, offset_err, pitch_ok))
         used_r.add(i)
         used_h.add(j)
@@ -72,7 +89,10 @@ def match_notes(ref, hyp, onset_tol=0.05, offset_tol=0.08, max_pitch_diff=0, min
     unmatched_hyp = [j for j in range(len(hyp)) if j not in used_h]
     return pairs, unmatched_ref, unmatched_hyp
 
-def compute_metrics(ref, hyp, pairs, unmatched_ref, unmatched_hyp, onset_tol=0.05, offset_tol=0.08):
+
+def compute_metrics(
+    ref, hyp, pairs, unmatched_ref, unmatched_hyp, onset_tol=0.05, offset_tol=0.08
+):
     n_ref = len(ref)
     n_hyp = len(hyp)
     n_match = len(pairs)
@@ -84,8 +104,8 @@ def compute_metrics(ref, hyp, pairs, unmatched_ref, unmatched_hyp, onset_tol=0.0
         onset_similarity = 100.0 * onset_ok / n_match
         offset_similarity = 100.0 * offset_ok / n_match
         pitch_accuracy = 100.0 * pitch_ok / n_match
-        mae_onset = 1000.0 * np.mean([e_on for _,_,e_on,_,_ in pairs])    # ms
-        mae_offset = 1000.0 * np.mean([e_off for _,_,_,e_off,_ in pairs])  # ms
+        mae_onset = 1000.0 * np.mean([e_on for _, _, e_on, _, _ in pairs])  # ms
+        mae_offset = 1000.0 * np.mean([e_off for _, _, _, e_off, _ in pairs])  # ms
     else:
         onset_similarity = offset_similarity = pitch_accuracy = 0.0
         mae_onset = mae_offset = float("nan")
@@ -112,6 +132,7 @@ def compute_metrics(ref, hyp, pairs, unmatched_ref, unmatched_hyp, onset_tol=0.0
         "missed_notes": missed_notes,
     }
 
+
 def analyze_contextual_errors(ref, hyp, pairs, unmatched_ref, unmatched_hyp):
     """Analyse des erreurs contextuelles.
     - Notes manquées isolées vs dans un accord (côté référence)
@@ -130,7 +151,9 @@ def analyze_contextual_errors(ref, hyp, pairs, unmatched_ref, unmatched_hyp):
         r = ref[i]
         # chevauchement avec une autre note de référence (autre index)
         has_overlap = any(
-            (k != i) and overlaps_interval(ref[k]["start"], ref[k]["end"], r["start"], r["end"]) for k in range(len(ref))
+            (k != i)
+            and overlaps_interval(ref[k]["start"], ref[k]["end"], r["start"], r["end"])
+            for k in range(len(ref))
         )
         if has_overlap:
             missed_in_chord += 1
@@ -142,7 +165,9 @@ def analyze_contextual_errors(ref, hyp, pairs, unmatched_ref, unmatched_hyp):
     for j in unmatched_hyp:
         h = hyp[j]
         has_overlap = any(
-            (k != j) and overlaps_interval(hyp[k]["start"], hyp[k]["end"], h["start"], h["end"]) for k in range(len(hyp))
+            (k != j)
+            and overlaps_interval(hyp[k]["start"], hyp[k]["end"], h["start"], h["end"])
+            for k in range(len(hyp))
         )
         if has_overlap:
             false_simultaneous += 1
@@ -159,7 +184,9 @@ def analyze_contextual_errors(ref, hyp, pairs, unmatched_ref, unmatched_hyp):
         "substitutions": substitutions,
     }
 
+
 # ======== UI Tkinter ========
+
 
 class MidiCompareApp(tk.Tk):
     def __init__(self):
@@ -173,10 +200,20 @@ class MidiCompareApp(tk.Tk):
         # Menu
         menubar = tk.Menu(self)
         filemenu = tk.Menu(menubar, tearoff=0)
-        filemenu.add_command(label="Ouvrir MIDI de référence…", command=self.pick_ref, accelerator="Ctrl+R / ⌘R")
-        filemenu.add_command(label="Ouvrir MIDI généré…", command=self.pick_gen, accelerator="Ctrl+G / ⌘G")
+        filemenu.add_command(
+            label="Ouvrir MIDI de référence…",
+            command=self.pick_ref,
+            accelerator="Ctrl+R / ⌘R",
+        )
+        filemenu.add_command(
+            label="Ouvrir MIDI généré…",
+            command=self.pick_gen,
+            accelerator="Ctrl+G / ⌘G",
+        )
         filemenu.add_separator()
-        filemenu.add_command(label="Quitter", command=self.destroy, accelerator="Ctrl+Q / ⌘Q")
+        filemenu.add_command(
+            label="Quitter", command=self.destroy, accelerator="Ctrl+Q / ⌘Q"
+        )
         menubar.add_cascade(label="Fichier", menu=filemenu)
         self.config(menu=menubar)
 
@@ -193,11 +230,15 @@ class MidiCompareApp(tk.Tk):
         frm.pack(fill="x")
 
         tk.Label(frm, text="MIDI de référence:").grid(row=0, column=0, sticky="w")
-        ttk.Entry(frm, textvariable=self.ref_path, width=70, state="readonly").grid(row=0, column=1, padx=6)
+        ttk.Entry(frm, textvariable=self.ref_path, width=70, state="readonly").grid(
+            row=0, column=1, padx=6
+        )
         tk.Button(frm, text="Choisir...", command=self.pick_ref).grid(row=0, column=2)
 
         tk.Label(frm, text="MIDI généré:").grid(row=1, column=0, sticky="w")
-        ttk.Entry(frm, textvariable=self.gen_path, width=70, state="readonly").grid(row=1, column=1, padx=6)
+        ttk.Entry(frm, textvariable=self.gen_path, width=70, state="readonly").grid(
+            row=1, column=1, padx=6
+        )
         tk.Button(frm, text="Choisir...", command=self.pick_gen).grid(row=1, column=2)
 
         # paramètres
@@ -212,28 +253,57 @@ class MidiCompareApp(tk.Tk):
         self.include_drums = tk.BooleanVar(value=False)
 
         row = 0
-        tk.Label(par, text="Tolérance attaque (ms):").grid(row=row, column=0, sticky="w")
-        tk.Entry(par, textvariable=self.onset_ms, width=8).grid(row=row, column=1, sticky="w", padx=6)
-        tk.Label(par, text="Tolérance fin (ms):").grid(row=row, column=2, sticky="w", padx=(16,0))
-        tk.Entry(par, textvariable=self.offset_ms, width=8).grid(row=row, column=3, sticky="w", padx=6)
+        tk.Label(par, text="Tolérance attaque (ms):").grid(
+            row=row, column=0, sticky="w"
+        )
+        tk.Entry(par, textvariable=self.onset_ms, width=8).grid(
+            row=row, column=1, sticky="w", padx=6
+        )
+        tk.Label(par, text="Tolérance fin (ms):").grid(
+            row=row, column=2, sticky="w", padx=(16, 0)
+        )
+        tk.Entry(par, textvariable=self.offset_ms, width=8).grid(
+            row=row, column=3, sticky="w", padx=6
+        )
 
         row += 1
-        tk.Label(par, text="Chevauchement min (0..1):").grid(row=row, column=0, sticky="w")
-        tk.Entry(par, textvariable=self.min_overlap, width=8).grid(row=row, column=1, sticky="w", padx=6)
-        tk.Label(par, text="Écart pitch max (demi-tons):").grid(row=row, column=2, sticky="w", padx=(16,0))
-        tk.Entry(par, textvariable=self.max_pitch_diff, width=8).grid(row=row, column=3, sticky="w", padx=6)
+        tk.Label(par, text="Chevauchement min (0..1):").grid(
+            row=row, column=0, sticky="w"
+        )
+        tk.Entry(par, textvariable=self.min_overlap, width=8).grid(
+            row=row, column=1, sticky="w", padx=6
+        )
+        tk.Label(par, text="Écart pitch max (demi-tons):").grid(
+            row=row, column=2, sticky="w", padx=(16, 0)
+        )
+        tk.Entry(par, textvariable=self.max_pitch_diff, width=8).grid(
+            row=row, column=3, sticky="w", padx=6
+        )
 
         row += 1
-        tk.Label(par, text="Filtrer instrument (program 0-127, vide=tous):").grid(row=row, column=0, columnspan=2, sticky="w")
-        tk.Entry(par, textvariable=self.only_program, width=8).grid(row=row, column=2, sticky="w")
-        tk.Checkbutton(par, text="Inclure drums", variable=self.include_drums).grid(row=row, column=3, sticky="w")
+        tk.Label(par, text="Filtrer instrument (program 0-127, vide=tous):").grid(
+            row=row, column=0, columnspan=2, sticky="w"
+        )
+        tk.Entry(par, textvariable=self.only_program, width=8).grid(
+            row=row, column=2, sticky="w"
+        )
+        tk.Checkbutton(par, text="Inclure drums", variable=self.include_drums).grid(
+            row=row, column=3, sticky="w"
+        )
 
         # actions
         act = tk.Frame(self, padx=10, pady=6)
         act.pack(fill="x")
         tk.Button(act, text="Comparer", command=self.run_compare).pack(side="left")
-        tk.Button(act, text="Exporter appariements (CSV)", command=self.export_pairs).pack(side="left", padx=8)
-        tk.Button(act, text="Enregistrer résultats (.txt)", command=self.save_results).pack(side="left", padx=8)
+        tk.Button(
+            act, text="Exporter appariements (CSV)", command=self.export_pairs
+        ).pack(side="left", padx=8)
+        tk.Button(
+            act, text="Enregistrer résultats (.txt)", command=self.save_results
+        ).pack(side="left", padx=8)
+        tk.Button(act, text="Effacer", command=self.clear_text).pack(
+            side="left", padx=8
+        )
 
         # zone résultats
         self.txt = tk.Text(self, wrap="word")
@@ -245,14 +315,17 @@ class MidiCompareApp(tk.Tk):
         self._last_hyp = None
 
     def pick_ref(self):
-        p = filedialog.askopenfilename(title="Choisir le MIDI de référence",
-                                       filetypes=[("MIDI files", "*.mid *.midi")])
+        p = filedialog.askopenfilename(
+            title="Choisir le MIDI de référence",
+            filetypes=[("MIDI files", "*.mid *.midi")],
+        )
         if p:
             self.ref_path.set(p)
 
     def pick_gen(self):
-        p = filedialog.askopenfilename(title="Choisir le MIDI généré",
-                                       filetypes=[("MIDI files", "*.mid *.midi")])
+        p = filedialog.askopenfilename(
+            title="Choisir le MIDI généré", filetypes=[("MIDI files", "*.mid *.midi")]
+        )
         if p:
             self.gen_path.set(p)
 
@@ -266,7 +339,9 @@ class MidiCompareApp(tk.Tk):
             self.pick_gen()
             gen = self.gen_path.get().strip()
         if not ref or not gen:
-            messagebox.showwarning("Fichiers manquants", "Sélectionne les deux fichiers MIDI.")
+            messagebox.showwarning(
+                "Fichiers manquants", "Sélectionne les deux fichiers MIDI."
+            )
             return
 
         try:
@@ -274,20 +349,32 @@ class MidiCompareApp(tk.Tk):
             if self.only_program.get().strip() != "":
                 programs = [int(self.only_program.get().strip())]
 
-            ref_notes = load_notes(ref, programs=programs, drums=self.include_drums.get())
-            hyp_notes = load_notes(gen, programs=programs, drums=self.include_drums.get())
+            ref_notes = load_notes(
+                ref, programs=programs, drums=self.include_drums.get()
+            )
+            hyp_notes = load_notes(
+                gen, programs=programs, drums=self.include_drums.get()
+            )
 
             onset_tol = float(self.onset_ms.get()) / 1000.0
             offset_tol = float(self.offset_ms.get()) / 1000.0
             pairs, unr, unp = match_notes(
-                ref_notes, hyp_notes,
+                ref_notes,
+                hyp_notes,
                 onset_tol=onset_tol,
                 offset_tol=offset_tol,
                 max_pitch_diff=int(self.max_pitch_diff.get()),
-                min_overlap=float(self.min_overlap.get())
+                min_overlap=float(self.min_overlap.get()),
             )
-            metrics = compute_metrics(ref_notes, hyp_notes, pairs, unr, unp,
-                                      onset_tol=onset_tol, offset_tol=offset_tol)
+            metrics = compute_metrics(
+                ref_notes,
+                hyp_notes,
+                pairs,
+                unr,
+                unp,
+                onset_tol=onset_tol,
+                offset_tol=offset_tol,
+            )
 
             ctx = analyze_contextual_errors(ref_notes, hyp_notes, pairs, unr, unp)
 
@@ -305,13 +392,21 @@ class MidiCompareApp(tk.Tk):
             t.append(f"Notes réf      : {metrics['n_ref']}")
             t.append(f"Notes générées : {metrics['n_hyp']}")
             t.append(f"Appariées      : {metrics['n_matched']}")
-            t.append(f"Similarité globale (rappel) : {metrics['global_similarity_%']:.1f}%")
+            t.append(
+                f"Similarité globale (rappel) : {metrics['global_similarity_%']:.1f}%"
+            )
             t.append(f"Précision                       : {metrics['precision_%']:.1f}%")
             t.append(f"F1                              : {metrics['f1_%']:.1f}%")
-            t.append(f"Début (attaque)                 : {metrics['onset_similarity_%']:.1f}%  (tol {self.onset_ms.get():.0f} ms)")
-            t.append(f"Fin   (relâchement)             : {metrics['offset_similarity_%']:.1f}%  (tol {self.offset_ms.get():.0f} ms)")
-            t.append(f"Justesse de note (pitch exact)  : {metrics['pitch_accuracy_%']:.1f}% (±{int(self.max_pitch_diff.get())} st)")
-            if np.isfinite(metrics['mean_abs_onset_error_ms']):
+            t.append(
+                f"Début (attaque)                 : {metrics['onset_similarity_%']:.1f}%  (tol {self.onset_ms.get():.0f} ms)"
+            )
+            t.append(
+                f"Fin   (relâchement)             : {metrics['offset_similarity_%']:.1f}%  (tol {self.offset_ms.get():.0f} ms)"
+            )
+            t.append(
+                f"Justesse de note (pitch exact)  : {metrics['pitch_accuracy_%']:.1f}% (±{int(self.max_pitch_diff.get())} st)"
+            )
+            if np.isfinite(metrics["mean_abs_onset_error_ms"]):
                 t.append(f"MAE attaque : {metrics['mean_abs_onset_error_ms']:.1f} ms")
                 t.append(f"MAE fin     : {metrics['mean_abs_offset_error_ms']:.1f} ms")
             t.append(f"Fausses notes (FP) : {metrics['false_notes']}")
@@ -331,24 +426,50 @@ class MidiCompareApp(tk.Tk):
         if self._last_pairs is None:
             messagebox.showinfo("Pas de données", "Lance d’abord une comparaison.")
             return
-        p = filedialog.asksaveasfilename(title="Enregistrer le CSV des appariements",
-                                         defaultextension=".csv",
-                                         filetypes=[("CSV", "*.csv")])
+        p = filedialog.asksaveasfilename(
+            title="Enregistrer le CSV des appariements",
+            defaultextension=".csv",
+            filetypes=[("CSV", "*.csv")],
+        )
         if not p:
             return
         try:
             import csv
+
             with open(p, "w", newline="") as f:
                 w = csv.writer(f)
-                w.writerow(["ref_idx","hyp_idx","ref_pitch","hyp_pitch",
-                            "ref_start_s","hyp_start_s","onset_err_ms",
-                            "ref_end_s","hyp_end_s","offset_err_ms","pitch_equal"])
-                for (i, j, e_on, e_off, p_ok) in self._last_pairs:
+                w.writerow(
+                    [
+                        "ref_idx",
+                        "hyp_idx",
+                        "ref_pitch",
+                        "hyp_pitch",
+                        "ref_start_s",
+                        "hyp_start_s",
+                        "onset_err_ms",
+                        "ref_end_s",
+                        "hyp_end_s",
+                        "offset_err_ms",
+                        "pitch_equal",
+                    ]
+                )
+                for i, j, e_on, e_off, p_ok in self._last_pairs:
                     r, h = self._last_ref[i], self._last_hyp[j]
-                    w.writerow([i, j, r["pitch"], h["pitch"],
-                                f"{r['start']:.6f}", f"{h['start']:.6f}", f"{e_on*1000:.1f}",
-                                f"{r['end']:.6f}",   f"{h['end']:.6f}",   f"{e_off*1000:.1f}",
-                                int(p_ok)])
+                    w.writerow(
+                        [
+                            i,
+                            j,
+                            r["pitch"],
+                            h["pitch"],
+                            f"{r['start']:.6f}",
+                            f"{h['start']:.6f}",
+                            f"{e_on*1000:.1f}",
+                            f"{r['end']:.6f}",
+                            f"{h['end']:.6f}",
+                            f"{e_off*1000:.1f}",
+                            int(p_ok),
+                        ]
+                    )
             messagebox.showinfo("Export", f"Appariements écrits dans:\n{p}")
         except Exception as e:
             messagebox.showerror("Erreur export", str(e))
@@ -358,9 +479,11 @@ class MidiCompareApp(tk.Tk):
         if not content.strip():
             messagebox.showinfo("Pas de données", "Aucun résultat à enregistrer.")
             return
-        p = filedialog.asksaveasfilename(title="Enregistrer les résultats",
-                                         defaultextension=".txt",
-                                         filetypes=[("Texte", "*.txt"), ("All", "*.*")])
+        p = filedialog.asksaveasfilename(
+            title="Enregistrer les résultats",
+            defaultextension=".txt",
+            filetypes=[("Texte", "*.txt"), ("All", "*.*")],
+        )
         if not p:
             return
         try:
@@ -369,6 +492,10 @@ class MidiCompareApp(tk.Tk):
             messagebox.showinfo("Export", f"Résultats enregistrés dans:\n{p}")
         except Exception as e:
             messagebox.showerror("Erreur export", str(e))
+
+    def clear_text(self):
+        self.txt.delete("1.0", "end")
+
 
 if __name__ == "__main__":
     app = MidiCompareApp()

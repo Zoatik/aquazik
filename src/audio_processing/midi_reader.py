@@ -1,14 +1,9 @@
 from enum import Enum
 import mido
-from constants import NOTE_NAMES
+from audio_processing.audio_utils import NOTE_NAMES, Instrument
 
 DEBUG = False
 
-
-class Instrument(Enum):
-    PIANO = 11
-    TRUMPET = 2
-    UNKNOWN = -1
 
 class MidiNote:
     endTicks = -1
@@ -25,14 +20,16 @@ class MidiNote:
         )
 
     def get_instrument(self):
-        values = [Instrument[x] for x in Instrument.__dict__.keys()
-         if not x.__contains__("_")
-         and not x.__contains__("UNKNOWN")]
-        
+        values = [
+            Instrument[x]
+            for x in Instrument.__dict__.keys()
+            if not x.__contains__("_") and not x.__contains__("UNKNOWN")
+        ]
+
         for instr in values:
             if instr.value == self.channel:
                 return instr
-        
+
         reduced = self.channel % len(values)
         if [x.value for x in values].__contains__(reduced):
             for instr in values:
@@ -51,9 +48,10 @@ class MidiNote:
         octave = (self.noteIndex // 12) - 1
         note = NOTE_NAMES[self.noteIndex % 12]
         return f"{note}{octave}"
-    
+
     def get_time(self) -> float:
         return self.endSeconds - self.startSeconds
+
 
 class MidiFile:
     note_list: list[MidiNote] = []
@@ -110,6 +108,7 @@ class MidiFile:
     # returns a list of unique used notes in the midi file
     def get_used_notes(self) -> list[str]:
         return list(set([x.get_real_note()[:-1] for x in self.note_list]))
+
 
 # test case
 """

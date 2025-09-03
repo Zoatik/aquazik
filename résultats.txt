@@ -1,0 +1,43 @@
+---- Résultats ----
+Fichier réf : /home/axelh/development/aquazik/audio_in/PinkPanther.midi
+Fichier gen : /home/axelh/development/aquazik/music.mid
+Notes réf      : 451
+Notes générées : 655
+Appariées      : 252
+Similarité globale (rappel) : 55.9%
+Précision                       : 38.5%
+F1                              : 45.6%
+Début (attaque)                 : 55.2%  (tol 50 ms)
+Fin   (relâchement)             : 36.1%  (tol 80 ms)
+Justesse de note (pitch exact)  : 100.0% (±0 st)
+MAE attaque : 143.0 ms
+MAE fin     : 322.6 ms
+Fausses notes (FP) : 403
+Notes manquées (FN): 199
+Substitutions (mauvais pitch apparié): 0
+Notes manquées isolées : 11
+Notes manquées dans accords : 188
+Fausses notes isolées : 0
+Fausses notes simultanées : 403
+
+---- Résultats ----
+Fichier réf : /home/axelh/development/aquazik/audio_in/Ecossaise_Beethoven.midi
+Fichier gen : /home/axelh/development/aquazik/music.mid
+Notes réf      : 747
+Notes générées : 830
+Appariées      : 428
+Similarité globale (rappel) : 57.3%
+Précision                       : 51.6%
+F1                              : 54.3%
+Début (attaque)                 : 60.7%  (tol 50 ms)
+Fin   (relâchement)             : 45.6%  (tol 80 ms)
+Justesse de note (pitch exact)  : 100.0% (±0 st)
+MAE attaque : 88.3 ms
+MAE fin     : 192.3 ms
+Fausses notes (FP) : 402
+Notes manquées (FN): 319
+Substitutions (mauvais pitch apparié): 0
+Notes manquées isolées : 3
+Notes manquées dans accords : 316
+Fausses notes isolées : 0
+Fausses notes simultanées : 402

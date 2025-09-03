@@ -1,0 +1,43 @@
+---- Résultats ----
+Fichier réf : /home/axelh/development/aquazik/audio_in/SuperMario.mid
+Fichier gen : /home/axelh/development/aquazik/audio_out/SuperMario.mid
+Notes réf      : 189
+Notes générées : 449
+Appariées      : 115
+Similarité globale (rappel) : 60.8%
+Précision                       : 25.6%
+F1                              : 36.1%
+Début (attaque)                 : 33.9%  (tol 50 ms)
+Fin   (relâchement)             : 18.3%  (tol 80 ms)
+Justesse de note (pitch exact)  : 100.0% (±0 st)
+MAE attaque : 65.0 ms
+MAE fin     : 137.7 ms
+Fausses notes (FP) : 334
+Notes manquées (FN): 74
+Substitutions (mauvais pitch apparié): 0
+Notes manquées isolées : 1
+Notes manquées dans accords : 73
+Fausses notes isolées : 0
+Fausses notes simultanées : 334
+
+---- Résultats ----
+Fichier réf : /home/axelh/development/aquazik/audio_in/SuperMario.mid
+Fichier gen : /home/axelh/development/aquazik/audio_out/SuperMario.mid
+Notes réf      : 189
+Notes générées : 133
+Appariées      : 109
+Similarité globale (rappel) : 57.7%
+Précision                       : 82.0%
+F1                              : 67.7%
+Début (attaque)                 : 27.5%  (tol 50 ms)
+Fin   (relâchement)             : 20.2%  (tol 80 ms)
+Justesse de note (pitch exact)  : 100.0% (±0 st)
+MAE attaque : 59.8 ms
+MAE fin     : 148.4 ms
+Fausses notes (FP) : 24
+Notes manquées (FN): 80
+Substitutions (mauvais pitch apparié): 0
+Notes manquées isolées : 8
+Notes manquées dans accords : 72
+Fausses notes isolées : 0
+Fausses notes simultanées : 24

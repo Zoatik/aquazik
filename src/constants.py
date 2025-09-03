@@ -1,8 +1,6 @@
 import random
 from enum import Enum, auto
 
-# List of note names
-NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
 
 class Colors:
     bgColor = (125, 125, 255)
@@ -20,9 +18,11 @@ class Colors:
     LEAF_DARK = (18, 102, 53)
     LEAF_LIGHT = (46, 181, 101)
 
-    patrick = (0xF8,0xAE,0xAF)
+    patrick = (0xF8, 0xAE, 0xAF)
+    purple = (160, 32, 240)
+    algues_green = (38, 180, 120)
 
-    
+
 class FishColors:
     yellow = (255, 255, 0)
     orange = (255, 165, 0)
@@ -32,9 +32,9 @@ class FishColors:
     green = (0, 255, 0)
     red = (255, 0, 0)
     blue = (0, 0, 255)
-    pinkTruite = (0xA9,0x83,0x80)
-    darkGrayTruite = (0x3B,0x45,0x44)
-    lightGrayTruite = (0xC9,0xC9,0xBF)
+    pinkTruite = (0xA9, 0x83, 0x80)
+    darkGrayTruite = (0x3B, 0x45, 0x44)
+    lightGrayTruite = (0xC9, 0xC9, 0xBF)
 
     def get_random_color():
         # Récupère tous les attributs de la classe sauf spéciaux (__xxx__)
@@ -47,7 +47,7 @@ class FishColors:
             and not k.startswith("white")
         ]
         return values[int(random() * len(values))]
-    
+
 
 class Direction(Enum):
     LEFT: float = -1
