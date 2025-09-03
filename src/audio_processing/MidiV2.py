@@ -28,7 +28,7 @@ def midi_maker(macro: list[Note], bpm: int, outfile: str = "music.mid") -> str:
         midi_note = Tools.note_to_midi(note.name)
         time = note.start_bpm
         duration = note.length_bpm
-        volume = int((note.magnitudes[0]) * 127)
+        volume = int((note.magnitude) * 127)
         MyMIDI.addNote(
             track=track,
             channel=channel,

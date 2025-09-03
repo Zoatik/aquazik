@@ -51,3 +51,5 @@ class Seaweed:
             right = [ (x0-nx*w0, y0-ny*w0), (x1-nx*w1, y1-ny*w1) ]
             pygame.draw.polygon(surf, self.color, [left[0], right[0], left[1]])
             pygame.draw.polygon(surf, self.color, [left[1], right[0], right[1]])
+            pygame.draw.polygon(surf, Colors.black, [left[0], right[0], left[1]],1)
+            pygame.draw.polygon(surf, Colors.black, [left[1], right[0], right[1]],1)

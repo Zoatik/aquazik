@@ -75,7 +75,7 @@ def main():
 
     #create the seaweed (algues)
     fronds = []
-    num_clusters = random.randint(8, 20)
+    num_clusters = random.randint(15, 30)
     for _ in range(num_clusters):
         x = random.randint(50, width - 50)    # avoid going out of screen
         y = random.randint(height // 2, height - 50)  # bottom half of the screen

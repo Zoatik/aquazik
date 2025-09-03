@@ -510,7 +510,7 @@ class Aquarium:
 
         for x in range(startX, endX, step):
             y = random.randint(lowY, topY)
-            height = random.randint(20, 60) 
+            height = int(y/10)+20
             speed = random.uniform(0.5, 2.0)
             sway_amp = random.randint(15, 35)
             fronds.append(Seaweed(x, y, height, width, speed, sway_amp))
