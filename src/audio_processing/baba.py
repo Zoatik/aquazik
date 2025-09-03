@@ -83,8 +83,11 @@ def wavelet_mag(audio_data, sample_rate, use_vqt=False, bins_per_octave=12):
     - times: centres temporels des frames (en secondes)
     - note_labels: liste de labels 'C0'..'B8' alignés aux lignes de mag
     """
-    n_bins = bins_per_octave * 9  # octaves 0..8 → 9 * 12 = 108
-    fmin = librosa.note_to_hz("C0")
+
+    fmin = Tools.note_to_midi("A0")
+    fmax = Tools.note_to_midi("C8")
+    n_bins = (fmax - fmin) * bins_per_octave // 12 + 1
+    fmin = librosa.note_to_hz("A0")
     hop_length = int(sample_rate * WINDOW_TIME)
     audio_data = librosa.util.normalize(audio_data)
 
@@ -105,6 +108,7 @@ def wavelet_mag(audio_data, sample_rate, use_vqt=False, bins_per_octave=12):
             fmin=fmin,
             n_bins=n_bins,
             bins_per_octave=bins_per_octave,
+            filter_scale=2.0,
         )
 
     mag = np.abs(C)
@@ -125,186 +129,106 @@ def wavelet_mag(audio_data, sample_rate, use_vqt=False, bins_per_octave=12):
     return mag, times, note_labels
 
 
-def smooth_wavelet_mag(
-    mag: np.ndarray,
-    times: np.ndarray,
-    note_labels,  # non utilisé dans le calcul (fourni pour compatibilité / debug)
-    *,
-    time_s: float = 0.05,  # largeur de fenêtre temporelle (secondes)
-    freq_bins: int = 3,  # largeur de fenêtre fréquentielle (en bins)
-    method: str = "gaussian",  # "gaussian" ou "box"
-    renormalize: bool = False,  # remet l'échelle sur [0,1] après lissage
-    pad_mode: str = "reflect",  # "reflect", "edge"…
-) -> np.ndarray:
-    """
-    Lissage séparable de la matrice d'amplitude 'mag' (n_bins, n_frames).
-
-    - Lissage temporel (le long de l'axe frames) avec une fenêtre de 'time_s' secondes.
-    - Lissage fréquentiel (le long de l'axe bins) avec 'freq_bins' bins.
-    - 'method' contrôle la forme de la fenêtre : gaussienne (douce) ou boîte (moyenne glissante).
-
-    Retourne:
-      mag_smooth : np.ndarray de même shape que 'mag'.
-    """
-    if mag.ndim != 2:
-        raise ValueError("mag doit être 2D (n_bins, n_frames)")
-
-    n_bins, n_frames = mag.shape
-    if n_frames == 0 or n_bins == 0:
-        return mag.copy()
-
-    # --- Tailles de fenêtres (oddes) ---
-    # pas temporel moyen (s) entre frames
-    dt = float(np.median(np.diff(times))) if len(times) > 1 else 0.0
-    if dt <= 0.0:
-        # fallback: estime via longueur / nb frames si possible
-        dt = (times[-1] / max(1, n_frames - 1)) if len(times) > 0 else 1.0
-
-    L_t = max(1, int(round(time_s / dt)))  # en frames
-    if L_t % 2 == 0:
-        L_t += 1
-
-    L_f = max(1, int(freq_bins))  # en bins
-    if L_f % 2 == 0:
-        L_f += 1
-
-    # --- Kernels 1D normalisés ---
-    def gaussian_kernel(L):
-        # sigma ~ L/3 pour une gaussienne "classique"
-        sigma = max(1e-6, L / 3.0)
-        r = (L - 1) // 2
-        x = np.arange(-r, r + 1, dtype=np.float64)
-        k = np.exp(-(x * x) / (2.0 * sigma * sigma))
-        k /= k.sum()
-        return k
-
-    def box_kernel(L):
-        return np.full(L, 1.0 / L, dtype=np.float64)
-
-    if method.lower() == "gaussian":
-        kt = gaussian_kernel(L_t)
-        kf = gaussian_kernel(L_f)
-    elif method.lower() == "box":
-        kt = box_kernel(L_t)
-        kf = box_kernel(L_f)
-    else:
-        raise ValueError("method doit être 'gaussian' ou 'box'")
-
-    # --- Convolutions séparables (temps puis fréquence) ---
-    def convolve_along_axis(X, kernel, axis: int, pad_mode: str = "reflect"):
-        """
-        Convolution 1D le long d'un axe avec padding symétrique.
-        Garantit une sortie de même longueur que l'entrée sur l'axe ciblé.
-        """
-        X = np.asarray(X)
-        L = len(kernel)
-        r = (L - 1) // 2
-        expected_N = X.shape[axis]
-
-        # Padding symétrique
-        pad_width = [(0, 0)] * X.ndim
-        pad_width[axis] = (r, r)
-        Xp = np.pad(X, pad_width, mode=pad_mode)
-
-        # Amène l'axe ciblé en dernier, reshape en (rows, N_pad)
-        Xp = np.moveaxis(Xp, axis, -1)  # (..., N + 2r)
-        rows = int(np.prod(Xp.shape[:-1])) if Xp.ndim > 1 else 1
-        N_pad = Xp.shape[-1]
-        Xw = Xp.reshape(rows, N_pad)
-
-        # Conteneur de sortie (même shape que X)
-        out = np.empty_like(X, dtype=np.float64)
-        Yw = out.reshape(rows, expected_N)
-
-        # Convolution ligne par ligne
-        for i in range(rows):
-            y = np.convolve(Xw[i], kernel, mode="valid")  # longueur = expected_N + 1
-            # Corrige l'excès d'un élément (off-by-one) dû à r=r(L)
-            if y.shape[0] == expected_N + 1:
-                y = y[:-1]
-            elif y.shape[0] != expected_N:
-                # Sécurité: recadrage centré si jamais (ne devrait pas arriver)
-                start = (y.shape[0] - expected_N) // 2
-                y = y[start : start + expected_N]
-            Yw[i] = y
-
-        # Restaure la forme et la position d'axe
-        out = Yw.reshape(*Xp.shape[:-1], expected_N)
-        out = np.moveaxis(out, -1, axis)
-        return out
-
-    # applique d'abord le lissage temporel (axis=1), puis fréquentiel (axis=0)
-    tmp = convolve_along_axis(mag.astype(np.float64, copy=False), kt, axis=1)
-    smoothed = convolve_along_axis(tmp, kf, axis=0)
-
-    # Optionnel: renormalisation à [0,1] (utile si tu relies à un seuil fixe)
-    if renormalize:
-        mx = smoothed.max() if smoothed.size else 0.0
-        if mx > 0:
-            smoothed /= mx
-
-    return smoothed.astype(mag.dtype, copy=False)
-
-
 def reinforce_fundamentals(
     mag,
     *,
     bins_per_octave=12,
-    max_harm=6,  # on cherche les harmoniques 2..max_harm
-    presence_thresh=0.15,  # seuil relatif (à la crête de la frame) pour “compter” une harmonique
-    neigh_bins=1,  # tolérance d’intonation ±neigh_bins (max-pooling après alignement)
-    boost_strength=0.8,  # intensité de renfort : 0..1 (≈ poids appliqué au nombre d’harmoniques)
-    use_amplitude=False,  # False = on compte; True = on pondère par l’amplitude alignée
-    renormalize=True,  # re-normaliser chaque frame sur [0,1] à la fin
+    max_harm=6,
+    presence_thresh=0.15,
+    neigh_bins=1,
+    boost_strength=0.8,
+    use_amplitude=False,
+    renormalize=True,
     eps=1e-12,
+    presence_ref="local",
+    f0_gate_rel=0.05,
+    harm_weight="1/k",
+    renorm_percentile=None,
+    # --- Subharmonique (inchangé) ---
+    enable_subharmonic=True,
+    promote_thresh=0.5,
+    demote_thresh=0.2,
+    sub_boost_strength=0.6,
+    suppress_factor=0.25,
+    presence_h2_rel=0.10,
+    # --- NOUVEAU : sauver f0 même si X[i]==0 s’il a assez d’harmoniques possibles ---
+    min_potential_harmonics_for_zero_f0=3,  # 0 = désactivé ; 3 recommandé
 ):
-    """
-    Renforce les fondamentales selon le nombre d'harmoniques détectées.
-
-    mag : np.ndarray de forme (n_bins, n_frames), normalisée [0,1] (comme ta sortie CQT).
-    Retourne une matrice de même forme.
-
-    Principe :
-    - pour chaque harmonique k (2..max_harm), on décale mag de ~log2(k)*BPO vers le bas
-      (pour aligner l’harmonique k sur le bin de la fondamentale),
-    - on fait un petit max-pooling ±neigh_bins pour tolérer un léger désaccord,
-    - on “compte” l’harmonique si son amplitude alignée dépasse presence_thresh * max_de_la_frame,
-    - plus un bin cumule d’harmoniques, plus on le renforce.
-    """
     if mag is None or mag.size == 0:
         return mag
 
-    n_bins, n_frames = mag.shape
     X = mag
+    n_bins, n_frames = X.shape
 
-    # Pré-calcul des décalages (en bins CQT) pour aligner k*f0 -> f0
-    offsets = []
+    # offsets harmoniques k=2..K
+    ks, offsets = [], []
     for k in range(2, max_harm + 1):
         off = int(round(bins_per_octave * math.log2(k)))
-        if off < n_bins:  # si l’harmonique sort de bande, on l’ignore
+        if off < n_bins:
+            ks.append(k)
             offsets.append(off)
     if not offsets:
-        return mag.copy()
+        return X.copy()
+    ks = np.asarray(ks)
+    offsets = np.asarray(offsets)
 
-    # max par frame pour un seuil relatif robuste
+    # poids harmoniques
+    if harm_weight is None:
+        w_k = np.ones_like(ks, dtype=X.dtype)
+    elif harm_weight == "1/k":
+        w_k = 1.0 / ks
+    elif harm_weight == "1/k2":
+        w_k = 1.0 / (ks.astype(X.dtype) ** 2)
+    else:
+        raise ValueError("harm_weight doit être None, '1/k' ou '1/k2'.")
+
+    # --- validité par bin : poids ET COMPTE ENTIER (nouveau) ---
+    valid_weight_per_bin = np.zeros(n_bins, dtype=X.dtype)
+    valid_count_per_bin = np.zeros(n_bins, dtype=np.int32)  # nouveau
+    for off, wk in zip(offsets, w_k):
+        valid_weight_per_bin[: n_bins - off] += wk
+        valid_count_per_bin[: n_bins - off] += 1
+    valid_weight_per_bin = np.maximum(valid_weight_per_bin, eps)
+
+    # Seuils par frame + gate énergie
     frame_max = np.maximum(np.max(X, axis=0, keepdims=True), eps)
+    f0_gate_energy = (X >= (f0_gate_rel * frame_max)).astype(X.dtype)
+
+    # --- NOUVEAU : bypass du gate si assez d’harmoniques potentielles ---
+    if min_potential_harmonics_for_zero_f0 and min_potential_harmonics_for_zero_f0 > 0:
+        potential_mask = valid_count_per_bin >= int(min_potential_harmonics_for_zero_f0)
+        # alt_gate = 1 pour les bins avec suffisamment de "k" possibles, sinon gate énergie
+        alt_gate = np.where(potential_mask[:, None], 1.0, f0_gate_energy)
+    else:
+        alt_gate = f0_gate_energy
+
+    # Référence "locale" pour le seuil de présence
+    if presence_ref == "local":
+        ref_pool = X.copy()
+        if neigh_bins > 0:
+            for d in range(1, neigh_bins + 1):
+                up = np.zeros_like(X)
+                up[d:, :] = X[:-d, :]
+                dn = np.zeros_like(X)
+                dn[:-d, :] = X[d:, :]
+                ref_pool = np.maximum(ref_pool, np.maximum(up, dn))
+    elif presence_ref == "frame":
+        ref_pool = None
+    else:
+        raise ValueError("presence_ref doit être 'local' ou 'frame'.")
 
     # Accumulateurs
-    harmonic_count = np.zeros_like(X)  # nombre d'harmoniques présentes par (bin, frame)
-    harmonic_power = np.zeros_like(
-        X
-    )  # somme des amplitudes alignées (si use_amplitude)
+    harmonic_count_w = np.zeros_like(X)
+    harmonic_power_w = np.zeros_like(X)
+    aligned_cache = []
 
-    for off in offsets:
-        # Aligner l’harmonique k: on “rabaisse” la bande haute (i+off) sur (i)
+    for off, wk in zip(offsets, w_k):
         aligned = np.zeros_like(X)
-        aligned[:-off, :] = X[off:, :]  # padding zéro en haut
+        aligned[:-off, :] = X[off:, :]
 
-        # Tolérance d’intonation : max-pooling ±neigh_bins (après alignement)
         if neigh_bins > 0:
             pooled = aligned.copy()
             for d in range(1, neigh_bins + 1):
-                # roll + masque zéro pour éviter les déversements aux bords
                 up = np.zeros_like(aligned)
                 up[d:, :] = aligned[:-d, :]
                 dn = np.zeros_like(aligned)
@@ -312,28 +236,66 @@ def reinforce_fundamentals(
                 pooled = np.maximum(pooled, np.maximum(up, dn))
             aligned = pooled
 
-        # Présence au-dessus d’un seuil relatif (par frame)
-        present = aligned >= (presence_thresh * frame_max)
+        if presence_ref == "local":
+            ref_aligned = np.zeros_like(X)
+            ref_aligned[:-off, :] = ref_pool[off:, :]
+            ref_ref = np.maximum(ref_aligned, eps)
+        else:
+            ref_ref = frame_max
 
-        harmonic_count += present.astype(X.dtype)
+        present = aligned >= (presence_thresh * ref_ref)
+
+        harmonic_count_w += wk * present.astype(X.dtype)
         if use_amplitude:
-            harmonic_power += aligned
+            harmonic_power_w += wk * aligned
 
-    # Score d’harmoniques (compte, éventuellement mixé avec l'amplitude)
+        aligned_cache.append((off, wk, aligned))
+
+    # Score "bin comme f0" (pas de gate énergie dur : on utilise alt_gate)
     if use_amplitude:
-        # normaliser la puissance par (max_harm-1) pour rester dans [0,1] environ
-        score = (harmonic_count + harmonic_power) / max(1, (len(offsets)))
+        score = (harmonic_count_w + harmonic_power_w) / valid_weight_per_bin[:, None]
     else:
-        score = harmonic_count / max(1, (len(offsets)))
+        score = harmonic_count_w / valid_weight_per_bin[:, None]
 
-    # Facteur de renfort (seulement sur les fondamentales candidates)
-    # 1 + boost_strength * score  ∈ [1, 1+boost_strength]
-    boost = 1.0 + boost_strength * score
-    Y = X * boost
+    # --- appliquer le gate assoupli (autorise X[i]==0 si assez d'harmoniques potentielles) ---
+    score *= alt_gate
+
+    # Renfort de base
+    boost = 1.0 + boost_strength * np.clip(score, 0.0, 1.0)
+
+    # ===== Promotion subharmonique (H2 -> f0) =====
+    promote_map = np.ones_like(X)
+    suppress_map = np.ones_like(X)
+
+    if enable_subharmonic and bins_per_octave > 0:
+        oct_off = int(round(bins_per_octave))
+        present_H2 = X >= (presence_h2_rel * frame_max)
+
+        for i in range(oct_off, n_bins):
+            b0 = i - oct_off
+            strong_f0 = score[b0, :] >= promote_thresh
+            weak_self = score[i, :] <= demote_thresh
+            cond = strong_f0 & weak_self & present_H2[i, :]
+
+            if not np.any(cond):
+                continue
+
+            promote_map[b0, cond] *= 1.0 + sub_boost_strength
+            for off in offsets:
+                h = b0 + off
+                if h < n_bins:
+                    suppress_map[h, cond] *= suppress_factor
+
+    Y = X * boost * promote_map * suppress_map
 
     if renormalize:
-        max_per_frame = np.maximum(np.max(Y, axis=0, keepdims=True), eps)
-        Y = Y / max_per_frame
+        if renorm_percentile is None:
+            denom = np.maximum(np.max(Y, axis=0, keepdims=True), eps)
+        else:
+            p = float(renorm_percentile)
+            denom = np.percentile(Y, p, axis=0, keepdims=True)
+            denom = np.maximum(denom, eps)
+        Y = Y / denom
 
     return Y
 
@@ -400,13 +362,107 @@ def plot_pianoroll(
     plt.tight_layout()
 
 
+def segment_features(mag, segment, bins_per_octave=12, max_k=6, neigh=1):
+    """Retourne un dict de features timbraux pour un segment track_notes."""
+    pitch = np.clip(np.round(segment["pitch_bins"]).astype(int), 0, mag.shape[0] - 1)
+    t0, t1 = segment["onset_idx"], segment["offset_idx"]
+    frames = range(max(0, t0), min(mag.shape[1], t1))
+    H1s, ratios, devs = [], [], []
+    odd_sum, even_sum = 0.0, 0.0
+
+    for tt in frames:
+        i = pitch[min(tt - t0, len(pitch) - 1)]
+        H = []
+        # H1
+        H1 = mag[i, tt]
+        # Hk alignés (max-pooling ±neigh)
+        for k in range(2, max_k + 1):
+            off = int(round(bins_per_octave * math.log2(k)))
+            j = i + off
+            if j >= mag.shape[0]:
+                H.append(0.0)
+                continue
+            vals = [mag[j, tt]]
+            for d in range(1, neigh + 1):
+                if j - d >= 0:
+                    vals.append(mag[j - d, tt])
+                if j + d < mag.shape[0]:
+                    vals.append(mag[j + d, tt])
+            H.append(max(vals))
+        # collecte
+        H1s.append(H1)
+        if H1 > 1e-9:
+            ratios.append([h / H1 for h in H])  # [H2/H1, H3/H1, ...]
+        # inharmonicité: déviation moyenne du meilleur alignement
+        # (approx simple: écart binaire entre j et l’indice où le max a été pris)
+        # ici on saute pour garder le code court; cf. remarque ci-dessous
+        # odd/even
+        for idx, h in enumerate(H, start=2):
+            if idx % 2:
+                odd_sum += h
+            else:
+                even_sum += h
+
+    ratios = np.array(ratios) if ratios else np.zeros((0, max_k - 1))
+    med_ratios = np.median(ratios, axis=0) if ratios.size else np.zeros(max_k - 1)
+    # pente spectrale (log)
+    ks = np.arange(2, max_k + 1, dtype=float)
+    y = np.log(np.maximum(med_ratios, 1e-12))
+    slope = float(np.polyfit(np.log(ks), y, 1)[0]) if ratios.size else 0.0
+
+    # dynamiques
+    e = np.array(segment["energy"], dtype=float)
+    e = e[(0 if t0 == segment["onset_idx"] else 0) :]  # déjà la bonne fenêtre
+    if e.size:
+        e_norm = e / (np.max(e) + 1e-12)
+        # attaque 10→90%
+        try:
+            t10 = np.argmax(e_norm >= 0.1)
+            t90 = np.argmax(e_norm >= 0.9)
+            attack = float(max(0, t90 - t10))
+        except Exception:
+            attack = float("nan")
+        # demi-vie (descente 1→0.5)
+        post = e_norm[np.argmax(e_norm) :]
+        half = np.argmax(post <= 0.5) if post.size else 0
+        half_life = float(half)
+    else:
+        attack = half_life = 0.0
+
+    # vibrato (sur pitch_bins)
+    pb = np.array(segment["pitch_bins"], dtype=float)
+    pb = pb - np.mean(pb)
+    vib_rate = 0.0
+    vib_depth = 0.0
+    if pb.size >= 16 and np.std(pb) > 1e-6:
+        ac = np.correlate(pb, pb, mode="full")[pb.size - 1 :]
+        ac = ac / (ac[0] + 1e-12)
+        # chercher le 1er pic secondaire
+        lag = np.argmax(ac[1 : min(64, pb.size // 2)]) + 1
+        vib_rate = 1.0 / lag if lag > 0 else 0.0
+        vib_depth = 2.0 * np.std(pb)  # ~ crête-à-crête en bins
+
+    return {
+        "H2_H1": float(med_ratios[0]) if med_ratios.size >= 1 else 0.0,
+        "H3_H1": float(med_ratios[1]) if med_ratios.size >= 2 else 0.0,
+        "odd_even": (odd_sum + 1e-9) / (even_sum + 1e-9),
+        "slope": slope,
+        "attack_frames": attack,
+        "half_life_frames": half_life,
+        "vib_rate_cyc_per_frame": vib_rate,
+        "vib_depth_bins": vib_depth,
+        "energy_med": float(np.median(H1s) if H1s else 0.0),
+        "energy_p95": float(np.percentile(H1s, 95) if H1s else 0.0),
+    }
+
+
 def track_notes(
     mag,
     times,
     *,
     bins_per_octave=12,
     freqs=None,  # np.array(n_bins) en Hz ; si None et librosa dispo, sera déduit
-    fmin_note="C0",  # utilisé seulement si freqs=None (via librosa.note_to_hz)
+    fmin_note="A0",  # utilisé seulement si freqs=None (via librosa.note_to_hz)
     max_harm=6,  # harmoniques 2..max_harm pour scorer les fondamentales
     peak_rel_thresh=0.20,  # seuil relatif (à max de frame) pour garder un pic
     peak_neighborhood=1,  # pic local : strictement plus grand que ±peak_neighborhood
@@ -817,61 +873,81 @@ def _group_by(seq, key):
 def tracks_to_notes(
     tracks,
     times,
+    mags,
     *,
     # unités et conversion
     output_units="beats",  # "beats" ou "seconds"
     bpm=120.0,  # utilisé si output_units="beats"
     # nettoyage pour MIDI
-    min_duration_beats=1 / 64,  # durée minimale (beats) après conversion
+    min_duration_beats=0.125,  # durée minimale (beats) après conversion
     epsilon_beats=1e-3,  # écart min entre fin et début sur même pitch
     overlap_policy="trim",  # "trim" | "shift" | "merge"
     # choix de la fréquence représentative
     use_energy_weight=True,  # fréquence moyenne pondérée par l’énergie
-):
+) -> list[Note]:
     """
     Convertit des 'tracks' (sortie de tracking) en liste de Note,
     en dédupliquant et empêchant les chevauchements par pitch.
-
-    - output_units: 'beats' => start/length seront en beats (recommandé pour midiutil)
-                    'seconds' => start/length resteront en secondes
-    - overlap_policy:
-        * 'trim'  : coupe la note précédente à (start_next - ε)
-        * 'shift' : décale la note suivante à (end_prev + ε)
-        * 'merge' : fusionne les deux notes (start=min starts, end=max ends)
+    Assigne aussi les descripteurs timbraux à chaque Note.
     """
     if not tracks:
         return []
 
-    # 1) Extraire segments “plats” (start, end, pitch_hz, energy…)
+    # --- utilitaires locaux ---
+    def _group_by(seq, key):
+        groups = {}
+        for x in seq:
+            k = key(x)
+            groups.setdefault(k, []).append(x)
+        return groups.items()
+
+    def _duration_of_seg(s):
+        return max(0.0, float(s["end"] - s["start"]))
+
+    def _combine_features(fa, fb, wa, wb):
+        # moyenne pondérée par la durée (wa, wb)
+        def wmean(a, b):
+            return (wa * a + wb * b) / max(1e-12, (wa + wb))
+
+        out = {}
+        keys = [
+            "H2_H1",
+            "H3_H1",
+            "odd_even",
+            "slope",
+            "attack_frames",
+            "half_life_frames",
+            "vib_rate_cyc_per_frame",
+            "vib_depth_bins",
+            "energy_med",
+            "energy_p95",
+        ]
+        for k in keys:
+            out[k] = wmean(fa.get(k, 0.0), fb.get(k, 0.0))
+        return out
+
+    # 1) Aplatir les segments et calculer les features par segment
     segs = []
     for seg in tracks:
         i0, i1 = int(seg["onset_idx"]), int(seg["offset_idx"])
         if i0 >= i1 or i0 < 0 or i1 > len(times):
             continue
 
-        # temps en secondes
+        # temps (secondes)
         start_s = float(times[i0])
-        end_s = float(times[i1 - 1]) if i1 - 1 < len(times) else float(times[-1])
-        # si on veut inclure le centre de la dernière frame, rajouter demi-hop au besoin
-        # ici on prend la borne supérieure i1 si disponible:
-        if i1 < len(times):
-            end_s = float(times[i1])
-
+        end_s = float(times[i1]) if i1 < len(times) else float(times[-1])
         duration_s = max(0.0, end_s - start_s)
         if duration_s == 0.0:
             continue
 
-        # fréquence instantanée
+        # fréquence instantanée de la piste (si disponible)
         if "pitch_hz" in seg and seg["pitch_hz"] is not None:
             freq_series = np.asarray(seg["pitch_hz"], dtype=float)
         else:
-            # fallback: approx via bins -> Hz impossible sans fmin/BPO;
-            # on prend une pseudo-fréquence en mappant le bin moyen sur A440 (purement pour avoir un nombre)
             bins = np.asarray(seg["pitch_bins"], dtype=float)
             if bins.size == 0:
                 continue
-            # approximation: midi ~ 69 + bins (si l'échelle de bins ~ demi-tons). Ajuste si besoin.
-            midi_est = 69.0 + (np.nanmean(bins))
+            midi_est = 69.0 + (np.nanmean(bins))  # fallback grossier
             freq_series = np.array([440.0 * (2.0 ** ((midi_est - 69.0) / 12.0))])
 
         # énergie
@@ -879,26 +955,22 @@ def tracks_to_notes(
         if energy.size == 0 or energy.size != freq_series.size:
             energy = np.ones_like(freq_series)
 
-        # fréquence représentative (pondérée ou pas)
+        # fréquence représentative
         if use_energy_weight and np.sum(energy) > 0:
             freq = float(np.sum(freq_series * energy) / np.sum(energy))
         else:
             freq = float(np.mean(freq_series))
 
-        # start/length selon unités demandées
-        if output_units == "beats":
-            start = start_s
-            end = end_s
-        elif output_units == "seconds":
-            start = start_s
-            end = end_s
-        else:
-            raise ValueError("output_units doit être 'beats' ou 'seconds'.")
-
+        # unités de sortie (on garde start/end en secondes puis on convertit plus tard)
+        start = start_s
+        end = end_s
         length = max(0.0, end - start)
-        # construire élément intermédiaire
+
         midi_number = Tools.freq_to_number(freq)
         name = Tools.note_name(midi_number)
+
+        # === features timbraux pour ce segment ===
+        feat_env = segment_features(mag=mags, segment=seg, bins_per_octave=48, max_k=6)
 
         segs.append(
             {
@@ -908,35 +980,25 @@ def tracks_to_notes(
                 "start": start,
                 "end": end,
                 "length": length,
-                "times": [
-                    start,
-                    end,
-                ],  # placeholder; la classe Note attend une série de times
-                "magnitudes": [
-                    1.0,
-                    1.0,
-                ],  # placeholder; tu peux remplacer par l’énergie du track resamplée
+                "times": [start, end],  # placeholder; peut être enrichi
+                "magnitudes": [1.0, 1.0],  # idem; on peut y mettre l’enveloppe réelle
+                "features": feat_env,
             }
         )
 
     if not segs:
         return []
 
-    # 2) Déduplication stricte: même (midi, start) => garder la plus longue durée
+    # 2) Déduplication stricte: même (midi, start) -> garder la plus longue
     segs.sort(key=lambda s: (s["midi"], s["start"], -s["length"]))
     dedup = []
     last_key = None
     for s in segs:
-        key = (
-            s["midi"],
-            round(s["start"], 6),
-        )  # arrondi pour tolérer de minuscules flottants
+        key = (s["midi"], round(s["start"], 6))
         if key != last_key:
             dedup.append(s)
             last_key = key
-        else:
-            # doublon: le premier a déjà la durée max (trié par -length), on ignore celui-ci
-            pass
+        # sinon, on ignore (le premier est déjà le plus long)
     segs = dedup
 
     # 3) Anti-overlap par pitch (trim/shift/merge) + epsilon + durée minimale
@@ -949,45 +1011,46 @@ def tracks_to_notes(
 
     notes_clean = []
     for midi_val, group in _group_by(segs, key=lambda s: s["midi"]):
-        # tri par start
         group.sort(key=lambda s: (s["start"], s["end"]))
         current = None
         for s in group:
             if current is None:
                 current = s
                 continue
-            # Chevauchement ?
+
             if s["start"] < current["end"] - 1e-9:
                 if overlap_policy == "trim":
-                    # on coupe la note courante
+                    # couper la note courante
                     current["end"] = max(current["start"], s["start"] - epsilon)
                     current["length"] = max(0.0, current["end"] - current["start"])
-                    # si elle devient trop courte, on la jette
                     if current["length"] < min_len:
                         current = s
                         continue
                 elif overlap_policy == "shift":
-                    # on décale la note suivante
+                    # décaler la suivante
                     shift = (current["end"] + epsilon) - s["start"]
                     s["start"] += max(0.0, shift)
                     s["length"] = max(0.0, s["end"] - s["start"])
-                    # si trop courte après décalage, on l’ignore
                     if s["length"] < min_len:
                         continue
                 elif overlap_policy == "merge":
-                    # on fusionne les deux
+                    # fusion + fusion des features (pondération par durée)
+                    wa = _duration_of_seg(current)
+                    wb = _duration_of_seg(s)
+                    f_merged = _combine_features(
+                        current["features"], s["features"], wa, wb
+                    )
                     current["end"] = max(current["end"], s["end"])
                     current["length"] = max(0.0, current["end"] - current["start"])
+                    current["features"] = f_merged
                     continue
                 else:
                     raise ValueError(
                         "overlap_policy doit être 'trim', 'shift' ou 'merge'."
                     )
-
             else:
-                # pas de chevauchement; mais impose un epsilon si start == end (collés)
+                # pas de chevauchement; marge si collés
                 if abs(s["start"] - current["end"]) < epsilon:
-                    # petite marge pour éviter 'On' et 'Off' exactement au même tick
                     if overlap_policy in ("trim", "merge"):
                         current["end"] = current["end"] - 0.5 * epsilon
                         current["length"] = max(0.0, current["end"] - current["start"])
@@ -997,21 +1060,18 @@ def tracks_to_notes(
                         s["start"] = current["end"] + epsilon
                         s["length"] = max(0.0, s["end"] - s["start"])
 
-            # valider et pousser current si assez long, puis avancer
+            # valider la courante si assez longue
             if current["length"] >= min_len:
                 notes_clean.append(current)
             current = s
 
-        # pousser le dernier
         if current and current["length"] >= min_len:
             notes_clean.append(current)
 
-    # 4) Construire les objets Note (ta classe)
-    # Tri final par start
+    # 4) Construire les objets Note + assigner les features timbraux
     notes_clean.sort(key=lambda s: (s["start"], s["midi"]))
     notes_out = []
     for s in notes_clean:
-        # times/magnitudes : si tu veux mieux, tu peux y mettre l’enveloppe d’énergie du track
         note = Note(
             frequency=s["pitch_hz"],
             magnitudes=s["magnitudes"],
@@ -1019,8 +1079,23 @@ def tracks_to_notes(
             start=s["start"],
             length=s["length"],
         )
+        # conversion beats si demandé
         note.length_bpm = Tools.seconds_to_beat(note.length, bpm)
         note.start_bpm = Tools.seconds_to_beat(note.start_time, bpm)
+
+        # === assignation des features ===
+        f = s.get("features", {}) or {}
+        note.h2_h1 = float(f.get("H2_H1", 0.0))
+        note.h3_h1 = float(f.get("H3_H1", 0.0))
+        note.odd_even = float(f.get("odd_even", 0.0))
+        note.slope = float(f.get("slope", 0.0))
+        note.attack = float(f.get("attack_frames", 0.0))
+        note.half_life = float(f.get("half_life_frames", 0.0))
+        note.vib_rate = float(f.get("vib_rate_cyc_per_frame", 0.0))
+        note.vib_depth = float(f.get("vib_depth_bins", 0.0))
+        note.energy_median = float(f.get("energy_med", 0.0))
+        note.energy_p95 = float(f.get("energy_p95", 0.0))
+
         notes_out.append(note)
 
     return notes_out
@@ -1045,6 +1120,7 @@ def harmonic_clean_and_octave_promote(
     octave_margin=0.15,  # marge de score requise pour promouvoir (anti-flap)
     promote_fraction=0.7,  # fraction d’énergie déplacée vers l’octave promue (0..1)
     eps=1e-12,
+    min_secondary_harmonics=2,
 ):
     """
     Pré-filtre CQT pour :
@@ -1127,6 +1203,20 @@ def harmonic_clean_and_octave_promote(
         pow_rel = power / (used * fmax + eps)
         return 0.6 * pres + 0.4 * pow_rel
 
+    def harmonic_count(col, f0_bin, fmax):
+        """Compte brut (#) d'harmoniques >= rel_thresh * fmax autour de f0_bin."""
+        cnt = 0
+        used = 0
+        for _, off_k in harm_off:
+            j = f0_bin + off_k
+            if j >= n_bins:
+                break
+            a = local_max_aligned(col, j)
+            if a >= rel_thresh * fmax:
+                cnt += 1
+            used += 1
+        return cnt, used
+
     # --- Traitement frame par frame ------------------------------------------
 
     for t in range(n_frames):
@@ -1171,14 +1261,21 @@ def harmonic_clean_and_octave_promote(
                         best_support = score
                         best_f0 = f0
 
+                # Déterminer si p est bien une harmonique de best_f0 et laquelle (offset utilisé)
+                is_harm = False
+                used_off = None
+                if best_f0 is not None and best_support > 0.2:
+                    delta = p - best_f0
+                    for _, off_k in harm_off:
+                        if abs(delta - off_k) <= tol_bins:
+                            is_harm = True
+                            used_off = off_k
+                            break
+
                 # --- Règle spéciale "octave" (1ʳᵉ harmonique) ---
-                # Si p ≈ 2 * best_f0 (± tol_bins) et que l'octave n'est pas assez forte,
-                # on SUPPRIME l'harmonique (mise à zéro) au lieu de simplement l'atténuer.
-                if (
-                    best_f0 is not None
-                    and best_support > 0.2
-                    and abs((p - best_f0) - bins_per_octave) <= tol_bins
-                ):
+                # Si p ≈ best_f0 + bins_per_octave (± tol_bins) et que l'octave n'est pas assez forte,
+                # on SUPPRIME toute la fenêtre autour de l’octave.
+                if is_harm and abs(used_off - bins_per_octave) <= tol_bins:
                     # Fenêtres locales robustes
                     j0_f0 = max(0, best_f0 - tol_bins)
                     j1_f0 = min(n_bins, best_f0 + tol_bins + 1)
@@ -1187,11 +1284,9 @@ def harmonic_clean_and_octave_promote(
                     j0_oct = max(0, oct_ix - tol_bins)
                     j1_oct = min(n_bins, oct_ix + tol_bins + 1)
 
-                    # Énergies max locales (tu peux utiliser .mean() si tu préfères)
                     f0_energy = col[j0_f0:j1_f0].max() if j1_f0 > j0_f0 else 0.0
                     oct_energy = col[j0_oct:j1_oct].max() if j1_oct > j0_oct else 0.0
 
-                    # Si l'octave n'est pas >= octave_factor × fondamentale -> suppression de TOUTE la bande d'octave
                     if (
                         f0_energy > 0.0
                         and oct_energy < octave_factor * f0_energy
@@ -1201,10 +1296,29 @@ def harmonic_clean_and_octave_promote(
                         col[j0_oct:j1_oct] = 0.0
                         if energy_conserve and removed > 0.0 and j1_f0 > j0_f0:
                             col[j0_f0:j1_f0] += removed / (j1_f0 - j0_f0)
-                        # Octave traitée : passer au pic suivant (ne pas appliquer l'atténuation générique)
-                        continue
+                        continue  # octave traitée → pic suivant
 
-                # --- Cas général: atténuation des harmoniques expliquées par une f0 plausible ---
+                # --- Règle "plus sévère" pour TOUTE harmonique ---
+                # On considère l’harmonique p comme une fondamentale hypothétique :
+                # si elle n’a pas au moins `min_secondary_harmonics` harmoniques au-dessus d’elle,
+                # on la SUPPRIME (± tol_bins).
+                if is_harm and min_secondary_harmonics > 0:
+                    cnt_p, used = harmonic_count(
+                        col, p, fmax
+                    )  # compte p+off_k (p elle-même non comptée)
+                    if cnt_p < min_secondary_harmonics:
+                        j0_p = max(0, p - tol_bins)
+                        j1_p = min(n_bins, p + tol_bins + 1)
+                        removed = float(col[j0_p:j1_p].sum())
+                        col[j0_p:j1_p] = 0.0
+                        if energy_conserve and removed > 0.0 and best_f0 is not None:
+                            j0_f0 = max(0, best_f0 - tol_bins)
+                            j1_f0 = min(n_bins, best_f0 + tol_bins + 1)
+                            if j1_f0 > j0_f0:
+                                col[j0_f0:j1_f0] += removed / (j1_f0 - j0_f0)
+                        continue  # harmonique supprimée → pic suivant
+
+                # --- Cas général: atténuation douce des harmoniques expliquées par une f0 plausible ---
                 if best_f0 is not None and best_support > 0.2 and harmonic_atten < 1.0:
                     removed = col[p] * (1.0 - harmonic_atten)
                     col[p] *= harmonic_atten
@@ -1370,11 +1484,47 @@ def convert_to_midi(audio_path: str, output_midi_path: str | None, debug: bool =
         audio_data, sr, use_vqt=False, bins_per_octave=48
     )
 
-    mag[mag < 0.01] = 0.0  # seuil numérique
+    mag[mag < 0.05] = 0.0  # seuil numérique
 
+    print("Nettoyage harmonique et promotion d’octaves...")
+    mag_h = harmonic_clean_and_octave_promote(
+        mag,
+        bins_per_octave=48,
+        max_harm=6,
+        max_octave_shift=4,
+        harmonic_atten=0.35,
+        tol_bins=4,
+        octave_factor=2.0,
+        promote_octaves=True,
+    )
+
+    mag_h[mag_h < 0.01] = 0.0
+
+    """
     print("Renforcement des fondamentales...")
     mag_fund = reinforce_fundamentals(
         mag,
+        bins_per_octave=48,
+        max_harm=6,
+        presence_ref="local",
+        presence_thresh=0.12,
+        neigh_bins=1,
+        harm_weight="1/k2",
+        use_amplitude=True,
+        f0_gate_rel=0.02,
+        renorm_percentile=98,
+        enable_subharmonic=True,
+        promote_thresh=0.35,
+        demote_thresh=0.22,
+        presence_h2_rel=0.06,
+        sub_boost_strength=0.8,
+        suppress_factor=0.01,
+        min_potential_harmonics_for_zero_f0=2,
+    )"""
+
+    print("Renforcement des fondamentales...")
+    mag_fund = reinforce_fundamentals(
+        mag_h,
         bins_per_octave=48,
         max_harm=6,
         presence_thresh=0.15,
@@ -1382,26 +1532,14 @@ def convert_to_midi(audio_path: str, output_midi_path: str | None, debug: bool =
         boost_strength=0.8,
         use_amplitude=False,
         renormalize=True,
+        enable_subharmonic=False,
     )
 
     mag_fund[mag_fund < 0.4] = 0.0
 
-    print("Nettoyage harmonique et promotion d’octaves...")
-    mag_h = harmonic_clean_and_octave_promote(
-        mag_fund,
-        bins_per_octave=48,
-        max_harm=6,
-        max_octave_shift=4,
-        harmonic_atten=0.35,
-        tol_bins=2,
-        octave_factor=2.0,
-    )
-
-    mag_h[mag_h < 0.01] = 0.0
-
     print("Génération des pistes de notes...")
     tracks = track_notes(
-        mag_h,
+        mag_fund,
         times,
         bins_per_octave=48,
         max_harm=6,
@@ -1414,7 +1552,10 @@ def convert_to_midi(audio_path: str, output_midi_path: str | None, debug: bool =
         thr_join_bins=1.5,
     )
 
-    notes = tracks_to_notes(tracks, times, bpm=bpm)
+    notes = tracks_to_notes(tracks, times, mag, bpm=bpm)
+
+    for note in notes:
+        note.print_features()
 
     midi_maker(notes, bpm, output_midi_path if output_midi_path else "music.mid")
 

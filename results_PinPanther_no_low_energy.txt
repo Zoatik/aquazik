@@ -1,0 +1,65 @@
+---- Résultats ----
+Fichier réf : /home/axelh/development/aquazik/audio_in/PinkPanther.midi
+Fichier gen : /home/axelh/development/aquazik/audio_out/PinkPanther_Both.mid
+Notes réf      : 451
+Notes générées : 323
+Appariées      : 260
+Similarité globale (rappel) : 57.6%
+Précision                       : 80.5%
+F1                              : 67.2%
+Début (attaque)                 : 50.8%  (tol 50 ms)
+Fin   (relâchement)             : 29.6%  (tol 80 ms)
+Justesse de note (pitch exact)  : 100.0% (±0 st)
+MAE attaque : 109.1 ms
+MAE fin     : 328.2 ms
+Fausses notes (FP) : 63
+Notes manquées (FN): 191
+Substitutions (mauvais pitch apparié): 0
+Notes manquées isolées : 3
+Notes manquées dans accords : 188
+Fausses notes isolées : 4
+Fausses notes simultanées : 59
+
+---- Résultats ----
+Fichier réf : /home/axelh/development/aquazik/audio_in/PinkPanther_Trumpet_Only.mid
+Fichier gen : /home/axelh/development/aquazik/audio_out/PinkPanther_Trumpet_Only.mid
+Notes réf      : 221
+Notes générées : 228
+Appariées      : 207
+Similarité globale (rappel) : 93.7%
+Précision                       : 90.8%
+F1                              : 92.2%
+Début (attaque)                 : 89.9%  (tol 50 ms)
+Fin   (relâchement)             : 17.4%  (tol 80 ms)
+Justesse de note (pitch exact)  : 100.0% (±0 st)
+MAE attaque : 37.4 ms
+MAE fin     : 130.0 ms
+Fausses notes (FP) : 21
+Notes manquées (FN): 14
+Substitutions (mauvais pitch apparié): 0
+Notes manquées isolées : 6
+Notes manquées dans accords : 8
+Fausses notes isolées : 4
+Fausses notes simultanées : 17
+
+---- Résultats ----
+Fichier réf : /home/axelh/development/aquazik/audio_in/PinkPanther_Piano_Only.mid
+Fichier gen : /home/axelh/development/aquazik/audio_out/PinkPanther_Piano_Only.mid
+Notes réf      : 230
+Notes générées : 220
+Appariées      : 186
+Similarité globale (rappel) : 80.9%
+Précision                       : 84.5%
+F1                              : 82.7%
+Début (attaque)                 : 39.8%  (tol 50 ms)
+Fin   (relâchement)             : 17.7%  (tol 80 ms)
+Justesse de note (pitch exact)  : 100.0% (±0 st)
+MAE attaque : 84.2 ms
+MAE fin     : 398.0 ms
+Fausses notes (FP) : 34
+Notes manquées (FN): 44
+Substitutions (mauvais pitch apparié): 0
+Notes manquées isolées : 0
+Notes manquées dans accords : 44
+Fausses notes isolées : 2
+Fausses notes simultanées : 32

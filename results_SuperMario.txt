@@ -1,0 +1,65 @@
+---- Résultats ----
+Fichier réf : /home/axelh/development/aquazik/audio_in/SuperMario.mid
+Fichier gen : /home/axelh/development/aquazik/audio_out/SuperMario.mid
+Notes réf      : 189
+Notes générées : 149
+Appariées      : 107
+Similarité globale (rappel) : 56.6%
+Précision                       : 71.8%
+F1                              : 63.3%
+Début (attaque)                 : 17.8%  (tol 50 ms)
+Fin   (relâchement)             : 13.1%  (tol 80 ms)
+Justesse de note (pitch exact)  : 100.0% (±0 st)
+MAE attaque : 87.3 ms
+MAE fin     : 174.6 ms
+Fausses notes (FP) : 42
+Notes manquées (FN): 82
+Substitutions (mauvais pitch apparié): 0
+Notes manquées isolées : 7
+Notes manquées dans accords : 75
+Fausses notes isolées : 0
+Fausses notes simultanées : 42
+
+---- Résultats ----
+Fichier réf : /home/axelh/development/aquazik/audio_in/SuperMario_Trumpet_Only.mid
+Fichier gen : /home/axelh/development/aquazik/audio_out/SuperMario_Trumpet.mid
+Notes réf      : 31
+Notes générées : 120
+Appariées      : 29
+Similarité globale (rappel) : 93.5%
+Précision                       : 24.2%
+F1                              : 38.4%
+Début (attaque)                 : 6.9%  (tol 50 ms)
+Fin   (relâchement)             : 0.0%  (tol 80 ms)
+Justesse de note (pitch exact)  : 100.0% (±0 st)
+MAE attaque : 122.0 ms
+MAE fin     : 253.1 ms
+Fausses notes (FP) : 91
+Notes manquées (FN): 2
+Substitutions (mauvais pitch apparié): 0
+Notes manquées isolées : 2
+Notes manquées dans accords : 0
+Fausses notes isolées : 3
+Fausses notes simultanées : 88
+
+---- Résultats ----
+Fichier réf : /home/axelh/development/aquazik/audio_in/SuperMario_Piano_Only.mid
+Fichier gen : /home/axelh/development/aquazik/audio_out/SuperMario_Piano.mid
+Notes réf      : 158
+Notes générées : 128
+Appariées      : 106
+Similarité globale (rappel) : 67.1%
+Précision                       : 82.8%
+F1                              : 74.1%
+Début (attaque)                 : 16.0%  (tol 50 ms)
+Fin   (relâchement)             : 13.2%  (tol 80 ms)
+Justesse de note (pitch exact)  : 100.0% (±0 st)
+MAE attaque : 87.0 ms
+MAE fin     : 173.7 ms
+Fausses notes (FP) : 22
+Notes manquées (FN): 52
+Substitutions (mauvais pitch apparié): 0
+Notes manquées isolées : 0
+Notes manquées dans accords : 52
+Fausses notes isolées : 0
+Fausses notes simultanées : 22
