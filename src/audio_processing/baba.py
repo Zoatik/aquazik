@@ -410,24 +410,62 @@ def segment_features(mag, segment, bins_per_octave=12, max_k=6, neigh=1):
     y = np.log(np.maximum(med_ratios, 1e-12))
     slope = float(np.polyfit(np.log(ks), y, 1)[0]) if ratios.size else 0.0
 
-    # dynamiques
-    e = np.array(segment["energy"], dtype=float)
-    e = e[(0 if t0 == segment["onset_idx"] else 0) :]  # déjà la bonne fenêtre
-    if e.size:
-        e_norm = e / (np.max(e) + 1e-12)
-        # attaque 10→90%
-        try:
-            t10 = np.argmax(e_norm >= 0.1)
-            t90 = np.argmax(e_norm >= 0.9)
-            attack = float(max(0, t90 - t10))
-        except Exception:
-            attack = float("nan")
-        # demi-vie (descente 1→0.5)
-        post = e_norm[np.argmax(e_norm) :]
-        half = np.argmax(post <= 0.5) if post.size else 0
-        half_life = float(half)
+    # dynamiques — calcule une enveloppe pitch-synchrone robuste
+    n_bins = mag.shape[0]
+    # Construire une enveloppe à partir de mag autour de la trajectoire de pitch (±neigh)
+    env = []
+    for tt in frames:
+        i = pitch[min(tt - t0, len(pitch) - 1)]
+        j0 = max(0, i - max(1, neigh))
+        j1 = min(n_bins, i + max(1, neigh) + 1)
+        env.append(float(np.max(mag[j0:j1, tt])))
+    env = np.asarray(env, dtype=float)
+
+    if env.size:
+        # Lissage léger (moyenne glissante taille 5)
+        k = 5
+        pad = k // 2
+        env_pad = np.pad(env, (pad, pad), mode="edge")
+        kern = np.ones(k, dtype=float) / k
+        e_s = np.convolve(env_pad, kern, mode="valid")
+
+        # Normalisation par plage dynamique locale (max - baseline)
+        e_max = np.max(e_s)
+        # baseline: médiane des 3 premières frames (si dispo)
+        m0 = int(min(3, e_s.size))
+        e_min = float(np.median(e_s[:m0])) if m0 > 0 else float(e_s[0])
+        rng = max(1e-12, e_max - e_min)
+        e_n = np.clip((e_s - e_min) / rng, 0.0, 1.0)
+
+        # Attaque = premier passage de 0.1 à 0.9 sur une montée
+        above10 = np.where(e_n >= 0.1)[0]
+        if above10.size:
+            t10 = int(above10[0])
+            # on cherche 0.9 après t10
+            above90 = np.where(e_n[t10:] >= 0.9)[0]
+            if above90.size:
+                t90 = int(t10 + above90[0])
+                # vérifier qu'il s'agit bien d'une montée (pente positive autour de t10)
+                if t90 >= t10:
+                    attack = float(t90 - t10)
+                else:
+                    attack = 0.0
+            else:
+                attack = 0.0
+        else:
+            attack = 0.0
+
+        # Demi-vie = temps après le pic pour tomber à 50%
+        peak_idx = int(np.argmax(e_n))
+        post = e_n[peak_idx:]
+        if post.size:
+            below50 = np.where(post <= 0.5)[0]
+            half_life = float(below50[0]) if below50.size else float(len(post) - 1)
+        else:
+            half_life = 0.0
     else:
-        attack = half_life = 0.0
+        attack = 0.0
+        half_life = 0.0
 
     # vibrato (sur pitch_bins)
     pb = np.array(segment["pitch_bins"], dtype=float)
