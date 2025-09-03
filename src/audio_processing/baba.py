@@ -1484,11 +1484,14 @@ def convert_to_midi(audio_path: str, output_midi_path: str | None, debug: bool =
         audio_data, sr, use_vqt=False, bins_per_octave=48
     )
 
-    mag[mag < 0.05] = 0.0  # seuil numérique
+    mag_thr = mag.copy()
+    mag_thr[mag_thr < 0.05] = 0.0
+
+    #mag[mag < 0.05] = 0.0  # seuil numérique
 
     print("Nettoyage harmonique et promotion d’octaves...")
     mag_h = harmonic_clean_and_octave_promote(
-        mag,
+        mag_thr,
         bins_per_octave=48,
         max_harm=6,
         max_octave_shift=4,
