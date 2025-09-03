@@ -1,0 +1,263 @@
+---- Résultats ----
+Fichier réf : /home/axelh/development/aquazik/audio_in/PinkPanther.midi
+Fichier gen : /home/axelh/development/aquazik/audio_out/PinkPanther_Both.mid
+Notes réf      : 451
+Notes générées : 340
+Appariées      : 272
+Similarité globale (rappel) : 60.3%
+Précision                       : 80.0%
+F1                              : 68.8%
+Début (attaque)                 : 29.4%  (tol 50 ms)
+Fin   (relâchement)             : 25.0%  (tol 80 ms)
+Justesse de note (pitch exact)  : 100.0% (±0 st)
+MAE attaque : 139.1 ms
+MAE fin     : 335.8 ms
+Fausses notes (FP) : 68
+Notes manquées (FN): 179
+Substitutions (mauvais pitch apparié): 0
+Notes manquées isolées : 1
+Notes manquées dans accords : 178
+Fausses notes isolées : 3
+Fausses notes simultanées : 65
+
+---- Résultats ----
+Fichier réf : /home/axelh/development/aquazik/audio_in/PinkPanther_Piano_Only.mid
+Fichier gen : /home/axelh/development/aquazik/audio_out/PinkPanther_Piano_Only.mid
+Notes réf      : 230
+Notes générées : 230
+Appariées      : 190
+Similarité globale (rappel) : 82.6%
+Précision                       : 82.6%
+F1                              : 82.6%
+Début (attaque)                 : 7.4%  (tol 50 ms)
+Fin   (relâchement)             : 14.2%  (tol 80 ms)
+Justesse de note (pitch exact)  : 100.0% (±0 st)
+MAE attaque : 124.6 ms
+MAE fin     : 425.8 ms
+Fausses notes (FP) : 40
+Notes manquées (FN): 40
+Substitutions (mauvais pitch apparié): 0
+Notes manquées isolées : 0
+Notes manquées dans accords : 40
+Fausses notes isolées : 5
+Fausses notes simultanées : 35
+
+---- Résultats ----
+Fichier réf : /home/axelh/development/aquazik/audio_in/Gamme.mid
+Fichier gen : /home/axelh/development/aquazik/audio_out/Gamme.mid
+Notes réf      : 52
+Notes générées : 117
+Appariées      : 32
+Similarité globale (rappel) : 61.5%
+Précision                       : 27.4%
+F1                              : 37.9%
+Début (attaque)                 : 9.4%  (tol 50 ms)
+Fin   (relâchement)             : 15.6%  (tol 80 ms)
+Justesse de note (pitch exact)  : 100.0% (±0 st)
+MAE attaque : 120.7 ms
+MAE fin     : 132.2 ms
+Fausses notes (FP) : 85
+Notes manquées (FN): 20
+Substitutions (mauvais pitch apparié): 0
+Notes manquées isolées : 4
+Notes manquées dans accords : 16
+Fausses notes isolées : 0
+Fausses notes simultanées : 85
+
+---- Résultats ----
+Fichier réf : /home/axelh/development/aquazik/audio_in/Gamme.mid
+Fichier gen : /home/axelh/development/aquazik/audio_out/Gamme.mid
+Notes réf      : 52
+Notes générées : 117
+Appariées      : 32
+Similarité globale (rappel) : 61.5%
+Précision                       : 27.4%
+F1                              : 37.9%
+Début (attaque)                 : 9.4%  (tol 50 ms)
+Fin   (relâchement)             : 15.6%  (tol 80 ms)
+Justesse de note (pitch exact)  : 100.0% (±0 st)
+MAE attaque : 120.7 ms
+MAE fin     : 132.2 ms
+Fausses notes (FP) : 85
+Notes manquées (FN): 20
+Substitutions (mauvais pitch apparié): 0
+Notes manquées isolées : 4
+Notes manquées dans accords : 16
+Fausses notes isolées : 0
+Fausses notes simultanées : 85
+
+---- Résultats ----
+Fichier réf : /home/axelh/development/aquazik/audio_in/Gamme.mid
+Fichier gen : /home/axelh/development/aquazik/audio_out/Gamme.mid
+Notes réf      : 52
+Notes générées : 124
+Appariées      : 32
+Similarité globale (rappel) : 61.5%
+Précision                       : 25.8%
+F1                              : 36.4%
+Début (attaque)                 : 9.4%  (tol 50 ms)
+Fin   (relâchement)             : 15.6%  (tol 80 ms)
+Justesse de note (pitch exact)  : 100.0% (±0 st)
+MAE attaque : 117.6 ms
+MAE fin     : 121.0 ms
+Fausses notes (FP) : 92
+Notes manquées (FN): 20
+Substitutions (mauvais pitch apparié): 0
+Notes manquées isolées : 4
+Notes manquées dans accords : 16
+Fausses notes isolées : 0
+Fausses notes simultanées : 92
+
+---- Résultats ----
+Fichier réf : /home/axelh/development/aquazik/audio_in/Gamme.mid
+Fichier gen : /home/axelh/development/aquazik/audio_out/Gamme.mid
+Notes réf      : 52
+Notes générées : 112
+Appariées      : 32
+Similarité globale (rappel) : 61.5%
+Précision                       : 28.6%
+F1                              : 39.0%
+Début (attaque)                 : 6.2%  (tol 50 ms)
+Fin   (relâchement)             : 12.5%  (tol 80 ms)
+Justesse de note (pitch exact)  : 100.0% (±0 st)
+MAE attaque : 136.4 ms
+MAE fin     : 137.0 ms
+Fausses notes (FP) : 80
+Notes manquées (FN): 20
+Substitutions (mauvais pitch apparié): 0
+Notes manquées isolées : 4
+Notes manquées dans accords : 16
+Fausses notes isolées : 0
+Fausses notes simultanées : 80
+
+---- Résultats ----
+Fichier réf : /home/axelh/development/aquazik/audio_in/Gamme.mid
+Fichier gen : /home/axelh/development/aquazik/audio_out/Gamme.mid
+Notes réf      : 52
+Notes générées : 170
+Appariées      : 33
+Similarité globale (rappel) : 63.5%
+Précision                       : 19.4%
+F1                              : 29.7%
+Début (attaque)                 : 9.1%  (tol 50 ms)
+Fin   (relâchement)             : 6.1%  (tol 80 ms)
+Justesse de note (pitch exact)  : 100.0% (±0 st)
+MAE attaque : 169.8 ms
+MAE fin     : 183.4 ms
+Fausses notes (FP) : 137
+Notes manquées (FN): 19
+Substitutions (mauvais pitch apparié): 0
+Notes manquées isolées : 4
+Notes manquées dans accords : 15
+Fausses notes isolées : 0
+Fausses notes simultanées : 137
+
+---- Résultats ----
+Fichier réf : /home/axelh/development/aquazik/audio_in/Gamme.mid
+Fichier gen : /home/axelh/development/aquazik/audio_out/Gamme.mid
+Notes réf      : 52
+Notes générées : 154
+Appariées      : 33
+Similarité globale (rappel) : 63.5%
+Précision                       : 21.4%
+F1                              : 32.0%
+Début (attaque)                 : 6.1%  (tol 50 ms)
+Fin   (relâchement)             : 6.1%  (tol 80 ms)
+Justesse de note (pitch exact)  : 100.0% (±0 st)
+MAE attaque : 155.1 ms
+MAE fin     : 157.7 ms
+Fausses notes (FP) : 121
+Notes manquées (FN): 19
+Substitutions (mauvais pitch apparié): 0
+Notes manquées isolées : 4
+Notes manquées dans accords : 15
+Fausses notes isolées : 0
+Fausses notes simultanées : 121
+
+---- Résultats ----
+Fichier réf : /home/axelh/development/aquazik/audio_in/Gamme.mid
+Fichier gen : /home/axelh/development/aquazik/audio_out/Gamme.mid
+Notes réf      : 52
+Notes générées : 115
+Appariées      : 32
+Similarité globale (rappel) : 61.5%
+Précision                       : 27.8%
+F1                              : 38.3%
+Début (attaque)                 : 12.5%  (tol 50 ms)
+Fin   (relâchement)             : 12.5%  (tol 80 ms)
+Justesse de note (pitch exact)  : 100.0% (±0 st)
+MAE attaque : 126.2 ms
+MAE fin     : 142.5 ms
+Fausses notes (FP) : 83
+Notes manquées (FN): 20
+Substitutions (mauvais pitch apparié): 0
+Notes manquées isolées : 4
+Notes manquées dans accords : 16
+Fausses notes isolées : 0
+Fausses notes simultanées : 83
+
+---- Résultats ----
+Fichier réf : /home/axelh/development/aquazik/audio_in/Gamme.mid
+Fichier gen : /home/axelh/development/aquazik/audio_out/Gamme.mid
+Notes réf      : 52
+Notes générées : 135
+Appariées      : 35
+Similarité globale (rappel) : 67.3%
+Précision                       : 25.9%
+F1                              : 37.4%
+Début (attaque)                 : 11.4%  (tol 50 ms)
+Fin   (relâchement)             : 8.6%  (tol 80 ms)
+Justesse de note (pitch exact)  : 100.0% (±0 st)
+MAE attaque : 176.6 ms
+MAE fin     : 187.0 ms
+Fausses notes (FP) : 100
+Notes manquées (FN): 17
+Substitutions (mauvais pitch apparié): 0
+Notes manquées isolées : 4
+Notes manquées dans accords : 13
+Fausses notes isolées : 0
+Fausses notes simultanées : 100
+
+---- Résultats ----
+Fichier réf : /home/axelh/development/aquazik/audio_in/Gamme.mid
+Fichier gen : /home/axelh/development/aquazik/audio_out/Gamme.mid
+Notes réf      : 52
+Notes générées : 144
+Appariées      : 34
+Similarité globale (rappel) : 65.4%
+Précision                       : 23.6%
+F1                              : 34.7%
+Début (attaque)                 : 20.6%  (tol 50 ms)
+Fin   (relâchement)             : 41.2%  (tol 80 ms)
+Justesse de note (pitch exact)  : 100.0% (±0 st)
+MAE attaque : 162.2 ms
+MAE fin     : 140.8 ms
+Fausses notes (FP) : 110
+Notes manquées (FN): 18
+Substitutions (mauvais pitch apparié): 0
+Notes manquées isolées : 4
+Notes manquées dans accords : 14
+Fausses notes isolées : 0
+Fausses notes simultanées : 110
+
+---- Résultats ----
+Fichier réf : /home/axelh/development/aquazik/audio_in/Gamme.mid
+Fichier gen : /home/axelh/development/aquazik/audio_out/Gamme.mid
+Notes réf      : 52
+Notes générées : 115
+Appariées      : 32
+Similarité globale (rappel) : 61.5%
+Précision                       : 27.8%
+F1                              : 38.3%
+Début (attaque)                 : 12.5%  (tol 50 ms)
+Fin   (relâchement)             : 12.5%  (tol 80 ms)
+Justesse de note (pitch exact)  : 100.0% (±0 st)
+MAE attaque : 126.2 ms
+MAE fin     : 140.2 ms
+Fausses notes (FP) : 83
+Notes manquées (FN): 20
+Substitutions (mauvais pitch apparié): 0
+Notes manquées isolées : 4
+Notes manquées dans accords : 16
+Fausses notes isolées : 0
+Fausses notes simultanées : 83

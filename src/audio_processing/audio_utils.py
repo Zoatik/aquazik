@@ -84,8 +84,37 @@ class Note:
         )  # Store the maximum magnitude observed for this note
         self.instrument = Instrument.PIANO.value
 
+        # Enveloppes
+        self.h2_h1: float = 0.0
+        self.h3_h1: float = 0.0
+        self.odd_even: float = 0.0
+        self.slope: float = 0.0
+        self.attack: float = 0.0
+        self.half_life: float = 0.0
+        self.vib_rate: float = 0.0
+        self.vib_depth: float = 0.0
+        self.energy_median: float = 0.0
+        self.energy_p95: float = 0.0
+
     def __repr__(self):
         return f"Note(frequency={self.frequency}, name='{self.name}', start={self.start_time}, bpm start={self.start_bpm} , bpm length={self.length_bpm}, magnitude={self.magnitudes})\n"
+
+    def print_features(self):
+        print(f"Note: {self.name} ({self.midi_number})")
+        print(f"  Frequency: {self.frequency:.2f} Hz")
+        print(f"  Start time: {self.start_time:.2f} s")
+        print(f"  Length: {self.length:.2f} s")
+        print("  Envelopes:")
+        print(f"    h2/h1: {self.h2_h1:.2f}")
+        print(f"    h3/h1: {self.h3_h1:.2f}")
+        print(f"    odd/even: {self.odd_even:.2f}")
+        print(f"    slope: {self.slope:.2f}")
+        print(f"    attack: {self.attack:.2f}")
+        print(f"    half-life: {self.half_life:.2f}")
+        print(f"    vibrato rate: {self.vib_rate:.2f}")
+        print(f"    vibrato depth: {self.vib_depth:.2f}")
+        print(f"    energy median: {self.energy_median:.2f}")
+        print(f"    energy p95: {self.energy_p95:.2f}")
 
     def set_bpm(self, bpm: int):
         self.start_bpm = round(Tools.seconds_to_beat(self.start_time, bpm) * 8) / 8

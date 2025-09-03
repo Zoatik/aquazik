@@ -3,7 +3,7 @@ from audio_processing.baba import convert_to_midi
 from audio_processing.audio_utils import INPUT_FOLDER, OUTPUT_FOLDER
 
 
-audio_name = "Gamme"
+audio_name = "SuperMario_Piano"
 audio_in_name = f"{audio_name}.mp3"
 audio_out_name = f"{audio_name}.mid"
 
