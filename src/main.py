@@ -5,19 +5,22 @@ from animation.aquarium import Aquarium
 from animation.fish import Fish, Bubble
 from animation.crab import Crab
 from audio_processing.midi_reader import MidiFile, Instrument
-#from audio_processing.freq_analysis import AudioAnalyzer
+
+# from audio_processing.freq_analysis import AudioAnalyzer
 import audio_processing.MidiV2
-from constants import Colors,FishColors, Direction
+from constants import Colors, FishColors, Direction
 import ctypes
 import platform
 import os
 
 from audio_processing.baba import convert_to_midi
 from audio_processing.audio_utils import INPUT_FOLDER, OUTPUT_FOLDER
+from audio_processing.instrument_split import assign_instrument
+
 
 def main():
-    #FILE = "audio_in/PinkPanther_Trumpet_Only.mp3"
-    audio_name = "PinkPanther_Trumpet_Only"
+    # FILE = "audio_in/PinkPanther_Trumpet_Only.mp3"
+    audio_name = "piano_music"
     audio_in_name = f"{audio_name}.mp3"
     audio_out_name = f"{audio_name}.mid"
     audio_in_path = os.path.join(INPUT_FOLDER, audio_in_name)
@@ -25,18 +28,23 @@ def main():
 
     # Setup analysis
     print("-- Analysing audio --")
-    #audio_analyser = AudioAnalyzer(FILE)
-    #bpm, notes = audio_analyser.convert_to_notes()
+    # audio_analyser = AudioAnalyzer(FILE)
+    # bpm, notes = audio_analyser.convert_to_notes()
     bpm, notes = convert_to_midi(audio_in_path, None)
 
+    notes_with_instrument = assign_instrument(
+        notes, features_used=["attack", "odd_even", "slope"]
+    )
+
     print("-- Creating MIDI file --")
-    midi_path = audio_processing.MidiV2.midi_maker(notes, bpm, audio_out_path)
-    #midi_path = "audio_in/PinkPanther.midi"
-    #print(f"bpm = {audio_data[0]}")
+    midi_path = audio_processing.MidiV2.midi_maker(
+        notes_with_instrument, bpm, audio_out_path
+    )
+    # midi_path = "audio_in/PinkPanther.midi"
+    # print(f"bpm = {audio_data[0]}")
 
     # Create MidiFile instance
     print("-- Processing MIDI file --")
-
 
     mdi = MidiFile(midi_path)
 
@@ -52,7 +60,7 @@ def main():
 
     # Set window's caption // and icon
     pygame.display.set_caption("Aquazik")
-    path = 'src/journalist.png'
+    path = "src/journalist.png"
     icon = pygame.image.load(path)
     pygame.display.set_icon(icon)
 
@@ -75,20 +83,20 @@ def main():
     start = time()
     last_notes = []
     bubbleList: list[Bubble] = []
-    #fishList = Aquarium.createFishList(window)
+    # fishList = Aquarium.createFishList(window)
     fishList = []
     starFishList = Aquarium.createStarfishList(window)
 
     crab = Crab(window, (500, 500), 50, music_start_time, bpm)
     last_nextNotes = []
 
-    #create the seaweed (algues)
+    # create the seaweed (algues)
     fronds = []
     num_clusters = random.randint(15, 30)
     for _ in range(num_clusters):
-        x = random.randint(50, width - 50)    # avoid going out of screen
+        x = random.randint(50, width - 50)  # avoid going out of screen
         y = random.randint(height // 2, height - 50)  # bottom half of the screen
-        count = random.randint(3, 8)          # how many fronds in this cluster
+        count = random.randint(3, 8)  # how many fronds in this cluster
         fronds.extend(Aquarium.createSeaweed(x, y, count))
 
     deltaTime = 0
@@ -98,7 +106,7 @@ def main():
         currentTime = runStartTime - start
 
         notes = mdi.find_note(currentTime)
-        
+
         result_piano = [
             x
             for x in notes
@@ -111,23 +119,31 @@ def main():
         ]
 
         # [:-1] enlève le dernier char du string (l'octave de la note)
-        allnotes_piano = [x.get_real_note()[:-1] for x in notes if x.get_instrument() == Instrument.PIANO]
-        allnotes_trumpet = [x.get_real_note()[:-1] for x in notes if x.get_instrument() == Instrument.TRUMPET]
+        allnotes_piano = [
+            x.get_real_note()[:-1]
+            for x in notes
+            if x.get_instrument() == Instrument.PIANO
+        ]
+        allnotes_trumpet = [
+            x.get_real_note()[:-1]
+            for x in notes
+            if x.get_instrument() == Instrument.TRUMPET
+        ]
 
         last_notes = notes
 
         nextNotes = mdi.find_note(currentTime + 2)
 
         fishList = [f for f in fishList if f.enabled]
-        for note in [x for x in nextNotes 
-                     if not last_nextNotes.__contains__(x) 
-                     and x.get_instrument() == Instrument.PIANO]:
+        for note in [
+            x
+            for x in nextNotes
+            if not last_nextNotes.__contains__(x)
+            and x.get_instrument() == Instrument.PIANO
+        ]:
             if len([x for x in fishList if x.name == note.get_real_note()[:-1]]) == 0:
                 # create fish
-                fishList.append(Fish(
-                    window,
-                    base_note = note
-                ))
+                fishList.append(Fish(window, base_note=note))
 
         last_nextNotes = nextNotes
 
@@ -136,29 +152,35 @@ def main():
             if fish.playing:
                 fish.lastNoteTime = time()
             fish.playing = False
-            result_piano_fish = [x for x in result_piano if x.get_real_note()[:-1] == fish.name]
+            result_piano_fish = [
+                x for x in result_piano if x.get_real_note()[:-1] == fish.name
+            ]
 
             # new notes
             if len(result_piano_fish) != 0:
-                fish.openMouth(result_piano_fish[0].velocity, result_piano_fish[0].get_time())
+                fish.openMouth(
+                    result_piano_fish[0].velocity, result_piano_fish[0].get_time()
+                )
                 bubbleList.append(fish.createBubble(window))
 
             # all notes
             if allnotes_piano.__contains__(fish.name):
                 fish.playing = True
-            
+
             # animer tous les poissons à chaque fois
             fish.animate(deltaTime)
 
         # for each starfish
         for starfish in starFishList:
             starfish.playing = False
-            result_trumpet_starfish = [x for x in result_trumpet if x.get_real_note()[:-1] == starfish.name]
+            result_trumpet_starfish = [
+                x for x in result_trumpet if x.get_real_note()[:-1] == starfish.name
+            ]
 
             # new notes
             if len(result_trumpet_starfish) != 0:
-                #I don't know if needed
-                #starfish.animStarfish()
+                # I don't know if needed
+                # starfish.animStarfish()
                 print("Is Mayonnaise an Instrument?")
 
             # all notes
@@ -176,8 +198,8 @@ def main():
 
         Aquarium.drawStarfish(starFishList)
 
-        #draw algues
-        Aquarium.drawSeaweed(window,fronds,start)
+        # draw algues
+        Aquarium.drawSeaweed(window, fronds, start)
 
         crab.move(deltaTime, starFishList)
         crab.draw()

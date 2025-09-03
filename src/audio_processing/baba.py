@@ -88,8 +88,13 @@ def wavelet_mag(audio_data, sample_rate, use_vqt=False, bins_per_octave=12):
     fmax = Tools.note_to_midi("C8")
     n_bins = (fmax - fmin) * bins_per_octave // 12 + 1
     fmin = librosa.note_to_hz("A0")
+
     hop_length = int(sample_rate * WINDOW_TIME)
+    print(hop_length)
     audio_data = librosa.util.normalize(audio_data)
+    tune = librosa.estimate_tuning(
+        y=audio_data, sr=sample_rate, bins_per_octave=bins_per_octave
+    )
 
     if use_vqt:
         C = librosa.vqt(
@@ -108,7 +113,8 @@ def wavelet_mag(audio_data, sample_rate, use_vqt=False, bins_per_octave=12):
             fmin=fmin,
             n_bins=n_bins,
             bins_per_octave=bins_per_octave,
-            filter_scale=2.0,
+            filter_scale=1.0,
+            tuning=tune,
         )
 
     mag = np.abs(C)
@@ -1525,7 +1531,7 @@ def convert_to_midi(audio_path: str, output_midi_path: str | None, debug: bool =
     mag_thr = mag.copy()
     mag_thr[mag_thr < 0.05] = 0.0
 
-    #mag[mag < 0.05] = 0.0  # seuil numérique
+    # mag[mag < 0.05] = 0.0  # seuil numérique
 
     print("Nettoyage harmonique et promotion d’octaves...")
     mag_h = harmonic_clean_and_octave_promote(
@@ -1598,7 +1604,7 @@ def convert_to_midi(audio_path: str, output_midi_path: str | None, debug: bool =
     for note in notes:
         note.print_features()
 
-    #midi_maker(notes, bpm, output_midi_path if output_midi_path else "music.mid")
+    # midi_maker(notes, bpm, output_midi_path if output_midi_path else "music.mid")
 
     if debug:
         plot_pianoroll(mag, times, note_labels, "piano-roll brut", threshold=0.00)
@@ -1624,6 +1630,7 @@ def convert_to_midi(audio_path: str, output_midi_path: str | None, debug: bool =
         plt.show()
 
     return bpm, notes
+
 
 if __name__ == "__main__":
     convert_to_midi("audio_in/Gamme.mp3", "test.mid", debug=True)
