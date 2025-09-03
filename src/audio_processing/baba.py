@@ -1598,7 +1598,7 @@ def convert_to_midi(audio_path: str, output_midi_path: str | None, debug: bool =
     for note in notes:
         note.print_features()
 
-    midi_maker(notes, bpm, output_midi_path if output_midi_path else "music.mid")
+    #midi_maker(notes, bpm, output_midi_path if output_midi_path else "music.mid")
 
     if debug:
         plot_pianoroll(mag, times, note_labels, "piano-roll brut", threshold=0.00)
@@ -1623,6 +1623,7 @@ def convert_to_midi(audio_path: str, output_midi_path: str | None, debug: bool =
 
         plt.show()
 
+    return bpm, notes
 
 if __name__ == "__main__":
     convert_to_midi("audio_in/Gamme.mp3", "test.mid", debug=True)

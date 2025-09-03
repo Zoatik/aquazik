@@ -5,23 +5,32 @@ from animation.aquarium import Aquarium
 from animation.fish import Fish, Bubble
 from animation.crab import Crab
 from audio_processing.midi_reader import MidiFile, Instrument
-from audio_processing.freq_analysis import AudioAnalyzer
+#from audio_processing.freq_analysis import AudioAnalyzer
 import audio_processing.MidiV2
 from constants import Colors,FishColors, Direction
 import ctypes
 import platform
 import os
 
+from audio_processing.baba import convert_to_midi
+from audio_processing.audio_utils import INPUT_FOLDER, OUTPUT_FOLDER
+
 def main():
-    FILE = "PinkPanther_Trumpet_Only.mp3"
+    #FILE = "audio_in/PinkPanther_Trumpet_Only.mp3"
+    audio_name = "PinkPanther_Trumpet_Only"
+    audio_in_name = f"{audio_name}.mp3"
+    audio_out_name = f"{audio_name}.mid"
+    audio_in_path = os.path.join(INPUT_FOLDER, audio_in_name)
+    audio_out_path = os.path.join(OUTPUT_FOLDER, audio_out_name)
 
     # Setup analysis
     print("-- Analysing audio --")
-    audio_analyser = AudioAnalyzer(FILE)
-    bpm, notes = audio_analyser.convert_to_notes()
+    #audio_analyser = AudioAnalyzer(FILE)
+    #bpm, notes = audio_analyser.convert_to_notes()
+    bpm, notes = convert_to_midi(audio_in_path, None)
 
     print("-- Creating MIDI file --")
-    midi_path = audio_processing.MidiV2.midi_maker(notes, bpm)
+    midi_path = audio_processing.MidiV2.midi_maker(notes, bpm, audio_out_path)
     #midi_path = "audio_in/PinkPanther.midi"
     #print(f"bpm = {audio_data[0]}")
 
@@ -54,7 +63,7 @@ def main():
 
     # Start music
     pygame.mixer.init()
-    pygame.mixer.music.load("audio_in/" + FILE)
+    pygame.mixer.music.load(audio_in_path)
     pygame.mixer.music.play()
     pygame.event.wait()
 
