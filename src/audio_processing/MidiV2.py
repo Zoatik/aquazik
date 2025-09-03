@@ -21,14 +21,17 @@ def midi_maker(macro: list[Note], bpm: int, outfile: str = "music.mid") -> str:
     MyMIDI = MIDIFile(1)
     MyMIDI.addTempo(track, 0, bpm)
 
+    #slope_list = []
+
     # Adding the notes to the sheet music => Note(channel = instrument, pitch = midi note , time = starting time, duration, volume)
     sheet_music = sorted(macro, key=lambda note: note.start_bpm)
     for note in sheet_music:
-        channel = note.instrument
         midi_note = Tools.note_to_midi(note.name)
         time = note.start_bpm
         duration = note.length_bpm
-        volume = int((note.magnitudes[0]) * 127)
+        volume = int((note.maximum) * 127)
+        get_instrument(note)
+        channel = note.instrument
         MyMIDI.addNote(
             track=track,
             channel=channel,
@@ -38,8 +41,42 @@ def midi_maker(macro: list[Note], bpm: int, outfile: str = "music.mid") -> str:
             volume=volume,
         )
 
+    def get_slope(note : Note):
+        # list note.magnitudes note.times
+        y0 = note.magnitudes[0]
+        x0 = note.times[0]
+        y = note.maximum
+        index_x = note.magnitudes.index(y)
+        x = note.times[index_x]
+        print(f"note magnitudes : {note.magnitudes}")
+        print(f"note time : {note.times}")
+        #print(f"y : {y}, y0 : {y0}, x : {x}, x0 : {x0}")
+        return (y - y0)/(x - x0)
+
+        #slope_list.append(slope)
+
+    def get_instrument(note : Note, piano_range : tuple = (0,0), trumpet_range : tuple = (0,0)):
+        slope = get_slope(note)
+        try:
+            if piano_range[1] >= slope >= piano_range[0]:
+                note.instrument = Instrument.PIANO.value
+            elif trumpet_range[1] >= slope >= trumpet_range[0]:
+                note.instrument = Instrument.TRUMPET.value
+            else: note.instrument
+        except:
+            print("Ranges are not well defined")
+
+        return
+        
     # Creating the .mid file
     with open(outfile, "wb") as output_file:
         MyMIDI.writeFile(output_file)
 
     return "music.mid"
+
+
+''' 
+print(f"piano slopes : {slope_list}")
+print(f"max : {max(slope_list)}")
+print(f"min : {min(slope_list)}")
+    '''
